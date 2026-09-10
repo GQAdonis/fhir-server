@@ -42,9 +42,14 @@ services:
     restart: on-failure
 
   server:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # Released multi-arch image, published to GHCR by the release workflow
+    # (also available pinned as ghcr.io/wso2/fhir-server:v<version>). To run
+    # your own build instead, comment out `image:`, uncomment `build:`, and
+    # run `docker compose up --build`.
+    image: ghcr.io/wso2/fhir-server:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     ports:
       - "9090:9090"
     environment:
