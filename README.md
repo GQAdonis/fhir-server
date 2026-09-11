@@ -16,7 +16,7 @@
 
 ## Why WSO2 FHIR Server?
 
-- **High performance.** Compiled Go on the hot path, and every FHIR search compiles down to indexed SQL — no interpretation layers between the API and PostgreSQL.
+- **High performance.** Written in Go, with every FHIR search translated directly into indexed SQL — a request goes straight from the API to PostgreSQL, with no layers in between.
 - **Lightweight.** One static binary and one database. The container image is under 10 MB — deploy it anywhere in seconds, from a laptop to Kubernetes.
 - **Zero friction to grow.** Every FHIR resource type works out of the box, and adopting a new Implementation Guide is a configuration change, not a schema migration.
 - **Production-ready from day one.** Prometheus metrics, OpenTelemetry tracing, structured logs, health probes, and multi-tenancy are built in, not bolted on.
