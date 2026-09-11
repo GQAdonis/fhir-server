@@ -1,6 +1,6 @@
 <div align="left">
   <h1>WSO2 FHIR Server</h1>
-  <p><strong>A blazing-fast, lightweight FHIR server written in Go.</strong> An open-source, modern, scalable FHIR server backed by PostgreSQL.</p>
+  <p><strong>WSO2 FHIR Server is a blazing-fast, open-source FHIR R4 server written in Go and backed by PostgreSQL.</strong> Lightweight to run and scale — a single binary, one database, and no per-resource schema migrations.</p>
 
 <!-- License & Project Info -->
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
