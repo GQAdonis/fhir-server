@@ -42,7 +42,7 @@ Resources are stored as JSON in a schema-generic table, alongside a full version
 
 ```
                        ┌──────────────────────────────┐
- HTTP (FHIR JSON)     │         fhir-server          │        PostgreSQL
+ HTTP (FHIR JSON)      │         fhir-server          │        PostgreSQL
 ──────────────────────▶│  router → validate → store   │──▶  resources + history
                        │  FHIRPath → search indexes   │──▶  sp_* index tables
                        └──────────────────────────────┘
