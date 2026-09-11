@@ -20,9 +20,14 @@ jobs:
       - name: Restore report history
         shell: bash
         run: |
-          mkdir -p website/static
-          if git fetch origin gh-pages && git cat-file -e origin/gh-pages:fhir262/runs/index.json; then
-            git archive origin/gh-pages fhir262 | tar -x -C website/static
+          mkdir -p website/static/docs/conformance/fhir262/app
+          if git fetch origin gh-pages; then
+            if git cat-file -e origin/gh-pages:docs/conformance/fhir262/app/runs/index.json; then
+              git archive origin/gh-pages docs/conformance/fhir262/app | tar -x -C website/static
+            elif git cat-file -e origin/gh-pages:fhir262/runs/index.json; then
+              git archive origin/gh-pages fhir262 | tar -x -C /tmp/fhir262-legacy
+              cp -a /tmp/fhir262-legacy/fhir262/. website/static/docs/conformance/fhir262/app/
+            fi
           fi
       - name: Checkout FHIR262 suite
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -52,15 +57,15 @@ jobs:
       - name: Build FHIR262 report
         run: |
           mkdir -p dist/runs
-          if [ -d ../website/static/fhir262/runs ]; then
-            cp -a ../website/static/fhir262/runs/. dist/runs/
+          if [ -d ../website/static/docs/conformance/fhir262/app/runs ]; then
+            cp -a ../website/static/docs/conformance/fhir262/app/runs/. dist/runs/
           fi
           bun bin/build.ts -results .results -dist dist
         working-directory: .fhir262
       - name: Include report in documentation site
         run: |
-          mkdir -p website/static/fhir262
-          cp -a .fhir262/dist/. website/static/fhir262/
+          mkdir -p website/static/docs/conformance/fhir262/app
+          cp -a .fhir262/dist/. website/static/docs/conformance/fhir262/app/
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
