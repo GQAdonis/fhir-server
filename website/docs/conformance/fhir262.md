@@ -5,10 +5,11 @@ description: Browse the latest public-image conformance run for WSO2 FHIR Server
 
 # FHIR262 conformance report
 
-This report runs the WSO2 FHIR Server adapter from the
+This report runs every publicly accessible server adapter from the
 [FHIR262 suite](https://github.com/prdai-archive/fhir262/tree/feat/wso2-fhir-server-integration)
-against the public `ghcr.io/wso2/fhir-server:latest` image. Run it manually from
-the repository's **Actions** tab when a refreshed result is needed.
+including WSO2 FHIR Server against the public `ghcr.io/wso2/fhir-server:latest`
+image. Aidbox is excluded because it requires a license secret. Run it manually
+from the repository's **Actions** tab when a refreshed result is needed.
 
 <iframe
   title="FHIR262 conformance report"

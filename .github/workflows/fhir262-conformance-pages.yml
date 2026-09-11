@@ -38,13 +38,15 @@ jobs:
       - name: Install FHIR262 dependencies
         run: bun install --frozen-lockfile
         working-directory: .fhir262
-      - name: Run WSO2 FHIR Server conformance suite
+      - name: Run publicly accessible FHIR262 conformance suites
         shell: bash
         run: |
           set +e
-          make test-wso2-fhir-server
+          make -k test-hapi test-medplum test-msfhir test-fhir-candle test-wso2-fhir-server
           set -e
-          test -s .results/wso2-fhir-server.json
+          for implementation in hapi medplum msfhir fhir-candle wso2-fhir-server; do
+            test -s ".results/$implementation.json"
+          done
           exit 0
         working-directory: .fhir262
       - name: Build FHIR262 report
