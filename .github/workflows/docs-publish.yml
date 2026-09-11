@@ -27,6 +27,13 @@ jobs:
           node-version: '20'
           cache: npm
           cache-dependency-path: website/package-lock.json
+      - name: Restore conformance report
+        shell: bash
+        run: |
+          mkdir -p website/static
+          if git fetch origin gh-pages && git cat-file -e origin/gh-pages:fhir262/runs/index.json; then
+            git archive origin/gh-pages fhir262 | tar -x -C website/static
+          fi
       - name: Install dependencies
         run: npm ci
         working-directory: website
