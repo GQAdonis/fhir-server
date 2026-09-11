@@ -30,15 +30,16 @@ jobs:
       - name: Restore conformance report
         shell: bash
         run: |
-          mkdir -p website/static/docs/conformance/fhir262/app
-          if git fetch origin gh-pages; then
-            if git cat-file -e origin/gh-pages:docs/conformance/fhir262/app/runs/index.json; then
-              git archive origin/gh-pages docs/conformance/fhir262/app | tar -x -C website/static
-            elif git cat-file -e origin/gh-pages:fhir262/runs/index.json; then
-              mkdir -p /tmp/fhir262-legacy
-              git archive origin/gh-pages fhir262 | tar -x -C /tmp/fhir262-legacy
-              cp -a /tmp/fhir262-legacy/fhir262/. website/static/docs/conformance/fhir262/app/
+          REPORT_DIR=website/static/docs/conformance/fhir262/app
+          mkdir -p "$REPORT_DIR" /tmp/fhir262-restore
+          git fetch origin gh-pages || exit 0
+          for candidate in docs/conformance/fhir262/app fhir262; do
+            if git cat-file -e "origin/gh-pages:$candidate/runs/index.json" 2>/dev/null; then
+              git archive "origin/gh-pages" "$candidate" | tar -x -C /tmp/fhir262-restore
+              cp -a "/tmp/fhir262-restore/$candidate/." "$REPORT_DIR/"
+              break
             fi
+          done
           fi
       - name: Install dependencies
         run: npm ci
