@@ -16,9 +16,12 @@
 
 ## Why WSO2 FHIR Server?
 
-Standing up a FHIR server usually means operating a heavyweight platform with many moving parts to deploy, tune, and keep alive. Teams that just need a conformant FHIR API end up spending their time running the server instead of building on top of it.
+Operational simplicity you can verify:
 
-Healthcare integrations also evolve constantly — a new resource type here, a new Implementation Guide there. Adopting them should be a configuration change, not a project.
+- **Two moving parts.** A single static Go binary (~28 MB) and one PostgreSQL database. The container image is distroless and under 10 MB compressed. Nothing else to deploy, tune, or keep alive.
+- **No schema migrations.** Sixteen fixed tables serve every FHIR resource type. Adding a resource type or an Implementation Guide is configuration, not a migration project.
+- **Small enough to read.** About 16,000 lines of Go (31,000 with tests) and nine runtime dependencies — auditing the whole server is feasible.
+- **Observable by default.** Prometheus metrics, OpenTelemetry tracing, structured JSON logs, and liveness/readiness probes are built in.
 
 ## What is WSO2 FHIR Server?
 
