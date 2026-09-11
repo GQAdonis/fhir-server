@@ -35,6 +35,7 @@ jobs:
             if git cat-file -e origin/gh-pages:docs/conformance/fhir262/app/runs/index.json; then
               git archive origin/gh-pages docs/conformance/fhir262/app | tar -x -C website/static
             elif git cat-file -e origin/gh-pages:fhir262/runs/index.json; then
+              mkdir -p /tmp/fhir262-legacy
               git archive origin/gh-pages fhir262 | tar -x -C /tmp/fhir262-legacy
               cp -a /tmp/fhir262-legacy/fhir262/. website/static/docs/conformance/fhir262/app/
             fi
