@@ -48,9 +48,9 @@ jobs:
         shell: bash
         run: |
           set +e
-          make -k test-hapi test-medplum test-msfhir test-fhir-candle test-wso2-fhir-server
+          make -k test-wso2-fhir-server test-hapi test-medplum test-msfhir test-fhir-candle
           set -e
-          for implementation in hapi medplum msfhir fhir-candle wso2-fhir-server; do
+          for implementation in wso2-fhir-server hapi medplum msfhir fhir-candle; do
             test -s ".results/$implementation.json"
           done
           exit 0
@@ -62,6 +62,10 @@ jobs:
             cp -a ../website/static/docs/conformance/fhir262/app/runs/. dist/runs/
           fi
           bun bin/build.ts -results .results -dist dist
+          for f in dist/runs/run-*.json; do
+            jq '.impls |= (map(select(.id == "wso2-fhir-server")) + map(select(.id != "wso2-fhir-server")))' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+          done
+          jq '.runs |= map(.impls |= (map(select(. == "wso2-fhir-server")) + map(select(. != "wso2-fhir-server"))))' dist/runs/index.json > dist/runs/index.json.tmp && mv dist/runs/index.json.tmp dist/runs/index.json
         working-directory: .fhir262
       - name: Include report in documentation site
         run: |
