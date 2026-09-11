@@ -1,10 +1,10 @@
 <div align="left">
   <h1>WSO2 FHIR Server</h1>
-  <p><strong>WSO2 FHIR Server is a blazing-fast, open-source FHIR R4 server written in Go and backed by PostgreSQL.</strong> Lightweight to run and scale — a single binary, one database, and no per-resource schema migrations.</p>
+  <p><strong>WSO2 FHIR Server is a blazing-fast, open-source FHIR server written in Go and backed by PostgreSQL.</strong> Lightweight to run and scale — a single binary, one database, and no per-resource schema migrations.</p>
 
 <!-- License & Project Info -->
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![FHIR R4](https://img.shields.io/badge/FHIR-R4%20(4.0.1)-e0561f)](https://hl7.org/fhir/R4/)
+[![FHIR](https://img.shields.io/badge/HL7-FHIR-e0561f)](https://hl7.org/fhir/)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/wso2/fhir-server)](./go.mod)
 
 <!-- Build & Activity -->
@@ -16,13 +16,13 @@
 
 ## Why WSO2 FHIR Server?
 
-Standing up a FHIR server usually means operating a heavyweight platform with many moving parts to deploy, tune, and keep alive. Teams that just need a conformant R4 API end up spending their time running the server instead of building on top of it.
+Standing up a FHIR server usually means operating a heavyweight platform with many moving parts to deploy, tune, and keep alive. Teams that just need a conformant FHIR API end up spending their time running the server instead of building on top of it.
 
 Healthcare integrations also evolve constantly — a new resource type here, a new Implementation Guide there. Adopting them should be a configuration change, not a project.
 
 ## What is WSO2 FHIR Server?
 
-WSO2 FHIR Server is an open-source FHIR R4 (4.0.1) REST server written in Go and backed by PostgreSQL. It ships as a single self-contained binary, needs exactly one database, and accepts **every concrete FHIR R4 resource type out of the box** — storage is schema-generic, so no type needs enabling and using a new one takes no migration.
+WSO2 FHIR Server is an open-source FHIR REST server written in Go and backed by PostgreSQL. It ships as a single self-contained binary, needs exactly one database, and accepts **every concrete FHIR resource type out of the box** — storage is schema-generic, so no type needs enabling and using a new one takes no migration.
 
 Key capabilities:
 
@@ -42,7 +42,7 @@ Resources are stored as JSON in a schema-generic table, alongside a full version
 
 ```
                        ┌──────────────────────────────┐
- HTTP (FHIR R4 JSON)   │         fhir-server          │        PostgreSQL
+ HTTP (FHIR JSON)     │         fhir-server          │        PostgreSQL
 ──────────────────────▶│  router → validate → store   │──▶  resources + history
                        │  FHIRPath → search indexes   │──▶  sp_* index tables
                        └──────────────────────────────┘
