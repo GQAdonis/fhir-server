@@ -62,10 +62,6 @@ jobs:
             cp -a ../website/static/docs/conformance/fhir262/app/runs/. dist/runs/
           fi
           bun bin/build.ts -results .results -dist dist
-          for f in dist/runs/run-*.json; do
-            jq '.impls |= (map(select(.id == "wso2-fhir-server")) + map(select(.id != "wso2-fhir-server")))' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-          done
-          jq '.runs |= map(.impls |= (map(select(. == "wso2-fhir-server")) + map(select(. != "wso2-fhir-server"))))' dist/runs/index.json > dist/runs/index.json.tmp && mv dist/runs/index.json.tmp dist/runs/index.json
         working-directory: .fhir262
       - name: Include report in documentation site
         run: |
