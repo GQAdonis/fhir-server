@@ -16,7 +16,7 @@
 
 ## Why WSO2 FHIR Server?
 
-- **High performance.** Search values are extracted and indexed when a resource is written, so every search runs as plain indexed SQL — no JSON parsing or FHIRPath evaluation at query time.
+- **High performance.** FHIR search is engineered down to the PostgreSQL query-plan level: search values are extracted into carefully indexed tables at write time, and each query is routed to the fastest execution strategy based on a quick probe of the data — plan decisions PostgreSQL cannot make on its own for FHIR-shaped data.
 - **Lightweight.** One static binary and one database. The container image is under 10 MB — deploy it anywhere in seconds, from a laptop to Kubernetes.
 - **Zero friction to grow.** Every FHIR resource type works out of the box, and adopting a new Implementation Guide is a configuration change, not a schema migration.
 - **Production-ready from day one.** Prometheus metrics, OpenTelemetry tracing, structured logs, health probes, and multi-tenancy are built in, not bolted on.
