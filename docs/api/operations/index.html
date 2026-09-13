@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.10.2">
 <title data-rh="true">Operations | WSO2 FHIR Server</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://wso2.github.io/fhir-server/docs/api/operations"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Operations | WSO2 FHIR Server"><meta data-rh="true" name="description" content="Reference for $validate, $everything, $lastn, $document, $convert, and the $meta family."><meta data-rh="true" property="og:description" content="Reference for $validate, $everything, $lastn, $document, $convert, and the $meta family."><link data-rh="true" rel="canonical" href="https://wso2.github.io/fhir-server/docs/api/operations"><link data-rh="true" rel="alternate" href="https://wso2.github.io/fhir-server/docs/api/operations" hreflang="en"><link data-rh="true" rel="alternate" href="https://wso2.github.io/fhir-server/docs/api/operations" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Operations","item":"https://wso2.github.io/fhir-server/docs/api/operations"}]}</script><link rel="stylesheet" href="/fhir-server/assets/css/styles.0b74bcdf.css">
-<script src="/fhir-server/assets/js/runtime~main.b5745a9a.js" defer="defer"></script>
+<script src="/fhir-server/assets/js/runtime~main.334b3bd8.js" defer="defer"></script>
 <script src="/fhir-server/assets/js/main.614cd809.js" defer="defer"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@ validated. The <code>mode</code> parameter (<code>create</code>/<code>update</co
 <li class="">Profile resolution is <strong>soft-fail</strong>: a profile that is not loaded is skipped silently, so an
 unrecognised <code>?profile=</code> returns <code>200 OK</code> rather than an error. Confirm packages loaded with
 <a class="" href="/fhir-server/docs/api/capability-statement"><code>/metadata</code></a>.</li>
-<li class="">Base R4 validation is included unless <code>FHIR_BASE_VALIDATION=false</code>. FHIRPath <code>invariant</code> failures
+<li class="">Base R4 validation is included unless <code>FHIR_VALIDATION_BASE=false</code>. FHIRPath <code>invariant</code> failures
 are reported as warnings — see <a class="" href="/fhir-server/docs/conformance/validation">Validation</a>.</li>
 </ul>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="everything">$everything<a href="#everything" class="hash-link" aria-label="Direct link to $everything" title="Direct link to $everything" translate="no">​</a></h2>
