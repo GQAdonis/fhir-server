@@ -180,6 +180,7 @@ func run() error {
 		DisableBaseValidation:        !cfg.Validation.Base,
 		ReferentialIntegrityEnforced: refIntegrity.OnWrite && refIntegrity.OnDelete,
 		MaxRequestBodyBytes:          int64(cfg.MaxRequestBodyBytes),
+		ServerVersion:                ver,
 	})
 	slog.Info("FHIR router initialized", "baseURL", cfg.BaseURL,
 		"baseValidation", cfg.Validation.Base, "profileValidation", cfg.Validation.Profile,

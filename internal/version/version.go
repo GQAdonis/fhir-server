@@ -42,6 +42,13 @@ var Version = ""
 //go:embed VERSION
 var embeddedVersion string
 
+// Current returns the resolved semantic version of the FHIR server.
+// It is equivalent to the first return value of Info().
+func Current() string {
+	v, _, _ := Info()
+	return v
+}
+
 // Info returns the resolved semantic version, the VCS commit, and the build
 // time. commit and date are "unknown" when the binary was not built from a
 // VCS checkout (e.g. from an extracted archive).

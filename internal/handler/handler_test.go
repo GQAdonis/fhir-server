@@ -28,6 +28,7 @@ import (
 
 	"github.com/wso2/fhir-server/internal/handler"
 	"github.com/wso2/fhir-server/internal/store"
+	"github.com/wso2/fhir-server/internal/version"
 )
 
 // ─── Mock store ───────────────────────────────────────────────────────────────
@@ -754,6 +755,32 @@ func TestMetadata_ReturnsCapabilityStatement(t *testing.T) {
 	}
 	if body["fhirVersion"] != "4.0.1" {
 		t.Errorf("want fhirVersion=4.0.1, got %v", body["fhirVersion"])
+	}
+	software, ok := body["software"].(map[string]any)
+	if !ok {
+		t.Fatalf("want software object, got %v", body["software"])
+	}
+	if software["name"] != "WSO2 FHIR Server" {
+		t.Errorf("want software.name=WSO2 FHIR Server, got %v", software["name"])
+	}
+	if software["version"] != version.Current() {
+		t.Errorf("want software.version=%s, got %v", version.Current(), software["version"])
+	}
+}
+
+func TestMetadata_CustomServerVersion(t *testing.T) {
+	h := newRouter(&mockStore{}, handler.Options{ServerVersion: "3.2.1"})
+	w := do(t, h, http.MethodGet, "/fhir/r4/metadata", nil)
+	if w.Code != http.StatusOK {
+		t.Fatalf("want 200, got %d", w.Code)
+	}
+	body := decodeJSON(t, w)
+	software, ok := body["software"].(map[string]any)
+	if !ok {
+		t.Fatalf("want software object, got %v", body["software"])
+	}
+	if software["version"] != "3.2.1" {
+		t.Errorf("want software.version=3.2.1, got %v", software["version"])
 	}
 }
 

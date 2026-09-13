@@ -30,6 +30,7 @@ import (
 	"github.com/wso2/fhir-server/internal/obs"
 	"github.com/wso2/fhir-server/internal/searchparam"
 	"github.com/wso2/fhir-server/internal/tenant"
+	"github.com/wso2/fhir-server/internal/version"
 )
 
 // Options tunes the behavior of the router/handler. The zero value is the
@@ -49,6 +50,9 @@ type Options struct {
 	// MaxRequestBodyBytes caps how much of any request body is read before a 413.
 	// Zero selects the built-in default (defaultMaxRequestBodyBytes).
 	MaxRequestBodyBytes int64
+	// ServerVersion overrides the version reported in CapabilityStatement.software.version.
+	// If empty, internal/version.Current() is used.
+	ServerVersion string
 }
 
 // NewRouter constructs the chi router. An optional Options controls validation
@@ -73,6 +77,10 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 	if maxBodyBytes <= 0 {
 		maxBodyBytes = defaultMaxRequestBodyBytes
 	}
+	serverVer := opt.ServerVersion
+	if serverVer == "" {
+		serverVer = version.Current()
+	}
 	h := &fhirHandler{
 		store:           s,
 		pool:            pool,
@@ -84,6 +92,7 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 		refIntegrity:    opt.ReferentialIntegrityEnforced,
 		baseDefs:        basedef.NewCache(pool),
 		maxBodyBytes:    maxBodyBytes,
+		serverVersion:   serverVer,
 	}
 
 	// Health probes
@@ -220,4 +229,5 @@ type fhirHandler struct {
 	refIntegrity    bool           // referential integrity enforced by the store (CapabilityStatement advertisement)
 	baseDefs        *basedef.Cache // memoized base StructureDefinition lookup by resource type
 	maxBodyBytes    int64          // request body cap in bytes (413 on overflow)
+	serverVersion   string         // server release version for CapabilityStatement.software.version
 }
