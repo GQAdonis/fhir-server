@@ -36,11 +36,11 @@ import (
 // production default: profile validation off, base FHIR R4 validation on.
 type Options struct {
 	// ValidateOnWrite enforces profile (meta.profile) validation on
-	// create/update. Controlled by FHIR_VALIDATE_ON_WRITE; default off.
+	// create/update. Controlled by FHIR_VALIDATION_PROFILE; default off.
 	ValidateOnWrite bool
 	// DisableBaseValidation turns OFF validation against the base FHIR R4
 	// StructureDefinitions on write. Base validation is on by default, so the
-	// zero value keeps it enabled; set via FHIR_BASE_VALIDATION=false.
+	// zero value keeps it enabled; set via FHIR_VALIDATION_BASE=false.
 	DisableBaseValidation bool
 	// ReferentialIntegrityEnforced reflects the store's referential-integrity
 	// setting so the CapabilityStatement can advertise referencePolicy

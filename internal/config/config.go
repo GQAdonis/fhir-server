@@ -83,9 +83,7 @@ type Config struct {
 
 // ValidationConfig groups every write-time validation toggle under one roof:
 // the YAML `validation:` block and the FHIR_VALIDATION_* env vars. Each field
-// resolves env > YAML > default; the legacy env names FHIR_BASE_VALIDATION and
-// FHIR_VALIDATE_ON_WRITE are still honored (the FHIR_VALIDATION_* name wins if
-// both are set).
+// resolves env > YAML > default.
 type ValidationConfig struct {
 	// Base validates writes against the base FHIR R4 StructureDefinitions
 	// (cardinality, fixed/pattern, slicing, type/shape). Default on.
@@ -225,16 +223,16 @@ func resolve(fc *FileConfig) (*Config, error) {
 		igForceReload = strings.EqualFold(v, "true")
 	}
 
-	// Validation toggles: env (FHIR_VALIDATION_* first, then the legacy names)
-	// > YAML `validation:` block > default. Unparseable values fail fast.
+	// Validation toggles: env (FHIR_VALIDATION_*) > YAML `validation:` block
+	// > default. Unparseable values fail fast.
 	validation := ValidationConfig{}
 	var err2 error
 	if validation.Base, err2 = resolveBoolSetting(true, fc.Validation.Base,
-		"FHIR_VALIDATION_BASE", "FHIR_BASE_VALIDATION"); err2 != nil {
+		"FHIR_VALIDATION_BASE"); err2 != nil {
 		return nil, err2
 	}
 	if validation.Profile, err2 = resolveBoolSetting(false, fc.Validation.Profile,
-		"FHIR_VALIDATION_PROFILE", "FHIR_VALIDATE_ON_WRITE"); err2 != nil {
+		"FHIR_VALIDATION_PROFILE"); err2 != nil {
 		return nil, err2
 	}
 	if validation.ReferentialIntegrityOnWrite, err2 = resolveBoolSetting(true, fc.Validation.ReferentialIntegrityOnWrite,
@@ -348,23 +346,18 @@ func resolve(fc *FileConfig) (*Config, error) {
 	}, nil
 }
 
-// resolveBoolSetting resolves a boolean setting: the first set env var (in the
-// given order — canonical name first, then any legacy alias) wins, then the
+// resolveBoolSetting resolves a boolean setting: the env var wins, then the
 // YAML value, then the default. A set-but-unparseable env value fails fast
 // naming the variable, consistent with the numeric tunables.
-func resolveBoolSetting(def bool, fileVal *bool, envVars ...string) (bool, error) {
-	for _, name := range envVars {
-		raw := strings.TrimSpace(os.Getenv(name))
-		if raw == "" {
-			continue
-		}
+func resolveBoolSetting(def bool, fileVal *bool, envVar string) (bool, error) {
+	if raw := strings.TrimSpace(os.Getenv(envVar)); raw != "" {
 		switch strings.ToLower(raw) {
 		case "true", "1", "yes", "on":
 			return true, nil
 		case "false", "0", "no", "off":
 			return false, nil
 		default:
-			return false, fmt.Errorf("invalid %s %q: must be true or false", name, raw)
+			return false, fmt.Errorf("invalid %s %q: must be true or false", envVar, raw)
 		}
 	}
 	if fileVal != nil {

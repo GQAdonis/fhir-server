@@ -393,7 +393,7 @@ Validation against IG `StructureDefinition` profiles (`internal/validate`,
 invariants, and slicing discriminators. It is gated by **two** conditions:
 
 1. The server was started with **`validateOnWrite`** enabled
-   (`FHIR_VALIDATE_ON_WRITE` / `server`-side config; **off by default**), **and**
+   (`FHIR_VALIDATION_PROFILE` / `server`-side config; **off by default**), **and**
 2. the resource itself **declares** a profile in `meta.profile`.
 
 If a resource declares no profile, nothing is validated. If a declared profile isn't

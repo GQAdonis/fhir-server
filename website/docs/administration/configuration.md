@@ -128,13 +128,12 @@ designed to avoid — change it only for controlled experiments. See
 ## Validation and terminology
 
 Validation toggles live in the `validation:` YAML block and can be overridden per setting by
-environment variable. The `FHIR_VALIDATION_*` names are canonical; the legacy names shown in
-parentheses are still honored as fallbacks. An unparseable boolean value fails startup.
+environment variable. An unparseable boolean value fails startup.
 
 | YAML key | Environment variable | Default | Effect |
 | --- | --- | --- | --- |
-| `validation.base` | `FHIR_VALIDATION_BASE` (legacy `FHIR_BASE_VALIDATION`) | `true` | Base R4 structural validation on writes; set `false` to disable. |
-| `validation.profile` | `FHIR_VALIDATION_PROFILE` (legacy `FHIR_VALIDATE_ON_WRITE`) | `false` | Set `true` to enforce declared profiles on create and update. |
+| `validation.base` | `FHIR_VALIDATION_BASE` | `true` | Base R4 structural validation on writes; set `false` to disable. |
+| `validation.profile` | `FHIR_VALIDATION_PROFILE` | `false` | Set `true` to enforce declared profiles on create and update. |
 | `validation.referentialIntegrityOnWrite` | `FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_WRITE` | `true` | Rejects writes whose local literal references do not resolve (`422`) — see [Validation](../conformance/validation.md#referential-integrity). |
 | `validation.referentialIntegrityOnDelete` | `FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_DELETE` | `true` | Rejects deletes of resources still referenced by others (`409`) — see [Validation](../conformance/validation.md#referential-integrity). |
 

@@ -115,8 +115,7 @@ Behaviour worth knowing:
 - Profile resolution is **soft-fail**: a profile that is not loaded is skipped silently, so an
   unrecognised `?profile=` returns `200 OK` rather than an error. Confirm packages loaded with
   [`/metadata`](./capability-statement.md).
-- Base R4 validation is included unless `FHIR_VALIDATION_BASE=false` (the legacy name
-  `FHIR_BASE_VALIDATION` is still honored). FHIRPath `invariant` failures
+- Base R4 validation is included unless `FHIR_VALIDATION_BASE=false`. FHIRPath `invariant` failures
   are reported as warnings — see [Validation](../conformance/validation.md).
 
 ## $everything

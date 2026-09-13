@@ -49,12 +49,12 @@ The response is an OperationOutcome:
 Base resource checks protect fundamental structure. Profile validation is deployment-controlled and applies to profiles declared in `meta.profile` when their StructureDefinitions are available.
 
 The toggles live in the `validation:` YAML block, and each can be overridden by an environment
-variable (the legacy names in parentheses remain accepted as fallbacks):
+variable:
 
 | YAML key | Environment variable | Default | Effect |
 | --- | --- | --- | --- |
-| `validation.base` | `FHIR_VALIDATION_BASE` (legacy `FHIR_BASE_VALIDATION`) | `true` | Validates every write against the base R4 StructureDefinition. Set `false` to disable. |
-| `validation.profile` | `FHIR_VALIDATION_PROFILE` (legacy `FHIR_VALIDATE_ON_WRITE`) | `false` | Set `true` to additionally enforce declared profiles on create and update. |
+| `validation.base` | `FHIR_VALIDATION_BASE` | `true` | Validates every write against the base R4 StructureDefinition. Set `false` to disable. |
+| `validation.profile` | `FHIR_VALIDATION_PROFILE` | `false` | Set `true` to additionally enforce declared profiles on create and update. |
 | `validation.referentialIntegrityOnWrite` | `FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_WRITE` | `true` | Rejects writes whose local literal references do not resolve — see below. |
 | `validation.referentialIntegrityOnDelete` | `FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_DELETE` | `true` | Rejects deletes of resources that are still referenced — see below. |
 

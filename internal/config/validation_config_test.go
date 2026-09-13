@@ -90,7 +90,7 @@ validation:
 	}
 }
 
-func TestValidation_LegacyEnvNames(t *testing.T) {
+func TestValidation_RemovedLegacyEnvNamesIgnored(t *testing.T) {
 	clearIGEnv(t)
 	t.Setenv("FHIR_BASE_VALIDATION", "false")
 	t.Setenv("FHIR_VALIDATE_ON_WRITE", "true")
@@ -98,24 +98,11 @@ func TestValidation_LegacyEnvNames(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if cfg.Validation.Base {
-		t.Error("legacy FHIR_BASE_VALIDATION=false should disable base validation")
-	}
-	if !cfg.Validation.Profile {
-		t.Error("legacy FHIR_VALIDATE_ON_WRITE=true should enable profile validation")
-	}
-}
-
-func TestValidation_CanonicalEnvBeatsLegacy(t *testing.T) {
-	clearIGEnv(t)
-	t.Setenv("FHIR_VALIDATE_ON_WRITE", "true")
-	t.Setenv("FHIR_VALIDATION_PROFILE", "false")
-	cfg, err := config.Load()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !cfg.Validation.Base {
+		t.Error("removed legacy FHIR_BASE_VALIDATION must not affect validation.base")
 	}
 	if cfg.Validation.Profile {
-		t.Error("FHIR_VALIDATION_PROFILE must win over legacy FHIR_VALIDATE_ON_WRITE")
+		t.Error("removed legacy FHIR_VALIDATE_ON_WRITE must not affect validation.profile")
 	}
 }
 

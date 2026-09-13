@@ -98,8 +98,6 @@ validation:
   # (env > file > default): FHIR_VALIDATION_BASE, FHIR_VALIDATION_PROFILE,
   # FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_WRITE,
   # FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_DELETE.
-  # The legacy names FHIR_BASE_VALIDATION / FHIR_VALIDATE_ON_WRITE are still
-  # honored for the first two.
 
   # Validate writes against the base FHIR R4 StructureDefinitions
   # (cardinality, fixed/pattern, slicing, primitive types). Default on.
