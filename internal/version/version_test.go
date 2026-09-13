@@ -21,6 +21,8 @@ import (
 	"testing"
 )
 
+// TestVersion_Default verifies that Current() and Info() fall back to the embedded
+// VERSION file when no linker Version override is present.
 func TestVersion_Default(t *testing.T) {
 	origVersion := Version
 	origEmbedded := embeddedVersion
@@ -53,6 +55,8 @@ func TestVersion_Default(t *testing.T) {
 	}
 }
 
+// TestVersion_LinkerOverride verifies that Current() and Info() honor the linker-injected
+// Version override when provided.
 func TestVersion_LinkerOverride(t *testing.T) {
 	origVersion := Version
 	origEmbedded := embeddedVersion
@@ -74,6 +78,8 @@ func TestVersion_LinkerOverride(t *testing.T) {
 	}
 }
 
+// TestVersion_FallbackDev verifies that Current() returns "dev" when neither the linker
+// flag nor an embedded version string is present.
 func TestVersion_FallbackDev(t *testing.T) {
 	origVersion := Version
 	origEmbedded := embeddedVersion

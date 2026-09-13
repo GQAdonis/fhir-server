@@ -768,6 +768,8 @@ func TestMetadata_ReturnsCapabilityStatement(t *testing.T) {
 	}
 }
 
+// TestMetadata_CustomServerVersion verifies that setting Options.ServerVersion
+// overrides the version advertised in CapabilityStatement.software.version.
 func TestMetadata_CustomServerVersion(t *testing.T) {
 	h := newRouter(&mockStore{}, handler.Options{ServerVersion: "3.2.1"})
 	w := do(t, h, http.MethodGet, "/fhir/r4/metadata", nil)
