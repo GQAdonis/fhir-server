@@ -262,8 +262,8 @@ ig:
 | `ig.forceReload` | `IG_FORCE_RELOAD` | `false` | Set to `true` to re-download and re-process IGs even if already recorded in the database. |
 | `ig.cacheDir` | `IG_CACHE_DIR` | `.fhir-ig-cache` | Directory for caching downloaded `.tgz` packages between restarts. |
 | *(env only)* | `FHIR_TERMINOLOGY_URL` | *(empty)* | Base URL of an external FHIR terminology server used for ValueSet `$expand` (e.g. `https://tx.fhir.org/r4`). Empty disables the `:in` / `:not-in` / `:below` / `:above` search filters. See [Terminology](#11-terminology). |
-| `validation.base` | `FHIR_VALIDATION_BASE` | `true` | Validate writes against the **base FHIR R4** StructureDefinitions (cardinality, fixed/pattern, slicing, primitive types). Set to `false` to disable. Legacy env name `FHIR_BASE_VALIDATION` is still honored. See [Validation](#9-validation). |
-| `validation.profile` | `FHIR_VALIDATION_PROFILE` | `false` | Enforce **profile** validation (against `meta.profile`) on create/update. Legacy env name `FHIR_VALIDATE_ON_WRITE` is still honored. See [Validation](#9-validation). |
+| `validation.base` | `FHIR_VALIDATION_BASE` | `true` | Validate writes against the **base FHIR R4** StructureDefinitions (cardinality, fixed/pattern, slicing, primitive types). Set to `false` to disable. See [Validation](#9-validation). |
+| `validation.profile` | `FHIR_VALIDATION_PROFILE` | `false` | Enforce **profile** validation (against `meta.profile`) on create/update. See [Validation](#9-validation). |
 | `validation.referentialIntegrityOnWrite` | `FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_WRITE` | `true` | Reject a create/update/patch whose local literal references (`Patient/123`) do not resolve to a live resource (422). Disable for out-of-order bulk loads. See [Referential integrity](#referential-integrity). |
 | `validation.referentialIntegrityOnDelete` | `FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_DELETE` | `true` | Reject deleting a resource that live resources still reference (409 Conflict, naming referrers). See [Referential integrity](#referential-integrity). |
 
@@ -942,10 +942,8 @@ validation:
   referentialIntegrityOnDelete: true  # FHIR_VALIDATION_REFERENTIAL_INTEGRITY_ON_DELETE
 ```
 
-The legacy env names `FHIR_BASE_VALIDATION` (for `validation.base`) and
-`FHIR_VALIDATE_ON_WRITE` (for `validation.profile`) keep working; the
-`FHIR_VALIDATION_*` name wins if both are set. An unparseable boolean value
-fails startup, naming the offending variable. See the
+An unparseable boolean value fails startup, naming the offending
+variable. See the
 [Configuration Reference](#4-configuration-reference) for the full table.
 
 ---

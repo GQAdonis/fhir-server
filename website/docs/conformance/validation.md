@@ -52,11 +52,11 @@ Two environment variables control the behavior:
 
 | Variable | Default | Effect |
 | --- | --- | --- |
-| `FHIR_BASE_VALIDATION` | `true` | Validates every write against the base R4 StructureDefinition. Set `false` to disable. |
-| `FHIR_VALIDATE_ON_WRITE` | `false` | Set `true` to additionally enforce declared profiles on create and update. |
+| `FHIR_VALIDATION_BASE` | `true` | Validates every write against the base R4 StructureDefinition. Set `false` to disable. |
+| `FHIR_VALIDATION_PROFILE` | `false` | Set `true` to additionally enforce declared profiles on create and update. |
 
 :::note
-The default behavior favors FHIR interoperability. Load the required Implementation Guides and set `FHIR_VALIDATE_ON_WRITE=true` when a deployment requires profile enforcement.
+The default behavior favors FHIR interoperability. Load the required Implementation Guides and set `FHIR_VALIDATION_PROFILE=true` when a deployment requires profile enforcement.
 :::
 
 ## Profile availability
