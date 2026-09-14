@@ -1,6 +1,6 @@
 <div align="left">
   <h1>WSO2 FHIR Server</h1>
-  <p><strong>WSO2 FHIR Server is a blazing-fast, open-source FHIR server written in Go and backed by PostgreSQL.</strong> Lightweight to run and scale — a single binary, one database, and no per-resource schema migrations.</p>
+  <p><strong>WSO2 FHIR Server is a blazing-fast, open-source FHIR server written in Go and backed by PostgreSQL — built for the cloud-native and agentic era.</strong></p>
 
 <!-- License & Project Info -->
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -15,8 +15,6 @@
 </div>
 
 ## Why WSO2 FHIR Server?
-
-The FHIR server built for the cloud-native and agentic era:
 
 - **Fast.** Write-time indexing and per-query plan selection in PostgreSQL, engineered for FHIR-shaped data.
 - **Lightweight.** One binary, one database, a container image under 10 MB.
