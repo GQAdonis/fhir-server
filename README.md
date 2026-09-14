@@ -39,15 +39,11 @@ Key capabilities:
 
 The server is a single Go process in front of PostgreSQL — there are no other moving parts.
 
-Resources are stored as JSON in a schema-generic table, alongside a full version history. At write time, a built-in FHIRPath evaluator extracts search-parameter values into a small set of typed index tables (strings, tokens, dates, references, …). Searches then compile directly to indexed SQL, which is what keeps queries fast without per-resource schemas:
+Resources are stored as JSON in a schema-generic table, alongside a full version history. At write time, a built-in FHIRPath evaluator extracts search-parameter values into a small set of typed index tables (strings, tokens, dates, references, …). Searches then compile directly to indexed SQL, which is what keeps queries fast without per-resource schemas.
 
-```
-                       ┌──────────────────────────────┐
- HTTP (FHIR JSON)      │         fhir-server          │        PostgreSQL
-──────────────────────▶│  router → validate → store   │──▶  resources + history
-                       │  FHIRPath → search indexes   │──▶  sp_* index tables
-                       └──────────────────────────────┘
-```
+<div align="left">
+  <img src="./docs/images/architecture.png" alt="WSO2 FHIR Server architecture" width="800"/>
+</div>
 
 Because storage is schema-generic, a new resource type — or a whole Implementation Guide — is a configuration change, not a migration.
 
