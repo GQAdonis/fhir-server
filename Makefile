@@ -5,11 +5,12 @@ BINARY      := fhir-server
 PKG         := ./cmd/server
 DOCKER_IMAGE := fhir-server:latest
 
-# Version stamped into the binary. Defaults to the tracked VERSION file; the
+# Version stamped into the binary. Defaults to the tracked version.txt file; the
 # release pipeline overrides it with the tag being released. Injected via -X.
-VERSION     ?= $(shell tr -d '[:space:]' < internal/version/VERSION 2>/dev/null || echo dev)
-VERSION_PKG := github.com/wso2/fhir-server/internal/version
-LDFLAGS     := -X $(VERSION_PKG).Version=$(VERSION)
+VERSION_FILE := version.txt
+VERSION      ?= $(shell tr -d '[:space:]' < $(VERSION_FILE) 2>/dev/null || echo dev)
+VERSION_PKG  := github.com/wso2/fhir-server/internal/version
+LDFLAGS      := -X $(VERSION_PKG).Version=$(VERSION)
 
 .DEFAULT_GOAL := help
 

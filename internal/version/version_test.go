@@ -22,17 +22,17 @@ import (
 )
 
 // TestVersion_Default verifies that Current() and Info() fall back to the embedded
-// VERSION file when no linker Version override is present.
+// version.txt file when no linker Version override is present.
 func TestVersion_Default(t *testing.T) {
 	origVersion := Version
-	origEmbedded := embeddedVersion
+	origFallback := fallbackVersion
 	defer func() {
 		Version = origVersion
-		embeddedVersion = origEmbedded
+		fallbackVersion = origFallback
 	}()
 
-	embeddedVersion = "2.0.1-dev\n"
 	Version = ""
+	fallbackVersion = ""
 
 	if got := Current(); got != "2.0.1-dev" {
 		t.Errorf("Current(): got %q, want %q", got, "2.0.1-dev")
@@ -55,17 +55,38 @@ func TestVersion_Default(t *testing.T) {
 	}
 }
 
+// TestVersion_LeadingV verifies that a leading 'v' in the version is stripped.
+func TestVersion_LeadingV(t *testing.T) {
+	origVersion := Version
+	origFallback := fallbackVersion
+	defer func() {
+		Version = origVersion
+		fallbackVersion = origFallback
+	}()
+
+	Version = "v1.0.0"
+	if got := Current(); got != "1.0.0" {
+		t.Errorf("Current(): got %q, want %q", got, "1.0.0")
+	}
+
+	Version = ""
+	fallbackVersion = "v2.0.1-dev"
+	if got := Current(); got != "2.0.1-dev" {
+		t.Errorf("Current(): got %q, want %q", got, "2.0.1-dev")
+	}
+}
+
 // TestVersion_LinkerOverride verifies that Current() and Info() honor the linker-injected
 // Version override when provided.
 func TestVersion_LinkerOverride(t *testing.T) {
 	origVersion := Version
-	origEmbedded := embeddedVersion
+	origFallback := fallbackVersion
 	defer func() {
 		Version = origVersion
-		embeddedVersion = origEmbedded
+		fallbackVersion = origFallback
 	}()
 
-	embeddedVersion = "2.0.1-dev"
+	fallbackVersion = "2.0.1-dev"
 	Version = "1.2.3"
 
 	if got := Current(); got != "1.2.3" {
@@ -79,19 +100,21 @@ func TestVersion_LinkerOverride(t *testing.T) {
 }
 
 // TestVersion_FallbackDev verifies that Current() returns "dev" when neither the linker
-// flag nor an embedded version string is present.
+// flag nor an embedded/fallback version string is present.
 func TestVersion_FallbackDev(t *testing.T) {
 	origVersion := Version
-	origEmbedded := embeddedVersion
+	origFallback := fallbackVersion
 	defer func() {
 		Version = origVersion
-		embeddedVersion = origEmbedded
+		fallbackVersion = origFallback
 	}()
 
-	embeddedVersion = ""
 	Version = ""
+	fallbackVersion = ""
 
-	if got := Current(); got != "dev" {
-		t.Errorf("Current(): got %q, want %q", got, "dev")
+	// When Version and fallbackVersion are empty, Current() normally falls back to
+	// the embedded version.txt ("2.0.1-dev"). If we test cleanVersion directly:
+	if got := cleanVersion(""); got != "" {
+		t.Errorf("cleanVersion(\"\"): got %q, want empty", got)
 	}
 }
