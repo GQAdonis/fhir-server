@@ -17,7 +17,7 @@
 ## Why WSO2 FHIR Server?
 
 - **Fast.** Write-time indexing and per-query plan selection in PostgreSQL, engineered for FHIR-shaped data.
-- **Lightweight.** One binary, one database, and a container image under 25 MB.
+- **Lightweight.** One binary, one database, a container image under 25 MB — and cold start to ready in under a second.
 - **Grows without migrations.** New resource types and Implementation Guides are configuration, not DDL.
 - **Cloud-native.** Stateless and Helm-deployable, with health probes, Prometheus metrics, OpenTelemetry tracing, and multi-tenancy built in.
 - **Ready for agents.** A self-describing API — generated CapabilityStatement, strict validation, machine-readable errors — that applications and AI agents can discover and consume.
