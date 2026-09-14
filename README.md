@@ -507,7 +507,10 @@ Holds the core FHIR R4 resource StructureDefinitions (one row per resource type)
 ## 8. API Reference
 
 **Base path:** `/fhir/r4`  
-**Content-Type:** All request and response bodies use `application/fhir+json`.  
+**Content-Type:** `application/fhir+json` is the default wire format. Requests may also send
+`application/fhir+xml` or `application/fhir+turtle` (`text/turtle`) bodies, and responses honor
+the `Accept` header and `_format` parameter for the same formats. `PATCH` additionally uses
+patch-specific media types — see [Partial Update](#partial-update-patch).  
 **Errors:** All error responses return an `OperationOutcome` resource.
 
 ### Endpoint table
@@ -520,7 +523,7 @@ Holds the core FHIR R4 resource StructureDefinitions (one row per resource type)
 | `GET` | `/{type}/{id}/_history/{vid}` | 200, 400, 404 | Read specific version |
 | `POST` | `/{type}` | 201 | Create resource |
 | `PUT` | `/{type}/{id}` | 200, 201, 400, 404, 412, 422 | Update resource (creates at the given id when missing — update-as-create; 404 only with `If-Match`) |
-| `PATCH` | `/{type}/{id}` | 200, 400, 404 | JSON Merge Patch, JSON Patch, XML Patch, or FHIR Patch — selected by `Content-Type` |
+| `PATCH` | `/{type}/{id}` | 200, 400, 404, 422 | JSON Merge Patch, JSON Patch, XML Patch, or FHIR Patch — selected by `Content-Type`; a patch that fails to apply returns 422 |
 | `DELETE` | `/{type}/{id}` | 204, 404 | Soft delete |
 | `GET` | `/{type}` | 200 | Search |
 | `POST` | `/{type}/_search` | 200 | Search (form-encoded body) |
@@ -623,7 +626,7 @@ Four patch formats are supported, selected by `Content-Type`:
 | `application/merge-patch+json` (or absent) | [JSON Merge Patch (RFC 7396)](https://tools.ietf.org/html/rfc7396) — set a key to `null` to delete it |
 | `application/json-patch+json` | [JSON Patch (RFC 6902)](https://tools.ietf.org/html/rfc6902) |
 | `application/xml-patch+xml` | XML Patch |
-| `application/fhir+json` (body is `Parameters`) | FHIR Patch |
+| `application/fhir+json` or `application/fhir+xml` (body is `Parameters`) | FHIR Patch |
 
 #### Delete a Resource
 
