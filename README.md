@@ -18,7 +18,7 @@
 
 - **Fast.** Write-time indexing and per-query plan selection in PostgreSQL, engineered for FHIR-shaped data.
 - **Lightweight.** One binary, one database, a container image under 25 MB — and cold start to ready in under a second.
-- **Grows without migrations.** New resource types and Implementation Guides are configuration, not DDL.
+- **Grows without migrations.** Any FHIR resource type is stored, searched, and validated from day one, and adopting an Implementation Guide is a configuration change — the database schema stays fixed either way.
 - **Cloud-native.** Stateless and Helm-deployable, with health probes, Prometheus metrics, OpenTelemetry tracing, and multi-tenancy built in.
 - **Ready for agents.** A self-describing API — generated CapabilityStatement, strict validation, machine-readable errors — that applications and AI agents can discover and consume.
 
