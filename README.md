@@ -18,13 +18,13 @@
 
 - **Fast.** Write-time indexing and per-query plan selection in PostgreSQL, engineered for FHIR-shaped data.
 - **Lightweight.** One binary, one database, a container image under 25 MB — and cold start to ready in under a second.
-- **Grows without migrations.** Any FHIR resource type is stored, searched, and validated from day one, and adopting an Implementation Guide is a configuration change — the database schema stays fixed either way.
+- **Open source.** Apache 2.0 licensed and community-driven — inspect it, extend it, and own your deployment and your data outright.
 - **Cloud-native.** Stateless and Helm-deployable, with health probes, Prometheus metrics, OpenTelemetry tracing, and multi-tenancy built in.
-- **Ready for agents.** A self-describing API — generated CapabilityStatement, strict validation, machine-readable errors — that applications and AI agents can discover and consume.
+- **Sovereign.** Deploy in your preferred environment — VMs, Docker, Kubernetes, any cloud.
 
 ## What is WSO2 FHIR Server?
 
-WSO2 FHIR Server is an open-source FHIR REST server written in Go and backed by PostgreSQL. It ships as a single self-contained binary, needs exactly one database, and accepts **every concrete FHIR resource type out of the box** — storage is schema-generic, so no type needs enabling and using a new one takes no migration.
+WSO2 FHIR Server is an open-source FHIR REST server written in Go and backed by PostgreSQL. It is also the fastest open-source FHIR server according to a [third-party performance benchmark](https://healthsamurai.github.io/fhir-server-performance-benchmark/).
 
 Key capabilities:
 
@@ -32,21 +32,15 @@ Key capabilities:
 - **Rich search** — string, token, date, reference, number, quantity, URI and composite parameters, with modifiers, chaining, `_include`/`_revinclude`, and custom `SearchParameter` registration.
 - **Validation** — base-spec checks and referential integrity (on both writes and deletes) enforced by default, opt-in profile validation against loaded Implementation Guides, and `$validate` to test resources without storing them.
 - **Implementation Guides** — configure IG packages to load at startup; their profiles and search parameters feed validation and the CapabilityStatement.
-- **Terminology** — externalized by design: point the server at any standard FHIR terminology service and searches like `code:in=<value-set>` (any code in a value set) or `code:below=<code>` (a code and its descendants) just work — no bundled terminology database to operate.
+- **Terminology** — externalized by design: point the server at any standard FHIR terminology service (e.g. the [WSO2 FHIR terminology service](https://github.com/wso2/open-healthcare-prebuilt-services/tree/main/miscellaneous/terminology-service)) and searches like `code:in=<value-set>` (any code in a value set) or `code:below=<code>` (a code and its descendants) just work.
 - **Multi-tenancy** — physical (per-tenant server and database) or logical (shared) isolation models.
 - **Operations-ready** — liveness/readiness probes, structured JSON logs, observability hooks, and configuration via YAML, environment variables, or both.
 
 ## How does it work?
 
-The server is a single Go process in front of PostgreSQL — there are no other moving parts.
-
-Resources are stored as JSON in a schema-generic table, alongside a full version history. At write time, a built-in FHIRPath evaluator extracts search-parameter values into a small set of typed index tables (strings, tokens, dates, references, …). Searches then compile directly to indexed SQL, which is what keeps queries fast without per-resource schemas.
-
 <div align="left">
   <img src="./docs/images/architecture.png" alt="WSO2 FHIR Server architecture" width="800"/>
 </div>
-
-Because storage is schema-generic, a new resource type — or a whole Implementation Guide — is a configuration change, not a migration.
 
 Read more in the **[Architecture documentation](https://wso2.github.io/fhir-server/docs/architecture/)**.
 
@@ -68,6 +62,8 @@ curl -s -X POST http://localhost:9090/fhir/r4/Patient \
 ```
 
 Follow the **[Quickstart Guide](https://wso2.github.io/fhir-server/docs/get-started/quickstart/)** for the full walkthrough, or the **[Deployment Guide](https://wso2.github.io/fhir-server/docs/administration/deployment/)** to build from source and run against your own PostgreSQL. For Kubernetes, deploy with the **[Helm chart](./helm/)**.
+
+Don't want to set anything up yourself? Try the hosted demo at **[fhir-explorer.openhealthcare.wso2.com](https://fhir-explorer.openhealthcare.wso2.com/)**.
 
 ## Documentation
 
