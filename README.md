@@ -32,7 +32,7 @@ Key capabilities:
 - **Rich search** — string, token, date, reference, number, quantity, URI and composite parameters, with modifiers, chaining, `_include`/`_revinclude`, and custom `SearchParameter` registration.
 - **Validation** — base-spec checks and referential integrity (on both writes and deletes) enforced by default, opt-in profile validation against loaded Implementation Guides, and `$validate` to test resources without storing them.
 - **Implementation Guides** — configure IG packages to load at startup; their profiles and search parameters feed validation and the CapabilityStatement.
-- **Terminology** — code validation backed by configurable terminology support.
+- **Terminology** — externalized by design: connect any standard FHIR terminology service to enable ValueSet-membership and code-hierarchy search modifiers, with no bundled terminology database to operate.
 - **Multi-tenancy** — physical (per-tenant server and database) or logical (shared) isolation models.
 - **Operations-ready** — liveness/readiness probes, structured JSON logs, observability hooks, and configuration via YAML, environment variables, or both.
 
