@@ -30,7 +30,7 @@ Key capabilities:
 
 - **Full FHIR REST API** — CRUD with versioning and history, conditional interactions, batch/transaction bundles, `$everything`, `$validate`, and a generated CapabilityStatement.
 - **Rich search** — string, token, date, reference, number, quantity, URI and composite parameters, with modifiers, chaining, `_include`/`_revinclude`, and custom `SearchParameter` registration.
-- **Validation** — request-level and base-spec validation on by default, plus opt-in profile validation against loaded Implementation Guides.
+- **Validation** — base-spec checks and referential integrity (on both writes and deletes) enforced by default, opt-in profile validation against loaded Implementation Guides, and `$validate` to test resources without storing them.
 - **Implementation Guides** — configure IG packages to load at startup; their profiles and search parameters feed validation and the CapabilityStatement.
 - **Terminology** — code validation backed by configurable terminology support.
 - **Multi-tenancy** — physical (per-tenant server and database) or logical (shared) isolation models.
