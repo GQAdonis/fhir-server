@@ -19,6 +19,8 @@ package version
 import (
 	"strings"
 	"testing"
+
+	fhirserver "github.com/wso2/fhir-server"
 )
 
 // TestVersion_Default verifies that Current() and Info() fall back to the embedded
@@ -34,13 +36,18 @@ func TestVersion_Default(t *testing.T) {
 	Version = ""
 	fallbackVersion = ""
 
-	if got := Current(); got != "2.0.1-dev" {
-		t.Errorf("Current(): got %q, want %q", got, "2.0.1-dev")
+	expected := cleanVersion(fhirserver.EmbeddedVersion())
+	if expected == "" {
+		expected = "dev"
+	}
+
+	if got := Current(); got != expected {
+		t.Errorf("Current(): got %q, want %q", got, expected)
 	}
 
 	v, commit, date := Info()
-	if v != "2.0.1-dev" {
-		t.Errorf("Info() version: got %q, want %q", v, "2.0.1-dev")
+	if v != expected {
+		t.Errorf("Info() version: got %q, want %q", v, expected)
 	}
 	if commit == "" {
 		t.Error("Info() commit should not be empty")
@@ -50,8 +57,8 @@ func TestVersion_Default(t *testing.T) {
 	}
 
 	str := String()
-	if !strings.HasPrefix(str, "fhir-server 2.0.1-dev") {
-		t.Errorf("String(): got %q, want prefix %q", str, "fhir-server 2.0.1-dev")
+	if !strings.HasPrefix(str, "fhir-server "+expected) {
+		t.Errorf("String(): got %q, want prefix %q", str, "fhir-server "+expected)
 	}
 }
 
