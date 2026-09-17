@@ -50,9 +50,6 @@ type Options struct {
 	// MaxRequestBodyBytes caps how much of any request body is read before a 413.
 	// Zero selects the built-in default (defaultMaxRequestBodyBytes).
 	MaxRequestBodyBytes int64
-	// ServerVersion overrides the version reported in CapabilityStatement.software.version.
-	// If empty, internal/version.Current() is used.
-	ServerVersion string
 }
 
 // NewRouter constructs the chi router. An optional Options controls validation
@@ -77,10 +74,6 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 	if maxBodyBytes <= 0 {
 		maxBodyBytes = defaultMaxRequestBodyBytes
 	}
-	serverVer := opt.ServerVersion
-	if serverVer == "" {
-		serverVer = version.Current()
-	}
 	h := &fhirHandler{
 		store:           s,
 		pool:            pool,
@@ -92,7 +85,7 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 		refIntegrity:    opt.ReferentialIntegrityEnforced,
 		baseDefs:        basedef.NewCache(pool),
 		maxBodyBytes:    maxBodyBytes,
-		serverVersion:   serverVer,
+		serverVersion:   version.Current(),
 	}
 
 	// Health probes
