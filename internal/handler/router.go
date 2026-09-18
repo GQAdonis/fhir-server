@@ -30,6 +30,7 @@ import (
 	"github.com/wso2/fhir-server/internal/obs"
 	"github.com/wso2/fhir-server/internal/searchparam"
 	"github.com/wso2/fhir-server/internal/tenant"
+	"github.com/wso2/fhir-server/internal/version"
 )
 
 // Options tunes the behavior of the router/handler. The zero value is the
@@ -84,6 +85,7 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 		refIntegrity:    opt.ReferentialIntegrityEnforced,
 		baseDefs:        basedef.NewCache(pool),
 		maxBodyBytes:    maxBodyBytes,
+		serverVersion:   version.Current(),
 	}
 
 	// Health probes
@@ -220,4 +222,5 @@ type fhirHandler struct {
 	refIntegrity    bool           // referential integrity enforced by the store (CapabilityStatement advertisement)
 	baseDefs        *basedef.Cache // memoized base StructureDefinition lookup by resource type
 	maxBodyBytes    int64          // request body cap in bytes (413 on overflow)
+	serverVersion   string         // server release version for CapabilityStatement.software.version
 }

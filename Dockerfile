@@ -12,7 +12,7 @@ ARG TARGETOS
 ARG TARGETARCH
 # Release version stamped into the binary, matching the release workflow's
 # ldflags. Left empty by default so the version package falls back to the
-# embedded internal/version/VERSION file (a plain `docker build` stays correct).
+# embedded version.txt file (a plain `docker build` stays correct).
 ARG VERSION=
 RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} \
     go build -trimpath \
