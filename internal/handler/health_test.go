@@ -90,11 +90,12 @@ func TestReadinessProbe_IgnoresCallerCancellation(t *testing.T) {
 }
 
 func TestReadinessProbe_PingHonoursTimeout(t *testing.T) {
+	timeout := 20 * time.Millisecond
 	start := time.Now()
-	if dbReachable(context.Background(), &fakePinger{block: true}, 20*time.Millisecond) {
+	if dbReachable(context.Background(), &fakePinger{block: true}, timeout) {
 		t.Fatal("want unreachable when ping exceeds timeout")
 	}
-	if elapsed := time.Since(start); elapsed >= time.Second {
+	if elapsed := time.Since(start); elapsed > timeout+200*time.Millisecond {
 		t.Fatalf("probe took %v, want it bounded by the timeout", elapsed)
 	}
 }
