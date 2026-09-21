@@ -554,9 +554,11 @@ Ordered initialization in `cmd/server`:
    flag when all finish.
 
 - **Liveness before readiness.** `/health/live` is 200 as soon as the process is up;
-  `/health/ready` is 503 while IGs load and 200 once `igReady` is set. In Kubernetes,
-  the readiness probe gates traffic so clients never hit a half-loaded registry, while
-  the liveness probe doesn't kill a server that's merely still loading IGs.
+  `/health/ready` is 200 once IGs are loaded (`igReady`) **and** PostgreSQL answers a ping,
+  and 503 otherwise. In Kubernetes, the readiness probe gates traffic so clients never hit
+  a half-loaded registry or an instance whose database is unreachable, while the liveness
+  probe doesn't kill a server that's merely still loading IGs. The DB ping is bounded by a
+  2s timeout and its result is cached for 2s, so the probe cannot hammer PostgreSQL.
 - **IG failures are non-fatal.** A bad package logs a warning and the others continue —
   one broken IG can't take down the server. The trade-off: if a package never succeeds,
   `igReady` never flips, so readiness stays 503 (surfacing the problem rather than

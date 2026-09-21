@@ -20,7 +20,9 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -31,6 +33,11 @@ import (
 	"github.com/wso2/fhir-server/internal/searchparam"
 	"github.com/wso2/fhir-server/internal/tenant"
 	"github.com/wso2/fhir-server/internal/version"
+)
+
+const (
+	readinessPingTimeout = 2 * time.Second
+	readinessCacheTTL    = 2 * time.Second
 )
 
 // Options tunes the behavior of the router/handler. The zero value is the
@@ -89,15 +96,20 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 	}
 
 	// Health probes
+	var probeDB dbPinger
+	if pool != nil {
+		probeDB = pool
+	}
+	probe := newReadinessProbe(probeDB)
 	r.Get("/health/live", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	r.Get("/health/ready", func(w http.ResponseWriter, _ *http.Request) {
-		if igReady != nil && igReady.Load() == 1 {
-			w.WriteHeader(http.StatusOK)
-		} else {
+	r.Get("/health/ready", func(w http.ResponseWriter, r *http.Request) {
+		if igReady == nil || igReady.Load() != 1 || !probe.dbReachable(r.Context()) {
 			w.WriteHeader(http.StatusServiceUnavailable)
+			return
 		}
+		w.WriteHeader(http.StatusOK)
 	})
 
 	// mountFHIR registers the full FHIR REST surface. It is mounted twice (see
@@ -223,4 +235,49 @@ type fhirHandler struct {
 	baseDefs        *basedef.Cache // memoized base StructureDefinition lookup by resource type
 	maxBodyBytes    int64          // request body cap in bytes (413 on overflow)
 	serverVersion   string         // server release version for CapabilityStatement.software.version
+}
+
+type dbPinger interface {
+	Ping(ctx context.Context) error
+}
+
+var _ dbPinger = (*pgxpool.Pool)(nil)
+
+// readinessProbe answers whether the database is reachable for a readiness
+// check. Results are cached for readinessCacheTTL so a tight probe interval
+// cannot hammer PostgreSQL; a failed ping is cached too, so recovery is seen
+// within one TTL.
+type readinessProbe struct {
+	db        dbPinger
+	timeout   time.Duration
+	ttl       time.Duration
+	mu        sync.Mutex
+	ok        bool
+	checkedAt time.Time
+	now       func() time.Time
+}
+
+func newReadinessProbe(db dbPinger) *readinessProbe {
+	return &readinessProbe{
+		db:      db,
+		timeout: readinessPingTimeout,
+		ttl:     readinessCacheTTL,
+		now:     time.Now,
+	}
+}
+
+func (p *readinessProbe) dbReachable(ctx context.Context) bool {
+	if p.db == nil {
+		return true
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if now := p.now(); !p.checkedAt.IsZero() && now.Sub(p.checkedAt) < p.ttl {
+		return p.ok
+	}
+	pingCtx, cancel := context.WithTimeout(ctx, p.timeout)
+	defer cancel()
+	p.ok = p.db.Ping(pingCtx) == nil
+	p.checkedAt = p.now()
+	return p.ok
 }
