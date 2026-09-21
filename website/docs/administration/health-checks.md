@@ -47,10 +47,9 @@ background — **and** PostgreSQL is reachable. On a deployment that loads large
 window where liveness already returns `200` while readiness is still `503`. That is the intended
 behaviour: the process is alive but must not receive traffic yet.
 
-Each call pings PostgreSQL with a 2-second timeout and caches the result for 2 seconds; a failed
-ping is cached too, so recovery is detected within one TTL. This keeps an instance with an
-unreachable database out of the load balancer without the probe itself hammering the database.
-Readiness does **not** probe the terminology server; monitor that separately — see
+Each call pings PostgreSQL with a 2-second timeout and uses the result directly, so an unreachable
+database drops the instance from the load balancer on the next probe and recovery is visible just as
+quickly. Readiness does **not** probe the terminology server; monitor that separately — see
 [Observability](./observability.md).
 
 ## Wiring probes in Kubernetes

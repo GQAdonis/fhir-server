@@ -20,7 +20,6 @@ import (
 	"context"
 	"net/http"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -35,10 +34,7 @@ import (
 	"github.com/wso2/fhir-server/internal/version"
 )
 
-const (
-	readinessPingTimeout = 2 * time.Second
-	readinessCacheTTL    = 2 * time.Second
-)
+const readinessPingTimeout = 2 * time.Second
 
 // Options tunes the behavior of the router/handler. The zero value is the
 // production default: profile validation off, base FHIR R4 validation on.
@@ -100,12 +96,11 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 	if pool != nil {
 		probeDB = pool
 	}
-	probe := newReadinessProbe(probeDB)
 	r.Get("/health/live", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 	r.Get("/health/ready", func(w http.ResponseWriter, req *http.Request) {
-		if igReady == nil || igReady.Load() != 1 || !probe.dbReachable(req.Context()) {
+		if igReady == nil || igReady.Load() != 1 || !dbReachable(req.Context(), probeDB, readinessPingTimeout) {
 			w.WriteHeader(http.StatusServiceUnavailable)
 			return
 		}
@@ -243,42 +238,14 @@ type dbPinger interface {
 
 var _ dbPinger = (*pgxpool.Pool)(nil)
 
-// readinessProbe answers whether the database is reachable for a readiness
-// check. Results are cached for readinessCacheTTL so a tight probe interval
-// cannot hammer PostgreSQL; a failed ping is cached too, so recovery is seen
-// within one TTL.
-type readinessProbe struct {
-	db        dbPinger
-	timeout   time.Duration
-	ttl       time.Duration
-	mu        sync.Mutex
-	ok        bool
-	checkedAt time.Time
-	now       func() time.Time
-}
-
-func newReadinessProbe(db dbPinger) *readinessProbe {
-	return &readinessProbe{
-		db:      db,
-		timeout: readinessPingTimeout,
-		ttl:     readinessCacheTTL,
-		now:     time.Now,
-	}
-}
-
-func (p *readinessProbe) dbReachable(ctx context.Context) bool {
-	if p.db == nil {
+// dbReachable reports whether the database answers a ping. A nil pinger means
+// no database is configured (test routers), so the check is a no-op.
+func dbReachable(ctx context.Context, db dbPinger, timeout time.Duration) bool {
+	if db == nil {
 		return true
 	}
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	if now := p.now(); !p.checkedAt.IsZero() && now.Sub(p.checkedAt) < p.ttl {
-		return p.ok
-	}
-	// A client disconnect must not cancel the ping and cache a false failure.
-	pingCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), p.timeout)
+	// A client disconnect must not cancel the ping.
+	pingCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), timeout)
 	defer cancel()
-	p.ok = p.db.Ping(pingCtx) == nil
-	p.checkedAt = p.now()
-	return p.ok
+	return db.Ping(pingCtx) == nil
 }

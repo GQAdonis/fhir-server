@@ -40,8 +40,7 @@ func (f *fakePinger) Ping(ctx context.Context) error {
 }
 
 func TestReadinessProbe_NilPoolAlwaysReachable(t *testing.T) {
-	p := newReadinessProbe(nil)
-	if !p.dbReachable(context.Background()) {
+	if !dbReachable(context.Background(), nil, readinessPingTimeout) {
 		t.Fatal("want reachable when no pool is configured")
 	}
 }
@@ -57,85 +56,42 @@ func TestReadinessProbe_PingOutcome(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			p := newReadinessProbe(&fakePinger{err: tc.err})
-			if got := p.dbReachable(context.Background()); got != tc.want {
+			f := &fakePinger{err: tc.err}
+			if got := dbReachable(context.Background(), f, readinessPingTimeout); got != tc.want {
 				t.Fatalf("want %v, got %v", tc.want, got)
 			}
 		})
 	}
 }
 
-func TestReadinessProbe_CachesUntilTTL(t *testing.T) {
-	now := time.Now()
-	clock := func() time.Time { return now }
-	cases := []struct {
-		name    string
-		err     error
-		advance time.Duration
-		want    bool
-	}{
-		{"cached success inside ttl", nil, 0, true},
-		{"re-probed success after ttl", nil, 3 * time.Second, true},
-		{"cached failure inside ttl", errors.New("down"), 0, false},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			f := &fakePinger{err: tc.err}
-			p := newReadinessProbe(f)
-			p.now = clock
-			p.ttl = 2 * time.Second
-
-			if got := p.dbReachable(context.Background()); got != (tc.err == nil) {
-				t.Fatalf("first probe: want %v, got %v", tc.err == nil, got)
-			}
-			now = now.Add(tc.advance)
-			if got := p.dbReachable(context.Background()); got != tc.want {
-				t.Fatalf("second probe: want %v, got %v", tc.want, got)
-			}
-			wantCalls := int32(1)
-			if tc.advance > 0 {
-				wantCalls = 2
-			}
-			if got := f.calls.Load(); got != wantCalls {
-				t.Fatalf("want %d ping(s), got %d", wantCalls, got)
-			}
-		})
-	}
-}
-
-func TestReadinessProbe_RecoversAfterFailure(t *testing.T) {
-	now := time.Now()
+func TestReadinessProbe_NoCaching(t *testing.T) {
 	f := &fakePinger{err: errors.New("down")}
-	p := newReadinessProbe(f)
-	p.now = func() time.Time { return now }
-	p.ttl = 2 * time.Second
+	ctx := context.Background()
 
-	if p.dbReachable(context.Background()) {
+	if dbReachable(ctx, f, readinessPingTimeout) {
 		t.Fatal("want unreachable while ping fails")
 	}
 	f.err = nil
-	now = now.Add(3 * time.Second)
-	if !p.dbReachable(context.Background()) {
-		t.Fatal("want reachable once ping succeeds after ttl")
+	if !dbReachable(ctx, f, readinessPingTimeout) {
+		t.Fatal("want reachable as soon as the ping succeeds")
+	}
+	if got := f.calls.Load(); got != 2 {
+		t.Fatalf("want 2 pings, got %d", got)
 	}
 }
 
 func TestReadinessProbe_IgnoresCallerCancellation(t *testing.T) {
-	p := newReadinessProbe(&fakePinger{})
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	if !p.dbReachable(ctx) {
+	if !dbReachable(ctx, &fakePinger{}, readinessPingTimeout) {
 		t.Fatal("want reachable: caller cancellation must not cancel the ping")
 	}
 }
 
 func TestReadinessProbe_PingHonoursTimeout(t *testing.T) {
-	p := newReadinessProbe(&fakePinger{block: true})
-	p.timeout = 20 * time.Millisecond
-
 	start := time.Now()
-	if p.dbReachable(context.Background()) {
+	if dbReachable(context.Background(), &fakePinger{block: true}, 20*time.Millisecond) {
 		t.Fatal("want unreachable when ping exceeds timeout")
 	}
 	if elapsed := time.Since(start); elapsed >= time.Second {

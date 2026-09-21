@@ -558,7 +558,7 @@ Ordered initialization in `cmd/server`:
   and 503 otherwise. In Kubernetes, the readiness probe gates traffic so clients never hit
   a half-loaded registry or an instance whose database is unreachable, while the liveness
   probe doesn't kill a server that's merely still loading IGs. The DB ping is bounded by a
-  2s timeout and its result is cached for 2s, so the probe cannot hammer PostgreSQL.
+  2s timeout and used directly, so an unreachable database is reflected on the next probe.
 - **IG failures are non-fatal.** A bad package logs a warning and the others continue —
   one broken IG can't take down the server. The trade-off: if a package never succeeds,
   `igReady` never flips, so readiness stays 503 (surfacing the problem rather than
