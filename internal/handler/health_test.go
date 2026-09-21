@@ -120,6 +120,16 @@ func TestReadinessProbe_RecoversAfterFailure(t *testing.T) {
 	}
 }
 
+func TestReadinessProbe_IgnoresCallerCancellation(t *testing.T) {
+	p := newReadinessProbe(&fakePinger{})
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if !p.dbReachable(ctx) {
+		t.Fatal("want reachable: caller cancellation must not cancel the ping")
+	}
+}
+
 func TestReadinessProbe_PingHonoursTimeout(t *testing.T) {
 	p := newReadinessProbe(&fakePinger{block: true})
 	p.timeout = 20 * time.Millisecond

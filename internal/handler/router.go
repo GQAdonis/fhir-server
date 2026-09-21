@@ -104,8 +104,8 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 	r.Get("/health/live", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	r.Get("/health/ready", func(w http.ResponseWriter, r *http.Request) {
-		if igReady == nil || igReady.Load() != 1 || !probe.dbReachable(r.Context()) {
+	r.Get("/health/ready", func(w http.ResponseWriter, req *http.Request) {
+		if igReady == nil || igReady.Load() != 1 || !probe.dbReachable(req.Context()) {
 			w.WriteHeader(http.StatusServiceUnavailable)
 			return
 		}
@@ -275,7 +275,8 @@ func (p *readinessProbe) dbReachable(ctx context.Context) bool {
 	if now := p.now(); !p.checkedAt.IsZero() && now.Sub(p.checkedAt) < p.ttl {
 		return p.ok
 	}
-	pingCtx, cancel := context.WithTimeout(ctx, p.timeout)
+	// A client disconnect must not cancel the ping and cache a false failure.
+	pingCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), p.timeout)
 	defer cancel()
 	p.ok = p.db.Ping(pingCtx) == nil
 	p.checkedAt = p.now()
