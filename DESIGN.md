@@ -330,8 +330,7 @@ change over Postgres `LISTEN/NOTIFY`, and on a 30-second poll as the backstop fo
 notifications that were lost while it was disconnected. Writers emit the notification
 inside their transaction, so it fires only if the change commits. Invalidation bounds the
 staleness window but cannot repair it: writes handled by a replica that did not yet know
-a parameter still miss that parameter's index rows, which is the reindex limitation in
-§7.
+a parameter still miss that parameter's index rows, which is the reindex limitation in §7.
 
 ### Custom `SearchParameter` resources
 
