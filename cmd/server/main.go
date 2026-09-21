@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
@@ -129,6 +130,16 @@ func run() error {
 	if err := registry.Load(ctx, pool); err != nil {
 		return fmt.Errorf("load search params: %w", err)
 	}
+
+	// Keep the registry current when another replica writes a SearchParameter;
+	// without this, only the pod that handled the write knows about it.
+	watcher := searchparam.NewWatcher(pool, registry)
+	var background sync.WaitGroup
+	background.Add(1)
+	go func() {
+		defer background.Done()
+		watcher.Run(ctx)
+	}()
 
 	// Store + HTTP (server starts immediately; IGs load in background)
 	searchTuning := store.SearchTuning{
@@ -260,7 +271,10 @@ func run() error {
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer shutdownCancel()
-	return srv.Shutdown(shutdownCtx)
+	err = srv.Shutdown(shutdownCtx)
+	cancel()
+	background.Wait()
+	return err
 }
 
 func setupLogging(level string) {

@@ -1136,6 +1136,10 @@ func (s *Store) SyncSearchParameter(ctx context.Context, body map[string]any) er
 		}
 	}
 
+	if err := searchparam.NotifyChange(ctx, tx, "custom search parameter "+code); err != nil {
+		return err
+	}
+
 	// Commit DB changes before updating the in-memory registry so that a
 	// failure or rollback never leaves the registry ahead of the database.
 	if err := tx.Commit(ctx); err != nil {
@@ -1198,6 +1202,9 @@ func (s *Store) DeleteSearchParameter(ctx context.Context, resourceID string) er
 		code, bases,
 	); err != nil {
 		return err
+	}
+	if err := searchparam.NotifyChange(ctx, s.pool, "deleted custom search parameter "+code); err != nil {
+		slog.Warn("notify search parameter change failed", "code", code, "err", err)
 	}
 
 	// Update the in-memory registry only after the DB delete commits so the

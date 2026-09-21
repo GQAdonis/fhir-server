@@ -1,0 +1,34 @@
+// Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com).
+//
+// WSO2 LLC. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+package searchparam
+
+import (
+	"context"
+	"time"
+)
+
+// SetIntervals shrinks the watcher's timings for tests.
+func (w *Watcher) SetIntervals(poll, debounce time.Duration) {
+	w.pollInterval = poll
+	w.debounce = debounce
+}
+
+// Listening signals once the LISTEN connection is established.
+func (w *Watcher) Listening() <-chan struct{} { return w.listening }
+
+// ReloadForTest drives one reload, as the watch loop would.
+func (w *Watcher) ReloadForTest(ctx context.Context) { w.reload(ctx, "test") }

@@ -76,9 +76,26 @@ func (r *Registry) RevInclude(targetType string) []string {
 	return cp
 }
 
+type loadStats struct {
+	total  int
+	base   int
+	fromIG int
+	custom int
+}
+
 // Load reads all definitions from the DB and replaces the current cache.
 func (r *Registry) Load(ctx context.Context, pool *pgxpool.Pool) error {
 	slog.Debug("loading search parameter definitions from database into the in-memory registry")
+	stats, err := r.load(ctx, pool)
+	if err != nil {
+		return err
+	}
+	slog.Info("loaded search parameter definitions into in-memory registry",
+		"total", stats.total, "baseFHIRR4", stats.base, "fromIGs", stats.fromIG, "userDefined", stats.custom)
+	return nil
+}
+
+func (r *Registry) load(ctx context.Context, pool *pgxpool.Pool) (loadStats, error) {
 	rows, err := pool.Query(ctx, `
 		SELECT resource_type, param_name, param_type, fhirpath_expr, is_custom, ig_source,
 		       COALESCE(target_types, ''), COALESCE(components_json, '')
@@ -86,20 +103,19 @@ func (r *Registry) Load(ctx context.Context, pool *pgxpool.Pool) error {
 		ORDER BY resource_type, param_name
 	`)
 	if err != nil {
-		return fmt.Errorf("query search_param_definitions: %w", err)
+		return loadStats{}, fmt.Errorf("query search_param_definitions: %w", err)
 	}
 	defer rows.Close()
 
 	byRes := make(map[string][]Definition)
 	byKey := make(map[string]Definition)
-	count := 0
-	var base, fromIG, custom int // by source: base FHIR R4 spec / IG package / user-defined
+	var stats loadStats
 
 	for rows.Next() {
 		var d Definition
 		var targetTypes, componentsJSON string
 		if err := rows.Scan(&d.ResourceType, &d.ParamName, &d.ParamType, &d.FHIRPath, &d.IsCustom, &d.IGSource, &targetTypes, &componentsJSON); err != nil {
-			return fmt.Errorf("scan definition row: %w", err)
+			return loadStats{}, fmt.Errorf("scan definition row: %w", err)
 		}
 		if targetTypes != "" {
 			d.Targets = strings.Split(targetTypes, "|")
@@ -109,18 +125,18 @@ func (r *Registry) Load(ctx context.Context, pool *pgxpool.Pool) error {
 		}
 		byRes[d.ResourceType] = append(byRes[d.ResourceType], d)
 		byKey[d.ResourceType+"."+d.ParamName] = d
-		count++
+		stats.total++
 		switch {
 		case d.IsCustom || d.IGSource == "user":
-			custom++
+			stats.custom++
 		case d.IGSource != "":
-			fromIG++
+			stats.fromIG++
 		default:
-			base++
+			stats.base++
 		}
 	}
 	if err := rows.Err(); err != nil {
-		return fmt.Errorf("iterate definitions: %w", err)
+		return loadStats{}, fmt.Errorf("iterate definitions: %w", err)
 	}
 
 	// Build reverse-include index: targetType → []"SourceType:paramName"
@@ -143,9 +159,7 @@ func (r *Registry) Load(ctx context.Context, pool *pgxpool.Pool) error {
 	r.revIncl = revIncl
 	r.mu.Unlock()
 
-	slog.Info("loaded search parameter definitions into in-memory registry",
-		"total", count, "baseFHIRR4", base, "fromIGs", fromIG, "userDefined", custom)
-	return nil
+	return stats, nil
 }
 
 func (r *Registry) ForResource(resourceType string) []Definition {

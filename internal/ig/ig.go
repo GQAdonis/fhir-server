@@ -210,6 +210,12 @@ func LoadPackage(
 		result.Profiles++
 	}
 
+	if result.SearchParams > 0 {
+		if err := searchparam.NotifyChange(ctx, tx, "IG "+source); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		return nil, err
 	}
