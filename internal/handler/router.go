@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -32,6 +33,8 @@ import (
 	"github.com/wso2/fhir-server/internal/tenant"
 	"github.com/wso2/fhir-server/internal/version"
 )
+
+const readinessPingTimeout = 2 * time.Second
 
 // Options tunes the behavior of the router/handler. The zero value is the
 // production default: profile validation off, base FHIR R4 validation on.
@@ -89,15 +92,19 @@ func NewRouter(s StoreAPI, pool *pgxpool.Pool, registry *searchparam.Registry, b
 	}
 
 	// Health probes
+	var probeDB dbPinger
+	if pool != nil {
+		probeDB = pool
+	}
 	r.Get("/health/live", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
-	r.Get("/health/ready", func(w http.ResponseWriter, _ *http.Request) {
-		if igReady != nil && igReady.Load() == 1 {
-			w.WriteHeader(http.StatusOK)
-		} else {
+	r.Get("/health/ready", func(w http.ResponseWriter, req *http.Request) {
+		if igReady == nil || igReady.Load() != 1 || !dbReachable(req.Context(), probeDB, readinessPingTimeout) {
 			w.WriteHeader(http.StatusServiceUnavailable)
+			return
 		}
+		w.WriteHeader(http.StatusOK)
 	})
 
 	// mountFHIR registers the full FHIR REST surface. It is mounted twice (see
@@ -223,4 +230,22 @@ type fhirHandler struct {
 	baseDefs        *basedef.Cache // memoized base StructureDefinition lookup by resource type
 	maxBodyBytes    int64          // request body cap in bytes (413 on overflow)
 	serverVersion   string         // server release version for CapabilityStatement.software.version
+}
+
+type dbPinger interface {
+	Ping(ctx context.Context) error
+}
+
+var _ dbPinger = (*pgxpool.Pool)(nil)
+
+// dbReachable reports whether the database answers a ping. A nil pinger means
+// no database is configured (test routers), so the check is a no-op.
+func dbReachable(ctx context.Context, db dbPinger, timeout time.Duration) bool {
+	if db == nil {
+		return true
+	}
+	// A client disconnect must not cancel the ping.
+	pingCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), timeout)
+	defer cancel()
+	return db.Ping(pingCtx) == nil
 }

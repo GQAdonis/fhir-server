@@ -120,8 +120,8 @@ persistence:
 
 # Probes target the server's own health endpoints (see internal/handler/router.go):
 # /health/live is 200 as soon as the process is up; /health/ready is 503 until any
-# configured Implementation Guides finish loading, then 200 -- a real signal, not
-# a stub, so readiness should gate traffic.
+# /health/live is 200 as soon as the process is up; /health/ready is 503 until all
+# configured Implementation Guide load attempts complete AND PostgreSQL answers a ping,
 probes:
   startup:
     enabled: true
