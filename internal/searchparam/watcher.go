@@ -90,8 +90,10 @@ func (w *Watcher) Run(ctx context.Context) {
 	}
 }
 
-// watch reloads the registry on a change notification and after a reconnect,
-// retrying failures with backoff.
+// watch reloads the registry on a change notification and after a reconnect. A
+// single timer drives both the debounce and the failed-reload backoff: a
+// notification (re)arms it for the debounce interval, a failed reload for a
+// growing retry interval.
 func (w *Watcher) watch(ctx context.Context) error {
 	conn, err := w.connect(ctx)
 	if err != nil {
@@ -102,11 +104,55 @@ func (w *Watcher) watch(ctx context.Context) error {
 	if _, err := conn.Exec(ctx, "LISTEN "+notifyChannel); err != nil {
 		return fmt.Errorf("listen on %s: %w", notifyChannel, err)
 	}
-	select {
-	case w.listening <- struct{}{}:
-	default:
+	w.signalListening()
+
+	notifications, readErr := watchNotifications(ctx, conn)
+
+	timer := time.NewTimer(0)
+	timer.Stop()
+	defer stopTimer(timer)
+
+	var (
+		timerC  <-chan time.Time
+		trigger string
+		retryIn = watchReloadRetryMin
+	)
+	if !w.reload(ctx, "connect") {
+		timerC, trigger = armTimer(timer, retryIn), "retry"
+		retryIn = min(retryIn*2, watchReloadRetryMax)
 	}
 
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case err := <-readErr:
+			return fmt.Errorf("wait for notification: %w", err)
+		case <-notifications:
+			timerC, trigger = armTimer(timer, w.debounce), "notify"
+		case <-timerC:
+			timerC = nil
+			if w.reload(ctx, trigger) {
+				retryIn = watchReloadRetryMin
+				continue
+			}
+			timerC, trigger = armTimer(timer, retryIn), "retry"
+			retryIn = min(retryIn*2, watchReloadRetryMax)
+		}
+	}
+}
+
+// connect opens the dedicated connection used to listen for change notifications.
+func (w *Watcher) connect(ctx context.Context) (*pgx.Conn, error) {
+	cfg := w.pool.Config().ConnConfig.Copy()
+	dialer := &net.Dialer{KeepAlive: watchKeepAlive}
+	cfg.DialFunc = dialer.DialContext
+	return pgx.ConnectConfig(ctx, cfg)
+}
+
+// watchNotifications forwards server notifications to the returned channel (at
+// most one pending) and reports a read failure on the error channel.
+func watchNotifications(ctx context.Context, conn *pgx.Conn) (<-chan struct{}, <-chan error) {
 	notifications := make(chan struct{}, 1)
 	readErr := make(chan error, 1)
 	go func() {
@@ -122,72 +168,15 @@ func (w *Watcher) watch(ctx context.Context) error {
 			}
 		}
 	}()
-
-	var (
-		debounce   *time.Timer
-		debounceC  <-chan time.Time
-		retry      *time.Timer
-		retryC     <-chan time.Time
-		retryDelay = watchReloadRetryMin
-	)
-	defer func() {
-		stopTimer(debounce)
-		stopTimer(retry)
-	}()
-
-	scheduleRetry := func() {
-		stopTimer(retry)
-		if retry == nil {
-			retry = time.NewTimer(retryDelay)
-		} else {
-			retry.Reset(retryDelay)
-		}
-		retryC = retry.C
-		retryDelay = min(retryDelay*2, watchReloadRetryMax)
-	}
-	if !w.reload(ctx, "connect") {
-		scheduleRetry()
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		case err := <-readErr:
-			return fmt.Errorf("wait for notification: %w", err)
-		case <-notifications:
-			if debounce == nil {
-				debounce = time.NewTimer(w.debounce)
-			} else {
-				debounce.Reset(w.debounce)
-			}
-			debounceC = debounce.C
-		case <-debounceC:
-			debounceC = nil
-			if w.reload(ctx, "notify") {
-				stopTimer(retry)
-				retryC = nil
-				retryDelay = watchReloadRetryMin
-			} else {
-				scheduleRetry()
-			}
-		case <-retryC:
-			retryC = nil
-			if w.reload(ctx, "retry") {
-				retryDelay = watchReloadRetryMin
-			} else {
-				scheduleRetry()
-			}
-		}
-	}
+	return notifications, readErr
 }
 
-// connect opens the dedicated connection used to listen for change notifications.
-func (w *Watcher) connect(ctx context.Context) (*pgx.Conn, error) {
-	cfg := w.pool.Config().ConnConfig.Copy()
-	dialer := &net.Dialer{KeepAlive: watchKeepAlive}
-	cfg.DialFunc = dialer.DialContext
-	return pgx.ConnectConfig(ctx, cfg)
+// signalListening records the first successful connect; later calls are no-ops.
+func (w *Watcher) signalListening() {
+	select {
+	case w.listening <- struct{}{}:
+	default:
+	}
 }
 
 // reload refreshes the registry, keeping the previous snapshot on failure.
@@ -203,10 +192,13 @@ func (w *Watcher) reload(ctx context.Context, trigger string) bool {
 	return true
 }
 
+func armTimer(t *time.Timer, d time.Duration) <-chan time.Time {
+	stopTimer(t)
+	t.Reset(d)
+	return t.C
+}
+
 func stopTimer(t *time.Timer) {
-	if t == nil {
-		return
-	}
 	if !t.Stop() {
 		select {
 		case <-t.C:
