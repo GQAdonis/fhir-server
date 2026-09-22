@@ -108,14 +108,16 @@ func (w *Watcher) watch(ctx context.Context) error {
 
 	notifications, readErr := watchNotifications(ctx, conn)
 
+	// reloadDue is the next scheduled reload, or nil when none is pending (a nil
+	// channel is never selected). reason labels it for the logs.
 	var (
-		timerC  <-chan time.Time
-		trigger string
-		retryIn = watchReloadRetryMin
+		reloadDue    <-chan time.Time
+		reason       string
+		retryBackoff = watchReloadRetryMin
 	)
 	if !w.reload(ctx, "connect") {
-		timerC, trigger = time.After(retryIn), "retry"
-		retryIn = min(retryIn*2, watchReloadRetryMax)
+		reloadDue, reason = time.After(retryBackoff), "retry"
+		retryBackoff = min(retryBackoff*2, watchReloadRetryMax)
 	}
 
 	for {
@@ -125,15 +127,17 @@ func (w *Watcher) watch(ctx context.Context) error {
 		case err := <-readErr:
 			return fmt.Errorf("wait for notification: %w", err)
 		case <-notifications:
-			timerC, trigger = time.After(w.debounce), "notify"
-		case <-timerC:
-			timerC = nil
-			if w.reload(ctx, trigger) {
-				retryIn = watchReloadRetryMin
+			// Coalesce a burst of changes into one reload.
+			reloadDue, reason = time.After(w.debounce), "notify"
+		case <-reloadDue:
+			reloadDue = nil
+			if w.reload(ctx, reason) {
+				retryBackoff = watchReloadRetryMin
 				continue
 			}
-			timerC, trigger = time.After(retryIn), "retry"
-			retryIn = min(retryIn*2, watchReloadRetryMax)
+			// Retry a failed reload with a growing backoff.
+			reloadDue, reason = time.After(retryBackoff), "retry"
+			retryBackoff = min(retryBackoff*2, watchReloadRetryMax)
 		}
 	}
 }
