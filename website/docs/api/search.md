@@ -198,8 +198,8 @@ no-op `PUT` of its current content. Plan that pass before exposing the parameter
 :::note
 With multiple replicas, a `SearchParameter` created on one is propagated to the others (over
 PostgreSQL `LISTEN/NOTIFY`), so they index new writes against it too. This bounds how long a
-replica can lag; it does not change the no-backfill behavior above. Propagation is on by default
-and can be disabled with `SEARCH_PARAM_WATCH=false` — see
+replica can lag; it does not change the no-backfill behavior above. Propagation is off by default;
+enable it with `SEARCH_PARAM_WATCH=true` when running multiple replicas — see
 [Configuration](../administration/configuration.md#search-parameter-registry).
 :::
 

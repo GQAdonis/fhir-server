@@ -23,29 +23,29 @@ import (
 	"github.com/wso2/fhir-server/internal/config"
 )
 
-func TestSearchParamsWatch_DefaultOn(t *testing.T) {
+func TestSearchParamsWatch_DefaultOff(t *testing.T) {
 	clearIGEnv(t)
 	cfg, err := config.Load()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !cfg.SearchParams.Watch {
-		t.Error("default SearchParams.Watch should be true")
+	if cfg.SearchParams.Watch {
+		t.Error("default SearchParams.Watch should be false")
 	}
 }
 
-func TestSearchParamsWatch_YAMLDisables(t *testing.T) {
+func TestSearchParamsWatch_YAMLEnables(t *testing.T) {
 	clearIGEnv(t)
 	path := writeConfigFile(t, `
 searchParams:
-  watch: false
+  watch: true
 `)
 	cfg, err := config.LoadFromPath(path)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if cfg.SearchParams.Watch {
-		t.Error("YAML searchParams.watch=false should disable the watcher")
+	if !cfg.SearchParams.Watch {
+		t.Error("YAML searchParams.watch=true should enable the watcher")
 	}
 }
 
@@ -53,14 +53,14 @@ func TestSearchParamsWatch_EnvOverridesYAML(t *testing.T) {
 	clearIGEnv(t)
 	path := writeConfigFile(t, `
 searchParams:
-  watch: true
+  watch: false
 `)
-	t.Setenv("SEARCH_PARAM_WATCH", "false")
+	t.Setenv("SEARCH_PARAM_WATCH", "true")
 	cfg, err := config.LoadFromPath(path)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if cfg.SearchParams.Watch {
+	if !cfg.SearchParams.Watch {
 		t.Error("env SEARCH_PARAM_WATCH should override the YAML value")
 	}
 }

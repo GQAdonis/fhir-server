@@ -104,9 +104,8 @@ type ValidationConfig struct {
 // SearchParamsConfig groups the search-parameter registry settings.
 type SearchParamsConfig struct {
 	// Watch keeps each replica's in-memory SearchParameter registry in sync with
-	// changes made by other replicas over Postgres LISTEN/NOTIFY. Default on;
-	// disable it on single-node deployments, where there are no other replicas
-	// to sync with. Env: SEARCH_PARAM_WATCH.
+	// changes made by other replicas over Postgres LISTEN/NOTIFY. Off by default;
+	// enable it when running more than one replica. Env: SEARCH_PARAM_WATCH.
 	Watch bool
 }
 
@@ -334,7 +333,7 @@ func resolve(fc *FileConfig) (*Config, error) {
 	// capability off entirely; the processing default exists so a deployment can
 	// opt whole workloads into parallel mode without per-request headers.
 
-	searchParamsWatch, err := resolveBoolSetting(true, fc.SearchParams.Watch, "SEARCH_PARAM_WATCH")
+	searchParamsWatch, err := resolveBoolSetting(false, fc.SearchParams.Watch, "SEARCH_PARAM_WATCH")
 	if err != nil {
 		return nil, err
 	}

@@ -84,10 +84,9 @@ searchParams:
   # Keep each replica's in-memory SearchParameter registry in sync with changes
   # made by other replicas (over PostgreSQL LISTEN/NOTIFY), so a SearchParameter
   # created on one replica is picked up by the rest instead of waiting for a
-  # restart. On by default; set to false on a single-node deployment, where
-  # there are no other replicas to sync with.
+  # restart. Off by default; enable it when running more than one replica.
   # Env: SEARCH_PARAM_WATCH.
-  watch: true
+  watch: false
 
 ig:
   # Implementation guides to load at startup. None are loaded by default —

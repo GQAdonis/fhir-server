@@ -333,7 +333,7 @@ a silent partition becomes a reconnect. Writers emit the notification inside the
 transaction, so it fires only if the change commits. Invalidation bounds the staleness
 window but cannot repair it: writes handled by a replica that did not yet know a parameter
 still miss that parameter's index rows, which is the reindex limitation in section 7. The watcher
-is on by default and can be disabled with `SEARCH_PARAM_WATCH=false` on single-node deployments.
+is off by default; enable it with `SEARCH_PARAM_WATCH=true` for multi-replica deployments.
 
 ### Custom `SearchParameter` resources
 

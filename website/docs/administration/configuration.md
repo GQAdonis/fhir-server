@@ -56,7 +56,7 @@ write:
   maxRowsPerBundle: 100000
 
 searchParams:
-  watch: true
+  watch: false
 
 ig:
   packages:
@@ -123,13 +123,13 @@ designed to avoid — change it only for controlled experiments. See
 
 | YAML key | Environment variable | Default | Effect |
 | --- | --- | --- | --- |
-| `searchParams.watch` | `SEARCH_PARAM_WATCH` | `true` | Keep each replica's in-memory SearchParameter registry in sync with changes made by other replicas. |
+| `searchParams.watch` | `SEARCH_PARAM_WATCH` | `false` | Keep each replica's in-memory SearchParameter registry in sync with changes made by other replicas. |
 
 The search-parameter registry is held in each server process. When one replica creates a
 `SearchParameter` (or loads an Implementation Guide), `searchParams.watch` makes the others reload
 their copy over PostgreSQL `LISTEN/NOTIFY` instead of staying stale until a restart — see [Custom
-search parameters](../api/search.md#custom-search-parameters). It is on by default; set it to
-`false` on a single-node deployment, where there are no other replicas to sync with.
+search parameters](../api/search.md#custom-search-parameters). It is off by default, so a
+single-node deployment is unaffected; enable it when running more than one replica.
 
 ## Implementation Guides
 

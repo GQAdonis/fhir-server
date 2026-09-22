@@ -56,8 +56,8 @@ Searches run against the typed indexes first and load the matching JSON document
 
 The set of search parameters is held in each process, so a multi-replica deployment keeps them in
 sync over PostgreSQL `LISTEN/NOTIFY`: when a replica adds or changes a search parameter, the others
-reload it rather than staying stale until a restart. This is on by default and can be turned off on
-single-node deployments with `SEARCH_PARAM_WATCH=false` — see
+reload it rather than staying stale until a restart. This is off by default; enable it for
+multi-replica deployments with `SEARCH_PARAM_WATCH=true` — see
 [Configuration](../administration/configuration.md#search-parameter-registry).
 
 ## What stays outside
