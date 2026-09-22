@@ -131,8 +131,7 @@ func run() error {
 		return fmt.Errorf("load search params: %w", err)
 	}
 
-	// Keep the registry current when another replica writes a SearchParameter;
-	// without this, only the pod that handled the write knows about it.
+	// Keep the shared registry in sync across replicas.
 	watcher := searchparam.NewWatcher(pool, registry)
 	var background sync.WaitGroup
 	background.Add(1)

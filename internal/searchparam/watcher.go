@@ -38,14 +38,12 @@ const (
 	watchKeepAlive      = 30 * time.Second
 )
 
-// Execer is the subset of pgx the change notification needs. It is satisfied by
-// *pgxpool.Pool, pgx.Tx and *pgx.Conn, so a writer can notify inside the
-// transaction that made the change and have it delivered only on commit.
+// Execer is the database interface the change notification needs.
 type Execer interface {
 	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
 }
 
-// NotifyChange tells the other replicas their in-memory registry is stale.
+// NotifyChange announces a registry change to the other replicas.
 func NotifyChange(ctx context.Context, db Execer, detail string) error {
 	if _, err := db.Exec(ctx, "SELECT pg_notify($1, $2)", notifyChannel, detail); err != nil {
 		return fmt.Errorf("notify %s: %w", notifyChannel, err)
@@ -53,10 +51,7 @@ func NotifyChange(ctx context.Context, db Execer, detail string) error {
 	return nil
 }
 
-// Watcher keeps a Registry in sync with search_param_definitions across
-// replicas. Each process loads the registry once at startup, so without the
-// watcher a SearchParameter written by another replica stays invisible to this
-// process — and therefore absent from the search index it writes — until restart.
+// Watcher keeps a Registry in sync with search_param_definitions across replicas.
 type Watcher struct {
 	pool      *pgxpool.Pool
 	registry  *Registry
@@ -73,8 +68,7 @@ func NewWatcher(pool *pgxpool.Pool, registry *Registry) *Watcher {
 	}
 }
 
-// Run blocks until ctx is cancelled, reconnecting the LISTEN connection with
-// capped backoff if it drops.
+// Run blocks until ctx is cancelled, reconnecting if the connection drops.
 func (w *Watcher) Run(ctx context.Context) {
 	backoff := watchReconnectMin
 	for ctx.Err() == nil {
@@ -96,12 +90,8 @@ func (w *Watcher) Run(ctx context.Context) {
 	}
 }
 
-// watch holds a dedicated connection on LISTEN and reloads the registry on
-// every (re)connect, so a process that was disconnected catches up on what it
-// missed. Notifications are debounced so a burst (an IG package writing many
-// parameters) costs one reload, and a failed reload is retried with backoff.
-// There is deliberately no periodic poll: the connection uses TCP keepalive, so
-// a silent partition surfaces as a reconnect, which triggers the catch-up reload.
+// watch reloads the registry on a change notification and after a reconnect,
+// retrying failures with backoff.
 func (w *Watcher) watch(ctx context.Context) error {
 	conn, err := w.connect(ctx)
 	if err != nil {
@@ -192,9 +182,7 @@ func (w *Watcher) watch(ctx context.Context) error {
 	}
 }
 
-// connect opens the dedicated LISTEN connection, deriving its config from the
-// pool so DSN, TLS and runtime params are reused. TCP keepalive makes a silent
-// partition detectable, turning it into a reconnect and therefore a reload.
+// connect opens the dedicated connection used to listen for change notifications.
 func (w *Watcher) connect(ctx context.Context) (*pgx.Conn, error) {
 	cfg := w.pool.Config().ConnConfig.Copy()
 	dialer := &net.Dialer{KeepAlive: watchKeepAlive}
@@ -202,9 +190,7 @@ func (w *Watcher) connect(ctx context.Context) (*pgx.Conn, error) {
 	return pgx.ConnectConfig(ctx, cfg)
 }
 
-// reload reports whether the registry was refreshed. A failed reload leaves the
-// previous snapshot in place, so callers retry rather than serving a half-swapped
-// cache.
+// reload refreshes the registry, keeping the previous snapshot on failure.
 func (w *Watcher) reload(ctx context.Context, trigger string) bool {
 	if _, err := w.registry.load(ctx, w.pool); err != nil {
 		if ctx.Err() != nil {

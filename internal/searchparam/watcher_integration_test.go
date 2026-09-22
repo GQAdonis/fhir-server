@@ -78,7 +78,7 @@ func TestWatcher_ReloadsOnConnect(t *testing.T) {
 	defer cancel()
 
 	// Written before the watcher connects, so only the connect-time reload can
-	// pick it up — there is no notification and no periodic poll.
+	// pick it up.
 	insertCustomParam(t, ctx, pool, "watcher-connect-param")
 
 	w := searchparam.NewWatcher(pool, reg)

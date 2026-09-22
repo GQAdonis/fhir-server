@@ -21,10 +21,10 @@ import (
 	"time"
 )
 
-// SetDebounce shrinks the watcher's notification debounce for tests.
+// SetDebounce overrides the watcher's debounce for tests.
 func (w *Watcher) SetDebounce(d time.Duration) { w.debounce = d }
 
-// Listening signals once the LISTEN connection is established.
+// Listening signals once the connection is established.
 func (w *Watcher) Listening() <-chan struct{} { return w.listening }
 
 // ReloadForTest drives one reload, as the watch loop would.
