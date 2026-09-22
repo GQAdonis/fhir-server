@@ -21,11 +21,8 @@ import (
 	"time"
 )
 
-// SetIntervals shrinks the watcher's timings for tests.
-func (w *Watcher) SetIntervals(poll, debounce time.Duration) {
-	w.pollInterval = poll
-	w.debounce = debounce
-}
+// SetDebounce shrinks the watcher's notification debounce for tests.
+func (w *Watcher) SetDebounce(d time.Duration) { w.debounce = d }
 
 // Listening signals once the LISTEN connection is established.
 func (w *Watcher) Listening() <-chan struct{} { return w.listening }

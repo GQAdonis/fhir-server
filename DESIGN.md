@@ -326,11 +326,13 @@ The `ig_source` column distinguishes provenance: `''` = base R4, `'user'` = a cu
 The registry is process-local, so a `SearchParameter` written on one replica is invisible
 to the others until they see the change. Each process runs a watcher
 (`internal/searchparam/watcher.go`) that reloads the registry when a writer announces a
-change over Postgres `LISTEN/NOTIFY`, and on a 30-second poll as the backstop for
-notifications that were lost while it was disconnected. Writers emit the notification
-inside their transaction, so it fires only if the change commits. Invalidation bounds the
-staleness window but cannot repair it: writes handled by a replica that did not yet know
-a parameter still miss that parameter's index rows, which is the reindex limitation in section 7.
+change over Postgres `LISTEN/NOTIFY`. `NOTIFY` is not durable — a listener that is
+disconnected at commit time misses it — so the watcher also reloads on every (re)connect,
+retries a failed reload with backoff, and keeps its connection alive with TCP keepalive so
+a silent partition becomes a reconnect. Writers emit the notification inside their
+transaction, so it fires only if the change commits. Invalidation bounds the staleness
+window but cannot repair it: writes handled by a replica that did not yet know a parameter
+still miss that parameter's index rows, which is the reindex limitation in section 7.
 
 ### Custom `SearchParameter` resources
 

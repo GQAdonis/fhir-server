@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -28,11 +29,13 @@ import (
 )
 
 const (
-	notifyChannel     = "search_param_definitions_changed"
-	watchPollInterval = 30 * time.Second
-	watchDebounce     = 500 * time.Millisecond
-	watchReconnectMin = time.Second
-	watchReconnectMax = 30 * time.Second
+	notifyChannel       = "search_param_definitions_changed"
+	watchDebounce       = 500 * time.Millisecond
+	watchReconnectMin   = time.Second
+	watchReconnectMax   = 30 * time.Second
+	watchReloadRetryMin = time.Second
+	watchReloadRetryMax = 30 * time.Second
+	watchKeepAlive      = 30 * time.Second
 )
 
 // Execer is the subset of pgx the change notification needs. It is satisfied by
@@ -55,20 +58,18 @@ func NotifyChange(ctx context.Context, db Execer, detail string) error {
 // watcher a SearchParameter written by another replica stays invisible to this
 // process — and therefore absent from the search index it writes — until restart.
 type Watcher struct {
-	pool         *pgxpool.Pool
-	registry     *Registry
-	pollInterval time.Duration
-	debounce     time.Duration
-	listening    chan struct{}
+	pool      *pgxpool.Pool
+	registry  *Registry
+	debounce  time.Duration
+	listening chan struct{}
 }
 
 func NewWatcher(pool *pgxpool.Pool, registry *Registry) *Watcher {
 	return &Watcher{
-		pool:         pool,
-		registry:     registry,
-		pollInterval: watchPollInterval,
-		debounce:     watchDebounce,
-		listening:    make(chan struct{}, 1),
+		pool:      pool,
+		registry:  registry,
+		debounce:  watchDebounce,
+		listening: make(chan struct{}, 1),
 	}
 }
 
@@ -95,12 +96,14 @@ func (w *Watcher) Run(ctx context.Context) {
 	}
 }
 
-// watch holds a dedicated connection on LISTEN. Notifications are debounced so
-// a burst (an IG package writing many parameters) costs one reload; the poll
-// interval is the correctness backstop for notifications missed while this
-// process was disconnected.
+// watch holds a dedicated connection on LISTEN and reloads the registry on
+// every (re)connect, so a process that was disconnected catches up on what it
+// missed. Notifications are debounced so a burst (an IG package writing many
+// parameters) costs one reload, and a failed reload is retried with backoff.
+// There is deliberately no periodic poll: the connection uses TCP keepalive, so
+// a silent partition surfaces as a reconnect, which triggers the catch-up reload.
 func (w *Watcher) watch(ctx context.Context) error {
-	conn, err := pgx.ConnectConfig(ctx, w.pool.Config().ConnConfig.Copy())
+	conn, err := w.connect(ctx)
 	if err != nil {
 		return fmt.Errorf("connect watcher: %w", err)
 	}
@@ -130,16 +133,31 @@ func (w *Watcher) watch(ctx context.Context) error {
 		}
 	}()
 
-	poll := time.NewTicker(w.pollInterval)
-	defer poll.Stop()
-
-	var debounce *time.Timer
+	var (
+		debounce   *time.Timer
+		debounceC  <-chan time.Time
+		retry      *time.Timer
+		retryC     <-chan time.Time
+		retryDelay = watchReloadRetryMin
+	)
 	defer func() {
-		if debounce != nil {
-			debounce.Stop()
-		}
+		stopTimer(debounce)
+		stopTimer(retry)
 	}()
-	var debounceC <-chan time.Time
+
+	scheduleRetry := func() {
+		stopTimer(retry)
+		if retry == nil {
+			retry = time.NewTimer(retryDelay)
+		} else {
+			retry.Reset(retryDelay)
+		}
+		retryC = retry.C
+		retryDelay = min(retryDelay*2, watchReloadRetryMax)
+	}
+	if !w.reload(ctx, "connect") {
+		scheduleRetry()
+	}
 
 	for {
 		select {
@@ -147,8 +165,6 @@ func (w *Watcher) watch(ctx context.Context) error {
 			return nil
 		case err := <-readErr:
 			return fmt.Errorf("wait for notification: %w", err)
-		case <-poll.C:
-			w.reload(ctx, "poll")
 		case <-notifications:
 			if debounce == nil {
 				debounce = time.NewTimer(w.debounce)
@@ -158,18 +174,57 @@ func (w *Watcher) watch(ctx context.Context) error {
 			debounceC = debounce.C
 		case <-debounceC:
 			debounceC = nil
-			w.reload(ctx, "notify")
+			if w.reload(ctx, "notify") {
+				stopTimer(retry)
+				retryC = nil
+				retryDelay = watchReloadRetryMin
+			} else {
+				scheduleRetry()
+			}
+		case <-retryC:
+			retryC = nil
+			if w.reload(ctx, "retry") {
+				retryDelay = watchReloadRetryMin
+			} else {
+				scheduleRetry()
+			}
 		}
 	}
 }
 
-func (w *Watcher) reload(ctx context.Context, trigger string) {
+// connect opens the dedicated LISTEN connection, deriving its config from the
+// pool so DSN, TLS and runtime params are reused. TCP keepalive makes a silent
+// partition detectable, turning it into a reconnect and therefore a reload.
+func (w *Watcher) connect(ctx context.Context) (*pgx.Conn, error) {
+	cfg := w.pool.Config().ConnConfig.Copy()
+	dialer := &net.Dialer{KeepAlive: watchKeepAlive}
+	cfg.DialFunc = dialer.DialContext
+	return pgx.ConnectConfig(ctx, cfg)
+}
+
+// reload reports whether the registry was refreshed. A failed reload leaves the
+// previous snapshot in place, so callers retry rather than serving a half-swapped
+// cache.
+func (w *Watcher) reload(ctx context.Context, trigger string) bool {
 	if _, err := w.registry.load(ctx, w.pool); err != nil {
 		if ctx.Err() != nil {
-			return
+			return true
 		}
 		slog.Warn("search param registry reload failed; keeping previous snapshot", "trigger", trigger, "err", err)
-		return
+		return false
 	}
 	slog.Debug("search param registry reloaded", "trigger", trigger)
+	return true
+}
+
+func stopTimer(t *time.Timer) {
+	if t == nil {
+		return
+	}
+	if !t.Stop() {
+		select {
+		case <-t.C:
+		default:
+		}
+	}
 }

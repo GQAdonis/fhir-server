@@ -59,7 +59,7 @@ func TestWatcher_ReloadsOnNotify(t *testing.T) {
 	defer cancel()
 
 	w := searchparam.NewWatcher(pool, reg)
-	w.SetIntervals(time.Hour, 10*time.Millisecond) // poll must not be what triggers the reload
+	w.SetDebounce(10 * time.Millisecond)
 	go w.Run(ctx)
 	<-w.Listening()
 
@@ -71,19 +71,21 @@ func TestWatcher_ReloadsOnNotify(t *testing.T) {
 	waitForParam(t, reg, "watcher-notify-param")
 }
 
-func TestWatcher_PollReloadsWithoutNotify(t *testing.T) {
+func TestWatcher_ReloadsOnConnect(t *testing.T) {
 	pool := testutil.MustSeededDB(t)
 	reg := testutil.MustRegistry(t, pool)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Written before the watcher connects, so only the connect-time reload can
+	// pick it up — there is no notification and no periodic poll.
+	insertCustomParam(t, ctx, pool, "watcher-connect-param")
+
 	w := searchparam.NewWatcher(pool, reg)
-	w.SetIntervals(20*time.Millisecond, time.Hour)
 	go w.Run(ctx)
 	<-w.Listening()
 
-	insertCustomParam(t, ctx, pool, "watcher-poll-param")
-	waitForParam(t, reg, "watcher-poll-param")
+	waitForParam(t, reg, "watcher-connect-param")
 }
 
 func TestWatcher_KeepsSnapshotOnReloadFailure(t *testing.T) {
