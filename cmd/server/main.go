@@ -131,14 +131,17 @@ func run() error {
 		return fmt.Errorf("load search params: %w", err)
 	}
 
-	// Keep the shared registry in sync across replicas.
-	watcher := searchparam.NewWatcher(pool, registry)
+	// Keep the shared registry in sync across replicas (SEARCH_PARAM_WATCH).
 	var background sync.WaitGroup
-	background.Add(1)
-	go func() {
-		defer background.Done()
-		watcher.Run(ctx)
-	}()
+	if cfg.SearchParams.Watch {
+		watcher := searchparam.NewWatcher(pool, registry)
+		background.Add(1)
+		go func() {
+			defer background.Done()
+			watcher.Run(ctx)
+		}()
+	}
+	slog.Info("search parameter registry watcher configured", "enabled", cfg.SearchParams.Watch)
 
 	// Store + HTTP (server starts immediately; IGs load in background)
 	searchTuning := store.SearchTuning{

@@ -332,7 +332,8 @@ retries a failed reload with backoff, and keeps its connection alive with TCP ke
 a silent partition becomes a reconnect. Writers emit the notification inside their
 transaction, so it fires only if the change commits. Invalidation bounds the staleness
 window but cannot repair it: writes handled by a replica that did not yet know a parameter
-still miss that parameter's index rows, which is the reindex limitation in section 7.
+still miss that parameter's index rows, which is the reindex limitation in section 7. The watcher
+is on by default and can be disabled with `SEARCH_PARAM_WATCH=false` on single-node deployments.
 
 ### Custom `SearchParameter` resources
 

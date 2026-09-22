@@ -47,6 +47,7 @@ type Config struct {
 	IGForceReload  bool     // re-load IGs even if already recorded in ig_packages
 	IGCacheDir     string   // local .tgz cache dir (default: .fhir-ig-cache)
 	Validation     ValidationConfig
+	SearchParams   SearchParamsConfig
 	TerminologyURL string // base URL of the FHIR terminology server for :in/:not-in (empty = disabled)
 	CreateTables   bool   // create database tables on startup (requires a DB role with DDL privileges; default off)
 
@@ -98,6 +99,15 @@ type ValidationConfig struct {
 	// ReferentialIntegrityOnDelete rejects the delete of a resource that live
 	// resources still reference (409 Conflict). Default on.
 	ReferentialIntegrityOnDelete bool
+}
+
+// SearchParamsConfig groups the search-parameter registry settings.
+type SearchParamsConfig struct {
+	// Watch keeps each replica's in-memory SearchParameter registry in sync with
+	// changes made by other replicas over Postgres LISTEN/NOTIFY. Default on;
+	// disable it on single-node deployments, where there are no other replicas
+	// to sync with. Env: SEARCH_PARAM_WATCH.
+	Watch bool
 }
 
 // FileConfig is the on-disk YAML schema. Each field is optional — anything
@@ -163,6 +173,12 @@ type FileConfig struct {
 		MaxRowsPerStatement *int `yaml:"maxRowsPerStatement"`
 		MaxRowsPerBundle    *int `yaml:"maxRowsPerBundle"`
 	} `yaml:"write"`
+
+	// Search-parameter registry settings. Pointer so an absent key is
+	// distinguishable from an explicit `false`.
+	SearchParams struct {
+		Watch *bool `yaml:"watch"`
+	} `yaml:"searchParams"`
 }
 
 // Load reads configuration using the env-var-based discovery path. The
@@ -318,6 +334,11 @@ func resolve(fc *FileConfig) (*Config, error) {
 	// capability off entirely; the processing default exists so a deployment can
 	// opt whole workloads into parallel mode without per-request headers.
 
+	searchParamsWatch, err := resolveBoolSetting(true, fc.SearchParams.Watch, "SEARCH_PARAM_WATCH")
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		DatabaseURL:         dbURL,
 		Port:                serverPort,
@@ -328,6 +349,7 @@ func resolve(fc *FileConfig) (*Config, error) {
 		IGForceReload:       igForceReload,
 		IGCacheDir:          igCacheDir,
 		Validation:          validation,
+		SearchParams:        SearchParamsConfig{Watch: searchParamsWatch},
 		TerminologyURL:      terminologyURL,
 		CreateTables:        createTables,
 		ReadTimeout:         readTimeout,
