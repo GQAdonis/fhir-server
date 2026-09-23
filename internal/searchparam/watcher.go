@@ -106,7 +106,10 @@ func (w *Watcher) watch(ctx context.Context) error {
 	}
 	w.signalListening()
 
-	notifications, readErr := watchNotifications(ctx, conn)
+	notifications, readErr, stopped := watchNotifications(ctx, conn)
+	// Join the reader before the deferred conn.Close so it never reads a closed
+	// connection.
+	defer func() { <-stopped }()
 
 	// reloadDue is the next scheduled reload, or nil when none is pending (a nil
 	// channel is never selected). reason labels it for the logs.
@@ -151,11 +154,14 @@ func (w *Watcher) connect(ctx context.Context) (*pgx.Conn, error) {
 }
 
 // watchNotifications forwards server notifications to the returned channel (at
-// most one pending) and reports a read failure on the error channel.
-func watchNotifications(ctx context.Context, conn *pgx.Conn) (<-chan struct{}, <-chan error) {
+// most one pending) and reports a read failure on the error channel. The third
+// channel is closed once the reader has stopped.
+func watchNotifications(ctx context.Context, conn *pgx.Conn) (<-chan struct{}, <-chan error, <-chan struct{}) {
 	notifications := make(chan struct{}, 1)
 	readErr := make(chan error, 1)
+	stopped := make(chan struct{})
 	go func() {
+		defer close(stopped)
 		for {
 			if _, err := conn.WaitForNotification(ctx); err != nil {
 				readErr <- err
@@ -168,7 +174,7 @@ func watchNotifications(ctx context.Context, conn *pgx.Conn) (<-chan struct{}, <
 			}
 		}
 	}()
-	return notifications, readErr
+	return notifications, readErr, stopped
 }
 
 // signalListening records the first successful connect; later calls are no-ops.
