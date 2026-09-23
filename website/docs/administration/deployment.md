@@ -76,8 +76,9 @@ running more than one replica: the replicas then keep those definitions in sync 
 `LISTEN/NOTIFY`, so a `SearchParameter` created on one replica reaches the others and keeps their
 write-time search indexing consistent. A single-node deployment needs no setting change.
 
-Propagation is best-effort and eventual — it bounds how long a replica can lag, but it does not
-backfill resources already written without the new parameter. See
+Propagation is best-effort and eventual — a replica learns of a change when it receives the
+notification or reconnects, with no fixed lag bound — but it does not backfill resources already
+written without the new parameter. See
 [Custom search parameters](../api/search.md#custom-search-parameters).
 
 ## After bulk loading
