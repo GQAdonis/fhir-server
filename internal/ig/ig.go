@@ -156,7 +156,9 @@ func LoadPackage(
 		return nil, fmt.Errorf("record ig_packages: %w", err)
 	}
 
-	// Persist SearchParameters
+	// Persist SearchParameters. Registry updates are deferred until the commit
+	// so a rolled-back transaction cannot leave the registry ahead of the DB.
+	var defs []searchparam.Definition
 	for _, sp := range pkg.SearchParams {
 		for _, baseRes := range sp.Base {
 			if baseRes == "" {
@@ -176,7 +178,7 @@ func LoadPackage(
 			if tag.RowsAffected() > 0 {
 				result.SearchParams++
 				if registry != nil {
-					registry.Upsert(searchparam.Definition{
+					defs = append(defs, searchparam.Definition{
 						ResourceType: baseRes,
 						ParamName:    sp.Code,
 						ParamType:    sp.Type,
@@ -218,6 +220,9 @@ func LoadPackage(
 
 	if err := tx.Commit(ctx); err != nil {
 		return nil, err
+	}
+	for _, d := range defs {
+		registry.Upsert(d)
 	}
 
 	slog.Info("IG package loaded",
