@@ -1197,14 +1197,22 @@ func (s *Store) DeleteSearchParameter(ctx context.Context, resourceID string) er
 		return nil
 	}
 
-	if _, err := s.pool.Exec(ctx,
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if _, err := tx.Exec(ctx,
 		`DELETE FROM search_param_definitions WHERE param_name = $1 AND is_custom = TRUE AND resource_type = ANY($2)`,
 		code, bases,
 	); err != nil {
 		return err
 	}
-	if err := searchparam.NotifyChange(ctx, s.pool, "deleted custom search parameter "+code); err != nil {
-		slog.Warn("notify search parameter change failed", "code", code, "err", err)
+	if err := searchparam.NotifyChange(ctx, tx, "deleted custom search parameter "+code); err != nil {
+		return err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return err
 	}
 
 	// Update the in-memory registry only after the DB delete commits so the
