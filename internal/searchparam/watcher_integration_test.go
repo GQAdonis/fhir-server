@@ -20,6 +20,7 @@ package searchparam_test
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
@@ -56,11 +57,19 @@ func TestWatcher_ReloadsOnNotify(t *testing.T) {
 	pool := testutil.MustSeededDB(t)
 	reg := testutil.MustRegistry(t, pool)
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	w := searchparam.NewWatcher(pool, reg)
 	w.SetDebounce(10 * time.Millisecond)
-	go w.Run(ctx)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		w.Run(ctx)
+	}()
+	t.Cleanup(func() {
+		cancel()
+		wg.Wait()
+	})
 	<-w.Listening()
 
 	insertCustomParam(t, ctx, pool, "watcher-notify-param")
@@ -75,14 +84,22 @@ func TestWatcher_ReloadsOnConnect(t *testing.T) {
 	pool := testutil.MustSeededDB(t)
 	reg := testutil.MustRegistry(t, pool)
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	// Written before the watcher connects, so only the connect-time reload can
 	// pick it up.
 	insertCustomParam(t, ctx, pool, "watcher-connect-param")
 
 	w := searchparam.NewWatcher(pool, reg)
-	go w.Run(ctx)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		w.Run(ctx)
+	}()
+	t.Cleanup(func() {
+		cancel()
+		wg.Wait()
+	})
 	<-w.Listening()
 
 	waitForParam(t, reg, "watcher-connect-param")
