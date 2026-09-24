@@ -83,14 +83,14 @@ VERIFICATION REQUIREMENTS
 
 PROGRESS LEDGER
 
-- [PENDING] add-hooks-typescript-toolchain: SELF (round 1)
-- [PENDING] add-architecture-agents: SELF (round 1)
-- [PENDING] add-karpathy-agent-ledger: SELF (round 2)
-- [PENDING] add-guardrail-hooks: SELF (round 2)
-- [PENDING] add-engineering-agents: SELF (round 2)
-- [PENDING] add-quality-agents: SELF (round 2)
-- [PENDING] add-infra-and-knowledge-agents: SELF (round 3)
-- [PENDING] document-and-verify-agent-team: SELF (round 4)
+- [DONE] add-hooks-typescript-toolchain: SELF (round 1)
+- [DONE] add-architecture-agents: SELF (round 1)
+- [DONE] add-karpathy-agent-ledger: SELF (round 2)
+- [DONE] add-guardrail-hooks: SELF (round 2)
+- [DONE] add-engineering-agents: SELF (round 2)
+- [DONE] add-quality-agents: SELF (round 2)
+- [DONE] add-infra-and-knowledge-agents: SELF (round 3)
+- [DONE] document-and-verify-agent-team: SELF (round 4)
 
 OUTPUTS
 
@@ -108,5 +108,14 @@ REFLECTION HANDOFF
 - Whether the round-2 plan fixes (recorder resolution, pk-absent acceptance) held up in change 2.
 - Actual model class used against the planned class for each change, to calibrate routing.
 - The Windows CI outcome for C1.
+
+EXECUTION RESULT (2026-09-24)
+
+- All 8 changes are DONE, verified and archived; openspec validate --all --strict passes.
+- Remote CI on PR https://github.com/GQAdonis/fhir-server/pull/1 is green on ubuntu, macOS and Windows (evidence/change8-ci-remote.txt).
+- Persona gates:
+  - fhir-security-compliance-reviewer PASS (Karpathy ledger);
+  - fhir-code-reviewer PASS (branch);
+  - fhir-conformance-validator goal check: G1–G5, C1 and C2 MET.
 
 EXECUTION READY

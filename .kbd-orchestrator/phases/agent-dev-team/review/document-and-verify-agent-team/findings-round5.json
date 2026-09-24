@@ -1,0 +1,47 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "line": 10,
+      "claim": "The new hook toolchain cannot build because `tsc -p .` requires a TypeScript project file, but the diff adds no `.claude/hooks/tsconfig.json`.",
+      "evidence": "`.claude/hooks/package.json` adds `\"build\": \"tsc -p .\"`; the diff adds package files, `src/lib/agent-lint.mts`, `src/lint-agents.mts`, and tests, but no `tsconfig.json`, while acceptance criterion 3.1 requires the workflow to run `build`.",
+      "suggested_fix": "Add `.claude/hooks/tsconfig.json` with the expected module/output settings, or change the build script to invoke `tsc` with explicit options that do not require a project file."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "line": 12,
+      "claim": "Several npm scripts and tests reference runtime files that are not added by this diff, so the documented checks fail on a fresh checkout.",
+      "evidence": "`package.json` defines `check:dist` as `node scripts/check-dist.mjs`, `scan:prometheus` as `node dist/scan-prometheus.mjs`, and `lint:agents` as `node dist/lint-agents.mjs`; `test/lint-agents.test.mjs` imports `../dist/lib/agent-lint.mjs`, but the diff adds no `scripts/check-dist.mjs`, no `dist/` files, and no `scan-prometheus` source/runtime file. Acceptance criteria 1.2 and 3.1 require `node .claude/hooks/dist/lint-agents.mjs`, `check:dist`, `lint:agents`, and `scan:prometheus` to succeed.",
+      "suggested_fix": "Commit the generated `.claude/hooks/dist/*.mjs` files and the missing `scripts/check-dist.mjs`/scan implementation, or update scripts/tests/workflow to build and reference files that exist."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".github/workflows/agent-tooling.yml",
+      "line": 49,
+      "claim": "The agent-tooling workflow does not run the required build step.",
+      "evidence": "Acceptance criterion 3.1 says the workflow must run `npm ci, build, test, check:dist, lint:agents, scan:prometheus`; the workflow runs `npm --prefix .claude/hooks ci`, then `npm --prefix .claude/hooks run check:dist`, `test`, `lint:agents`, and `scan:prometheus`, with no `npm --prefix .claude/hooks run build` step.",
+      "suggested_fix": "Add a workflow step running `npm --prefix .claude/hooks run build` in the required sequence, or update the acceptance criterion if `check:dist` is intended to replace build."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".claude/hooks/src/lib/agent-lint.mts",
+      "line": 126,
+      "claim": "The disallowed-tools check misses a direct conflict when only one of `Edit` or `Write` is disallowed.",
+      "evidence": "`lintAgent` only reports a conflict when `disallowed.has(\"Edit\") && disallowed.has(\"Write\") && (tools.has(\"Edit\") || tools.has(\"Write\"))`; therefore `tools: Edit` with `disallowedTools: Edit` is silently accepted.",
+      "suggested_fix": "Check each disallowed tool independently, e.g. report when any `asList(fm[\"disallowedTools\"])` entry is also present in `tools`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

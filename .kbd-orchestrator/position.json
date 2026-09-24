@@ -2,25 +2,23 @@
   "schemaVersion": "1",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 253,
-  "derivedRevision": 253,
+  "sourceRevision": 261,
+  "derivedRevision": 261,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 253
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 261
   },
   "conflictCount": 0,
-  "updatedAt": "2026-09-24T14:00:36.859207Z",
+  "updatedAt": "2026-09-24T16:41:20.681749Z",
   "cursor": [
     "agent-dev-team",
-    "execute",
-    "document-and-verify-agent-team",
-    "4"
+    "execute"
   ],
   "root": {
     "type": "phase",
     "id": "98eeab9c-ff3e-4471-a109-52e79b939f28",
     "status": "ready",
     "progress": {
-      "done": 7,
+      "done": 8,
       "total": 8
     },
     "children": [
@@ -30,7 +28,7 @@
         "canonicalId": "agent-dev-team",
         "status": "PENDING",
         "progress": {
-          "done": 7,
+          "done": 8,
           "total": 8
         },
         "children": [
@@ -100,9 +98,9 @@
           {
             "type": "change",
             "id": "document-and-verify-agent-team",
-            "status": "IN_PROGRESS",
+            "status": "COMPLETE",
             "progress": {
-              "done": 4,
+              "done": 6,
               "total": 6
             }
           }

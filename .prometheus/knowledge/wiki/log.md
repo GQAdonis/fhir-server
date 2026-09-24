@@ -1,6 +1,13 @@
 # Update Log
 
 ## 2026-09-24
+* **Ingest**: [Karpathy session 8763617a184a](/karpathy-session-8763617a184ac184.md)
+* **Ingest**: [Karpathy session 18ac732c4d12](/karpathy-session-18ac732c4d12e000.md)
+* **Creation**: [Claude hooks activity for fhir-code-reviewer verification failure](/claude-hooks-activity-for-fhir-code-reviewer-verification-failure.md)
+* **Ingest**: [Karpathy session a550b8f42872](/karpathy-session-a550b8f42872a87d.md)
+* **Ingest**: [Karpathy session 2f8b3acbe2a5](/karpathy-session-2f8b3acbe2a5b14c.md)
+* **Creation**: [Claude hooks activity for document-and-verify ingestion](/claude-hooks-activity-for-document-and-verify-ingestion.md)
+* **Creation**: [Claude hooks activity for conformance validation failures](/claude-hooks-activity-for-conformance-validation-failures.md)
 * **Creation**: [Claude hooks activity for final document-and-verify boundary](/claude-hooks-activity-for-final-document-and-verify-boundary.md)
 * **Ingest**: [Karpathy session 3a524083c587](/karpathy-session-3a524083c5874a38.md)
 * **Ingest**: [Karpathy session f732b02f2a06](/karpathy-session-f732b02f2a0653e7.md)

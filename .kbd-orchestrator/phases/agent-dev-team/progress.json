@@ -2,27 +2,27 @@
   "schemaVersion": "2",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 253,
-  "derivedRevision": 253,
+  "sourceRevision": 260,
+  "derivedRevision": 260,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 253
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 260
   },
   "conflictCount": 0,
   "phase": "agent-dev-team",
   "phaseId": "agent-dev-team",
   "parentPhase": null,
-  "last_updated": "2026-09-24T14:00:36.859207Z",
+  "last_updated": "2026-09-24T16:28:07.318134Z",
   "last_updated_by": "kbd-runtime",
   "changes_total": 8,
-  "changes_completed": 7,
+  "changes_completed": 8,
   "implementation_total": 8,
-  "implementation_completed": 7,
+  "implementation_completed": 8,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 7,
+      "completed": 8,
       "total": 8,
-      "status": "IN_PROGRESS"
+      "status": "COMPLETE"
     },
     "evidence": {
       "status": "PENDING",
@@ -121,12 +121,12 @@
     {
       "id": "document-and-verify-agent-team",
       "title": "Document and verify agent team",
-      "status": "IN_PROGRESS",
-      "implementation_status": "IN_PROGRESS",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
       "tasks_total": 6,
-      "tasks_done": 4,
-      "last_task_completed": "4.1 Verify all 11 `fhir-*` agents appear in Claude Code's agent list for this repo and each answers a role-confirmation ",
-      "next_task_pending": "3.1 Add `.github/workflows/agent-tooling.yml` (ubuntu/macos/windows matrix, Node 24, SHA-pinned checkout/setup-node, pat",
+      "tasks_done": 6,
+      "last_task_completed": "4.2 Run `/kbd-goal-check agent-dev-team`; verify G1–G5 and constraints C1–C2 report MET, or record the remaining gaps as",
+      "next_task_pending": null,
       "blockers": []
     }
   ],

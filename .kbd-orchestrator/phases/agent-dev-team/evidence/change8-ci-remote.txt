@@ -1,0 +1,17 @@
+# Remote CI — PR https://github.com/GQAdonis/fhir-server/pull/1 — 2026-09-24T16:10:18Z
+## Run 1 (a171d40): Agent tooling FAILED on windows-latest only
+Cause: CRLF checkout of docs/agent-team.md (lint parsed empty prerequisites) and of Go fixtures (gofmt). Fixed in e0987cf.
+
+## Run 2 (e0987cf)
+- Hooks (macos-latest): pass (16s) https://github.com/GQAdonis/fhir-server/actions/runs/36024147430/job/107716257704
+- Hooks (ubuntu-latest): pass (11s) https://github.com/GQAdonis/fhir-server/actions/runs/36024147430/job/107716257403
+- Hooks (windows-latest): pass (35s) https://github.com/GQAdonis/fhir-server/actions/runs/36024147430/job/107716257880
+- Integration tests: pass (9m48s) https://github.com/GQAdonis/fhir-server/actions/runs/36024147439/job/107716258184
+- Lint & format: pass (23s) https://github.com/GQAdonis/fhir-server/actions/runs/36024147439/job/107716258669
+- Lint Helm chart: pass (9s) https://github.com/GQAdonis/fhir-server/actions/runs/36024147439/job/107716258409
+- Unit tests: pass (53s) https://github.com/GQAdonis/fhir-server/actions/runs/36024147439/job/107716258339
+
+Exec-form step output per OS (recaptured from job logs):
+- Hooks (ubuntu-latest): exec-form hook OK on linux: {"ts":"2026-09-24T15:59:25.005Z","session_id":"ci-linux","agent_type":"fhir-code-reviewer","agent_id":"ci","event":"SubagentStop","outcome":"stopped"}
+- Hooks (macos-latest): exec-form hook OK on darwin: {"ts":"2026-09-24T15:59:37.444Z","session_id":"ci-darwin","agent_type":"fhir-code-reviewer","agent_id":"ci","event":"SubagentStop","outcome":"stopped"}
+- Hooks (windows-latest): exec-form hook OK on win32: {"ts":"2026-09-24T15:59:47.224Z","session_id":"ci-win32","agent_type":"fhir-code-reviewer","agent_id":"ci","event":"SubagentStop","outcome":"stopped"}

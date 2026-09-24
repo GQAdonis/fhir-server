@@ -23,3 +23,6 @@ fhirtestengineer
 - fhir-storage-search-engineer (exit 0): **fhir-storage-search-engineer** — I own the correctness-critical storage, search indexing, SQL construction, and schema layers. KBD stages: `/kbd-apply` routed to `internal/store`, `internal/index`, `internal/db`, `inte
 - fhir-tech-lead (exit 0): **fhir-tech-lead** — owns KBD stages `/kbd-execute`, `/kbd-status`, `/kbd-goal-check`, `/kbd-next-phase`, and the archive gates (`/kbd-apply` dispatch, reviewer verdicts, conformance validation before commit). 
 - fhir-test-engineer (exit 0): I'm **fhir-test-engineer**, owning `*_test.go` across the repo, test utilities, conformance tests, golden files, and benchmarks. I drive integration and unit test suites, verify CI parity, and report coverage and test re
+
+## Correction (after review)
+The first fhir-knowledge-curator reply above called itself "karpathy-curator", because its Role section did not state its name. The prompt was fixed (`You are \`fhir-knowledge-curator\`.`). A fresh-session re-check on Haiku replied: **fhir-knowledge-curator**.

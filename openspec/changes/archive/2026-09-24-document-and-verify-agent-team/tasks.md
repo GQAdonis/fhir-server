@@ -9,9 +9,9 @@
 
 ## 3. Cross-platform CI
 
-- [ ] 3.1 Add `.github/workflows/agent-tooling.yml` (ubuntu/macos/windows matrix, Node 24, SHA-pinned checkout/setup-node, paths filter; npm ci, build, test, check:dist, lint:agents, scan:prometheus, exec-form fixture run); verify locally with `node` for each step and via a pushed branch run showing all three OS jobs green
+- [x] 3.1 Add `.github/workflows/agent-tooling.yml` (ubuntu/macos/windows matrix, Node 24, SHA-pinned checkout/setup-node, paths filter; npm ci, check:dist (compiles into a temp dir and must byte-match the committed dist/; runs instead of an in-place build so drift fails), test, lint:agents, scan:prometheus, exec-form fixture run); verify locally with `node` for each step and via a pushed branch run showing all three OS jobs green
 
 ## 4. Team acceptance
 
 - [x] 4.1 Verify all 11 `fhir-*` agents appear in Claude Code's agent list for this repo and each answers a role-confirmation prompt; record the result in `.kbd-orchestrator/phases/agent-dev-team/evidence/`
-- [ ] 4.2 Run `/kbd-goal-check agent-dev-team`; verify G1–G5 and constraints C1–C2 report MET, or record the remaining gaps as reflection inputs
+- [x] 4.2 Run `/kbd-goal-check agent-dev-team`; verify G1–G5 and constraints C1–C2 report MET, or record the remaining gaps as reflection inputs

@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "line": 11,
+      "claim": "The required `npm ci` verification for agent tooling cannot succeed because the hook package adds dependencies without committing a package lockfile.",
+      "evidence": "Acceptance criterion 3.1 requires the agent-tooling workflow to run `npm ci`; the diff adds `.claude/hooks/package.json` with `devDependencies` for `@types/node` and `typescript`, but no `.claude/hooks/package-lock.json` is added in the package area of the diff.",
+      "suggested_fix": "Run `npm --prefix .claude/hooks install --package-lock-only` or `npm --prefix .claude/hooks install`, commit `.claude/hooks/package-lock.json`, and verify `npm --prefix .claude/hooks ci` succeeds."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

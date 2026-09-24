@@ -88,6 +88,40 @@ test("a machine-local preload and a bad model are rejected", () => {
   }
 });
 
+test("path-like skill names are rejected and never resolved", () => {
+  const root = fixtureRepo({ agentSkills: ["karpathy-guidelines", "../../etc"] });
+  try {
+    const { problems } = lintAll(noLocal(root));
+    assert.ok(problems.some((p) => /skill name "\.\.\/\.\.\/etc" is not a valid identifier/.test(p)), problems.join("\n"));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("list-valued model/name/description are rejected", () => {
+  const root = fixtureRepo();
+  try {
+    const f = path.join(root, ".claude", "agents", "fhir-demo.md");
+    writeFileSync(f, readFileSync(f, "utf8").replace("model: sonnet\n", "model:\n  - opus\n"));
+    const { problems } = lintAll(noLocal(root));
+    assert.ok(problems.some((p) => /"model" must be a single value, not a list/.test(p)), problems.join("\n"));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a tool both granted and disallowed is reported", () => {
+  const root = fixtureRepo();
+  try {
+    const f = path.join(root, ".claude", "agents", "fhir-demo.md");
+    writeFileSync(f, readFileSync(f, "utf8").replace("tools: Read, Grep\n", "tools: Read, Grep, Write\ndisallowedTools: Write\n"));
+    const { problems } = lintAll(noLocal(root));
+    assert.ok(problems.some((p) => /"Write" is both granted in tools and listed in disallowedTools/.test(p)), problems.join("\n"));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("the real .claude/agents pass with only documented prerequisites (as on a CI runner)", () => {
   const { agents, problems } = lintAll(noLocal(repoRoot));
   assert.equal(agents, 11);

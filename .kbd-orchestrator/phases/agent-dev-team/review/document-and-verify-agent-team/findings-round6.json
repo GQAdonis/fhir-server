@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/agent-lint.mts",
+      "line": 115,
+      "claim": "The agent lint does not fail when `model` is a non-scalar list, allowing an invalid model field to bypass the allowed-model check.",
+      "evidence": "Acceptance 2.1 requires a model alias check, and the spec says lint SHALL fail for \"a model other than `opus`, `sonnet`, `haiku`, `fable` or `inherit`\"; the code only validates `model` inside `if (typeof fm[\"model\"] === \"string\" && !MODELS.has(fm[\"model\"]))`, while the required-field check accepts arrays via `asList(fm[field]).length`.",
+      "suggested_fix": "Require `model` to be a scalar string and reject arrays or empty/non-allowed values, e.g. `if (typeof fm[\"model\"] !== \"string\" || !MODELS.has(fm[\"model\"])) ...`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".kbd-orchestrator/project.json",
+      "line": 25,
+      "claim": "The model policy registry is not aligned with the documented roster because it includes Qwen models for the `t4` and `l4` lanes instead of the current Opus/Sonnet/Haiku family.",
+      "evidence": "The spec requirement says `.kbd-orchestrator/project.json` `model_policy.registry` SHALL reference the current model family \"Opus 5.5, Sonnet 5, Haiku 4.5\", consistent with the agent files; the diff adds `t4`/`l4` entries such as `\"Qwen3.5-9B-Q8_0\"`, `\"Qwen3.5-27B-Q4\"`, and `\"Qwen3.5-35B-A3B-Q4\"` under `model_policy.registry`.",
+      "suggested_fix": "Either change all registry lanes to the current Claude family required by the spec, or amend the OpenSpec requirement and acceptance criteria to explicitly allow non-roster self-hosted models for `t4`/`l4`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

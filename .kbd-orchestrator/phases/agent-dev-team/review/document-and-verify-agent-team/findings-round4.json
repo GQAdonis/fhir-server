@@ -1,0 +1,36 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".github/workflows/agent-tooling.yml",
+      "claim": "The required cross-platform agent-tooling workflow is not present in the diff, so acceptance criterion 3.1 is not satisfied.",
+      "evidence": "Acceptance criterion 3.1 requires adding `.github/workflows/agent-tooling.yml` with ubuntu/macos/windows Node 24 jobs, SHA-pinned actions, and hook checks; the supplied diff contains no hunk for `.github/workflows/agent-tooling.yml` and the file tree shows no `.github/` directory.",
+      "suggested_fix": "Add `.github/workflows/agent-tooling.yml` implementing the required matrix and commands, with all third-party actions pinned by full commit SHA."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "docs/agent-team.md",
+      "claim": "The new fhir agent roster is added without a corresponding visible update to `docs/agent-team.md`, so criterion 1.1's documentation and reference verification is not demonstrated.",
+      "evidence": "Acceptance criterion 1.1 requires `docs/agent-team.md` to reference every `fhir-*` agent file and document roster, model rationale, skill matrix, prerequisites, Karpathy data flow, PHI policy, and Windows/Git Bash notes; the diff adds 11 `.claude/agents/fhir-*.md` files but shows no hunk for `docs/agent-team.md`.",
+      "suggested_fix": "Update `docs/agent-team.md` to include all newly added agents and the required machine-local skill prerequisites, then run `node .claude/hooks/dist/lint-agents.mjs`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "CLAUDE.md",
+      "claim": "The diff does not show the required `CLAUDE.md` Agent team section or `.kbd-orchestrator/project.json` model-policy alignment, so criterion 1.2 is not satisfied from the packet.",
+      "evidence": "Acceptance criterion 1.2 requires adding an Agent team section to `CLAUDE.md` and aligning `.kbd-orchestrator/project.json` `model_policy.registry` and `preferred_*` with the roster; the supplied diff shows no hunks for `CLAUDE.md` or `.kbd-orchestrator/project.json`.",
+      "suggested_fix": "Add the `CLAUDE.md` Agent team section and update `.kbd-orchestrator/project.json`, then verify with `node .claude/hooks/dist/lint-agents.mjs` and `jq . .kbd-orchestrator/project.json`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

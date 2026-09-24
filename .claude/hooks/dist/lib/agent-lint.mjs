@@ -66,10 +66,16 @@ export function documentedPrerequisites(doc) {
     const block = /```yaml\n([\s\S]*?)```/.exec(doc.replace(/\r\n/g, "\n"))?.[1] ?? "";
     return new Set([...block.matchAll(/^\s*- name: (\S+)\s*$/gm)].map((m) => m[1]));
 }
+/** Skill/agent names are plain identifiers; anything path-like is never looked up. */
+const NAME = /^[a-z0-9][a-z0-9-]*(?::[a-z0-9][a-z0-9-]*)?$/;
 function repoResident(ctx, skill) {
+    if (!NAME.test(skill))
+        return false;
     return existsSync(path.join(ctx.repoRoot, ".claude", "skills", skill, "SKILL.md"));
 }
 function resolvesLocally(ctx, name) {
+    if (!NAME.test(name))
+        return false;
     const bare = name.includes(":") ? name.slice(name.indexOf(":") + 1) : name;
     return (repoResident(ctx, bare) ||
         ctx.localSkillDirs.some((d) => existsSync(path.join(d, bare, "SKILL.md"))) ||
@@ -91,11 +97,19 @@ export function lintAgent(file, source, ctx, prerequisites, doc) {
         if (fm[field] === undefined || asList(fm[field]).length === 0)
             problems.push(`${expectedName}: missing frontmatter field "${field}"`);
     }
+    for (const scalar of ["name", "description", "model"]) {
+        if (Array.isArray(fm[scalar]))
+            problems.push(`${expectedName}: "${scalar}" must be a single value, not a list`);
+    }
     if (typeof fm["name"] === "string" && fm["name"] !== expectedName)
         problems.push(`${expectedName}: name "${fm["name"]}" does not match the file name`);
     if (typeof fm["model"] === "string" && !MODELS.has(fm["model"]))
         problems.push(`${expectedName}: unknown model "${fm["model"]}"`);
     for (const skill of asList(fm["skills"])) {
+        if (!NAME.test(skill)) {
+            problems.push(`${expectedName}: skill name "${skill}" is not a valid identifier`);
+            continue;
+        }
         if (!repoResident(ctx, skill))
             problems.push(`${expectedName}: preloaded skill "${skill}" is not repo-resident (.claude/skills/${skill}/SKILL.md); preload only vendored skills`);
     }
@@ -113,8 +127,9 @@ export function lintAgent(file, source, ctx, prerequisites, doc) {
     }
     const disallowed = new Set(asList(fm["disallowedTools"]));
     const tools = new Set(asList(fm["tools"]));
-    if (disallowed.has("Edit") && disallowed.has("Write") && (tools.has("Edit") || tools.has("Write"))) {
-        problems.push(`${expectedName}: Edit/Write are both granted in tools and disallowed`);
+    for (const tool of disallowed) {
+        if (tools.has(tool))
+            problems.push(`${expectedName}: "${tool}" is both granted in tools and listed in disallowedTools`);
     }
     if (!doc.includes(`\`${expectedName}\``))
         problems.push(`${expectedName}: not listed in docs/agent-team.md`);

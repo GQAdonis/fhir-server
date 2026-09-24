@@ -1,0 +1,17 @@
+# Goal-check residual gap closure — HEAD e0987cf — 2026-09-24T16:22:09Z
+$ openspec validate --specs --strict
+✓ spec/agent-tooling/hook-runtime
+✓ spec/agent-tooling/karpathy-logging
+Totals: 7 passed, 0 failed (7 items)
+exit=0
+$ openspec validate --all --strict
+✓ change/document-and-verify-agent-team
+Totals: 8 passed, 0 failed (8 items)
+$ go build ./... && go vet ./...
+exit=0
+$ gofmt -l .
+<none>
+$ make test
+15
+exit=0
+(golangci-lint: CI-GREEN on e0987cf, see change8-ci-remote.txt)

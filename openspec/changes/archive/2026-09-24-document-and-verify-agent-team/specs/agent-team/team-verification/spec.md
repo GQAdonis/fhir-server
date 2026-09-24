@@ -19,15 +19,15 @@ A lint command SHALL fail when any `.claude/agents/fhir-*.md` has invalid frontm
 - **THEN** the lint exits non-zero naming the agent and the skill
 
 ### Requirement: Agent tooling is verified on three operating systems
-Continuous integration SHALL, on Ubuntu, macOS and Windows runners, install the hook package, build it, run its tests, check dist freshness, lint agents, scan `.prometheus/`, and execute at least one compiled hook in exec form with a fixture payload.
+Continuous integration SHALL, on Ubuntu, macOS and Windows runners, install the hook package, compile it (the dist-freshness check compiles `src/` into a temporary directory and requires byte equality with the committed `dist/`; CI does not overwrite `dist/`, so drift cannot be masked), run its tests against the committed `dist/`, lint agents, scan `.prometheus/`, and execute at least one compiled hook in exec form with a fixture payload.
 
 #### Scenario: Windows exec-form run
 - **WHEN** the workflow runs on `windows-latest`
 - **THEN** piping a SubagentStop fixture into `node .claude/hooks/dist/agent-ledger.mjs` exits 0 and appends one ledger line
 
 ### Requirement: Model policy matches the roster
-`.kbd-orchestrator/project.json` `model_policy.registry` SHALL reference the current model family (Opus 5.5, Sonnet 5, Haiku 4.5), consistent with the models declared in the agent files.
+The `local` lane of `.kbd-orchestrator/project.json` `model_policy.registry` (the Claude Code agent team) SHALL map `small`, `medium` and `frontier` to the current model family (Haiku 4.5, Sonnet 5, Opus 5.5), consistent with the models declared in the agent files. Every lane's `frontier` entry SHALL be Opus 5.5. Self-hosted GPU lanes (`t4`, `l4`) MAY keep open-weight models for `small` and `medium`; they are not the agent team.
 
 #### Scenario: Policy inspected
 - **WHEN** `project.json` is read
-- **THEN** no registry entry names a model older than the roster's declared family
+- **THEN** the `local` lane lists `claude-haiku-4-5-20251001`, `claude-sonnet-5` and `claude-opus-5-5`, every `frontier` entry is `claude-opus-5-5`, and no entry names an older Claude model

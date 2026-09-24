@@ -1,49 +1,17 @@
----
-okf_version: "0.2"
----
-
 # Wiki Index
-
-## Reference
-
-* [Claude hooks activity for add-karpathy-agent-ledger](/claude-hooks-timing-for-add-karpathy-agent-ledger-activity.md)
-* [Claude hooks activity for agent-dev-team guardrail and agent changes](/claude-hooks-activity-for-agent-dev-team-guardrail-and-agent-changes.md)
-* [Claude hooks activity for document-and-verify agent-team changes](/claude-hooks-activity-for-document-and-verify-agent-team-changes.md)
-* [Claude hooks activity for document-and-verify-agent-team](/claude-hooks-activity-for-document-and-verify-agent-team.md)
-* [Claude hooks activity for document-and-verify-agent-team ingest](/claude-hooks-activity-for-document-and-verify-agent-team-ingest.md)
-* [Claude hooks activity for documenting fhir-test-engineer verification](/claude-hooks-activity-for-documenting-fhir-test-engineer-verification.md)
-* [Claude hooks activity for fhir-architect verification prompt](/claude-hooks-activity-for-fhir-architect-verification-prompt.md)
-* [Claude hooks activity for fhir-code-reviewer quality-agent changes](/claude-hooks-activity-for-fhir-code-reviewer-quality-agent-changes.md)
-* [Claude hooks activity for fhir-conformance-validator ingestion](/claude-hooks-activity-for-fhir-conformance-validator-ingestion.md)
-* [Claude hooks activity for fhir-conformance-validator verification](/claude-hooks-activity-for-fhir-conformance-validator-verification.md)
-* [Claude hooks activity for fhir-conformance-validator verification ingest](/claude-hooks-activity-for-fhir-conformance-validator-verification-ingest.md)
-* [Claude hooks activity for fhir-go-developer ingestion](/claude-hooks-activity-for-fhir-go-developer-ingestion.md)
-* [Claude hooks activity for fhir-go-developer verification ingest](/claude-hooks-activity-for-fhir-go-developer-verification-ingest.md)
-* [Claude hooks activity for fhir-ideation-strategist verification ingest](/claude-hooks-activity-for-fhir-ideation-strategist-verification-ingest.md)
-* [Claude hooks activity for fhir-infra-release-engineer verification ingest](/claude-hooks-activity-for-fhir-infra-release-engineer-verification-ingest.md)
-* [Claude hooks activity for fhir-knowledge-curator ingestion](/claude-hooks-activity-for-fhir-knowledge-curator-ingestion.md)
-* [Claude hooks activity for fhir-knowledge-curator verification ingest](/claude-hooks-activity-for-fhir-knowledge-curator-verification-ingest.md)
-* [Claude hooks activity for fhir-security compliance verification ingest](/claude-hooks-activity-for-fhir-security-compliance-verification-ingest.md)
-* [Claude hooks activity for fhir-security reviewer verification ingest](/claude-hooks-activity-for-fhir-security-reviewer-verification-ingest.md)
-* [Claude hooks activity for fhir-storage-search-engineer ingest](/claude-hooks-activity-for-fhir-storage-search-engineer-ingest.md)
-* [Claude hooks activity for fhir-storage-search-engineer verification ingest](/claude-hooks-activity-for-fhir-storage-search-engineer-verification-ingest.md)
-* [Claude hooks activity for fhir-tech-lead verification ingest](/claude-hooks-activity-for-fhir-tech-lead-verification-ingest.md)
-* [Claude hooks activity for fhir-test-engineer ingestion](/claude-hooks-activity-for-fhir-test-engineer-ingestion.md)
-* [Claude hooks activity for final document-and-verify boundary](/claude-hooks-activity-for-final-document-and-verify-boundary.md)
-* [Claude hooks activity for final document-and-verify ingestion](/claude-hooks-activity-for-final-document-and-verify-ingestion.md)
-* [Claude hooks activity for post-verification fhir-code-reviewer window](/claude-hooks-activity-for-post-verification-fhir-code-reviewer-window.md)
-* [Claude hooks activity for security and infra agent additions](/claude-hooks-activity-for-security-and-infra-agent-additions.md)
-* [Claude hooks aggregate activity for agent-dev-team changes](/claude-hooks-aggregate-activity-for-agent-dev-team-changes.md)
 
 ## SessionRecord
 
 * [Karpathy session 0489a051e0df](/karpathy-session-0489a051e0df42f6.md)
 * [Karpathy session 0fa43ffdffc0](/karpathy-session-0fa43ffdffc0ddeb.md)
 * [Karpathy session 163efe891056](/karpathy-session-163efe891056f799.md)
+* [Karpathy session 18ac732c4d12](/karpathy-session-18ac732c4d12e000.md)
 * [Karpathy session 25fcb4c7ca6e](/karpathy-session-25fcb4c7ca6ebc45.md)
 * [Karpathy session 2a833c9817af](/karpathy-session-2a833c9817af261a.md)
 * [Karpathy session 2dbc7851e0d5](/karpathy-session-2dbc7851e0d5a503.md)
+* [Karpathy session 2f8b3acbe2a5](/karpathy-session-2f8b3acbe2a5b14c.md)
 * [Karpathy session 30a56327e8bb](/karpathy-session-30a56327e8bbec7b.md)
+* [Karpathy session 3a524083c587](/karpathy-session-3a524083c5874a38.md)
 * [Karpathy session 3b1b713b1de8](/karpathy-session-3b1b713b1de8e49f.md)
 * [Karpathy session 3daace311070](/karpathy-session-3daace311070694d.md)
 * [Karpathy session 496dd11da5d1](/karpathy-session-496dd11da5d145f2.md)
@@ -59,9 +27,11 @@ okf_version: "0.2"
 * [Karpathy session 75959a280388](/karpathy-session-75959a280388e275.md)
 * [Karpathy session 7fe2f67c968c](/karpathy-session-7fe2f67c968c111b.md)
 * [Karpathy session 8601aa54ada6](/karpathy-session-8601aa54ada667f5.md)
+* [Karpathy session 8763617a184a](/karpathy-session-8763617a184ac184.md)
 * [Karpathy session 9d1da888e40b](/karpathy-session-9d1da888e40b01f5.md)
 * [Karpathy session a26af2378983](/karpathy-session-a26af23789833ee4.md)
 * [Karpathy session a4cb4f49369f](/karpathy-session-a4cb4f49369fc4d0.md)
+* [Karpathy session a550b8f42872](/karpathy-session-a550b8f42872a87d.md)
 * [Karpathy session b77ebb5648df](/karpathy-session-b77ebb5648df8152.md)
 * [Karpathy session b9b4a94df0b3](/karpathy-session-b9b4a94df0b3b6cf.md)
 * [Karpathy session ca1a3423fccb](/karpathy-session-ca1a3423fccb40dd.md)
