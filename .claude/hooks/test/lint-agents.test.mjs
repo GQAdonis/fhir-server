@@ -49,6 +49,14 @@ test("invokeSkills and documentedPrerequisites extract names", () => {
   assert.deepEqual([...documentedPrerequisites("```yaml\nprerequisites:\n  - name: foo\n    kind: skill\n```")], ["foo"]);
 });
 
+test("CRLF checkouts (Windows) parse the same as LF", () => {
+  const doc = "```yaml\r\nprerequisites:\r\n  - name: foo\r\n    kind: skill\r\n```\r\n";
+  assert.deepEqual([...documentedPrerequisites(doc)], ["foo"]);
+  assert.deepEqual(invokeSkills("## Skills\r\n\r\n- Invoke when needed: `a-b`.\r\n\r\n## Karpathy\r\n"), ["a-b"]);
+  const { frontmatter } = parseAgent("---\r\nname: a\r\ntools: Read\r\n---\r\nbody\r\n");
+  assert.equal(frontmatter.name, "a");
+});
+
 test("a clean fixture passes", () => {
   const root = fixtureRepo();
   try {

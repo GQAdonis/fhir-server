@@ -56,13 +56,14 @@ export function asList(value) {
 }
 /** Skill names listed on the prompt's "Invoke when needed" line. */
 export function invokeSkills(body) {
-    const section = body.split("## Skills")[1]?.split("\n## ")[0] ?? "";
+    const section = body.replace(/\r\n/g, "\n").split("## Skills")[1]?.split("\n## ")[0] ?? "";
     const line = section.split("\n").find((l) => l.includes("Invoke when needed")) ?? "";
     return [...line.matchAll(/`([a-z0-9][a-z0-9:-]*)`/g)].map((m) => m[1]);
 }
 /** Names in the ```yaml prerequisites block of docs/agent-team.md. */
 export function documentedPrerequisites(doc) {
-    const block = /```yaml\n([\s\S]*?)```/.exec(doc)?.[1] ?? "";
+    // Windows checkouts may use CRLF; normalize before matching line structure.
+    const block = /```yaml\n([\s\S]*?)```/.exec(doc.replace(/\r\n/g, "\n"))?.[1] ?? "";
     return new Set([...block.matchAll(/^\s*- name: (\S+)\s*$/gm)].map((m) => m[1]));
 }
 function repoResident(ctx, skill) {

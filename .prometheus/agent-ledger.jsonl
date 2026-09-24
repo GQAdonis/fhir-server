@@ -79,3 +79,6 @@
 {"ts":"2026-09-24T14:00:20.506Z","session_id":"9f7d9481-145a-46b1-9272-ee063bdb63fb","agent_type":"fhir-knowledge-curator","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-dev-team","kbd_change":"document-and-verify-agent-team","prompt_chars":56}
 {"ts":"2026-09-24T14:00:38.788Z","event":"kb_ingested","outcome":"delivered:1,remaining:0"}
 {"ts":"2026-09-24T14:00:47.506Z","event":"boundary_recorded","outcome":"task:duplicate","kbd_phase":"agent-dev-team","kbd_change":"document-and-verify-agent-team"}
+{"ts":"2026-09-24T15:47:02.869Z","event":"kb_ingested","outcome":"delivered:1,remaining:0"}
+{"ts":"2026-09-24T15:49:57.542Z","session_id":"2bd5bbd2-7c7a-495f-9b41-d460cd2d1bae","agent_id":"a283ed4964cbc8cf4","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-dev-team","kbd_change":"document-and-verify-agent-team"}
+{"ts":"2026-09-24T15:57:29.333Z","session_id":"2bd5bbd2-7c7a-495f-9b41-d460cd2d1bae","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-dev-team","kbd_change":"document-and-verify-agent-team","prompt_chars":414}

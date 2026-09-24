@@ -10,7 +10,8 @@ import { hasLicenseHeader } from "../dist/lib/go-checks.mjs";
 
 const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "dist");
 const repoRoot = path.resolve(dist, "..", "..", "..");
-const HEADER = readFileSync(path.join(repoRoot, "internal", "config", "config.go"), "utf8").split("\n").slice(0, 16).join("\n");
+// Normalize line endings: a Windows checkout may hand us CRLF, which gofmt rejects.
+const HEADER = readFileSync(path.join(repoRoot, "internal", "config", "config.go"), "utf8").replace(/\r\n/g, "\n").split("\n").slice(0, 16).join("\n");
 const hasGofmt = spawnSync("gofmt", ["-h"], { encoding: "utf8" }).error === undefined;
 
 /** process.env with PATH replaced case-insensitively (Windows exposes it as `Path`). */

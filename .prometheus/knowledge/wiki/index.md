@@ -1,4 +1,39 @@
+---
+okf_version: "0.2"
+---
+
 # Wiki Index
+
+## Reference
+
+* [Claude hooks activity for add-karpathy-agent-ledger](/claude-hooks-timing-for-add-karpathy-agent-ledger-activity.md)
+* [Claude hooks activity for agent-dev-team guardrail and agent changes](/claude-hooks-activity-for-agent-dev-team-guardrail-and-agent-changes.md)
+* [Claude hooks activity for document-and-verify agent-team changes](/claude-hooks-activity-for-document-and-verify-agent-team-changes.md)
+* [Claude hooks activity for document-and-verify-agent-team](/claude-hooks-activity-for-document-and-verify-agent-team.md)
+* [Claude hooks activity for document-and-verify-agent-team ingest](/claude-hooks-activity-for-document-and-verify-agent-team-ingest.md)
+* [Claude hooks activity for documenting fhir-test-engineer verification](/claude-hooks-activity-for-documenting-fhir-test-engineer-verification.md)
+* [Claude hooks activity for fhir-architect verification prompt](/claude-hooks-activity-for-fhir-architect-verification-prompt.md)
+* [Claude hooks activity for fhir-code-reviewer quality-agent changes](/claude-hooks-activity-for-fhir-code-reviewer-quality-agent-changes.md)
+* [Claude hooks activity for fhir-conformance-validator ingestion](/claude-hooks-activity-for-fhir-conformance-validator-ingestion.md)
+* [Claude hooks activity for fhir-conformance-validator verification](/claude-hooks-activity-for-fhir-conformance-validator-verification.md)
+* [Claude hooks activity for fhir-conformance-validator verification ingest](/claude-hooks-activity-for-fhir-conformance-validator-verification-ingest.md)
+* [Claude hooks activity for fhir-go-developer ingestion](/claude-hooks-activity-for-fhir-go-developer-ingestion.md)
+* [Claude hooks activity for fhir-go-developer verification ingest](/claude-hooks-activity-for-fhir-go-developer-verification-ingest.md)
+* [Claude hooks activity for fhir-ideation-strategist verification ingest](/claude-hooks-activity-for-fhir-ideation-strategist-verification-ingest.md)
+* [Claude hooks activity for fhir-infra-release-engineer verification ingest](/claude-hooks-activity-for-fhir-infra-release-engineer-verification-ingest.md)
+* [Claude hooks activity for fhir-knowledge-curator ingestion](/claude-hooks-activity-for-fhir-knowledge-curator-ingestion.md)
+* [Claude hooks activity for fhir-knowledge-curator verification ingest](/claude-hooks-activity-for-fhir-knowledge-curator-verification-ingest.md)
+* [Claude hooks activity for fhir-security compliance verification ingest](/claude-hooks-activity-for-fhir-security-compliance-verification-ingest.md)
+* [Claude hooks activity for fhir-security reviewer verification ingest](/claude-hooks-activity-for-fhir-security-reviewer-verification-ingest.md)
+* [Claude hooks activity for fhir-storage-search-engineer ingest](/claude-hooks-activity-for-fhir-storage-search-engineer-ingest.md)
+* [Claude hooks activity for fhir-storage-search-engineer verification ingest](/claude-hooks-activity-for-fhir-storage-search-engineer-verification-ingest.md)
+* [Claude hooks activity for fhir-tech-lead verification ingest](/claude-hooks-activity-for-fhir-tech-lead-verification-ingest.md)
+* [Claude hooks activity for fhir-test-engineer ingestion](/claude-hooks-activity-for-fhir-test-engineer-ingestion.md)
+* [Claude hooks activity for final document-and-verify boundary](/claude-hooks-activity-for-final-document-and-verify-boundary.md)
+* [Claude hooks activity for final document-and-verify ingestion](/claude-hooks-activity-for-final-document-and-verify-ingestion.md)
+* [Claude hooks activity for post-verification fhir-code-reviewer window](/claude-hooks-activity-for-post-verification-fhir-code-reviewer-window.md)
+* [Claude hooks activity for security and infra agent additions](/claude-hooks-activity-for-security-and-infra-agent-additions.md)
+* [Claude hooks aggregate activity for agent-dev-team changes](/claude-hooks-aggregate-activity-for-agent-dev-team-changes.md)
 
 ## SessionRecord
 

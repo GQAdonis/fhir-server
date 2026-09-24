@@ -3,3 +3,8 @@
 # Hook sources and compiled output are byte-compared by check:dist; keep LF on
 # every platform (Windows runners default to CRLF checkouts).
 .claude/hooks/** text eol=lf
+# Go source is LF everywhere (gofmt emits LF; CRLF checkouts fail gofmt -l on Windows).
+*.go text eol=lf
+# Agent definitions and the team doc are parsed by lint-agents; keep LF.
+.claude/agents/*.md text eol=lf
+docs/agent-team.md text eol=lf
