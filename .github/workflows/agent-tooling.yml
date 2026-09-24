@@ -1,0 +1,81 @@
+name: Agent tooling
+
+# Verifies the Claude Code agent team and its Node hooks on all three
+# developer platforms: hook tests, committed dist/ freshness, agent lint,
+# the .prometheus/ PHI/secret scan, and an exec-form hook run (no shell).
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".claude/**"
+      - ".prometheus/**"
+      - ".kbd-orchestrator/hooks-config.json"
+      - "docs/agent-team.md"
+      - ".gitattributes"
+      - ".github/workflows/agent-tooling.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".claude/**"
+      - ".prometheus/**"
+      - ".kbd-orchestrator/hooks-config.json"
+      - "docs/agent-team.md"
+      - ".gitattributes"
+      - ".github/workflows/agent-tooling.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-tooling-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hooks:
+    name: Hooks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: .claude/hooks/package-lock.json
+
+      - name: Install hook toolchain (TypeScript 7)
+        run: npm --prefix .claude/hooks ci
+
+      # check:dist compiles into a temp dir and byte-compares with the committed
+      # dist/. It runs before anything that could rebuild dist/, so drift fails.
+      - name: Committed dist/ matches src/
+        run: npm --prefix .claude/hooks run check:dist
+
+      - name: Hook tests (node:test against dist/)
+        run: npm --prefix .claude/hooks test
+
+      - name: Lint agent definitions
+        run: npm --prefix .claude/hooks run lint:agents
+
+      - name: PHI/secret scan of committable .prometheus/
+        run: npm --prefix .claude/hooks run scan:prometheus
+
+      # Exec form, as Claude Code runs the hooks: node spawns the compiled
+      # module directly with a hook payload on stdin; no shell is involved.
+      - name: Exec-form hook run
+        run: >-
+          node -e "
+          const { spawnSync } = require('node:child_process');
+          const fs = require('node:fs'); const os = require('node:os'); const path = require('node:path');
+          const project = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-exec-'));
+          const payload = JSON.stringify({ hook_event_name: 'SubagentStop', agent_type: 'fhir-code-reviewer', agent_id: 'ci', session_id: 'ci-' + process.platform });
+          const r = spawnSync(process.execPath, [path.join('.claude', 'hooks', 'dist', 'agent-ledger.mjs')], { input: payload, encoding: 'utf8', env: { ...process.env, CLAUDE_PROJECT_DIR: project } });
+          if (r.status !== 0) { console.error(r.stderr); process.exit(1); }
+          const lines = fs.readFileSync(path.join(project, '.prometheus', 'agent-ledger.jsonl'), 'utf8').trim().split('\n');
+          if (lines.length !== 1 || JSON.parse(lines[0]).event !== 'SubagentStop') { console.error(lines); process.exit(1); }
+          console.log('exec-form hook OK on ' + process.platform + ': ' + lines[0]);
+          "

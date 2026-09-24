@@ -1,0 +1,11 @@
+.claude/agents/fhir-tech-lead.md
+.claude/agents/fhir-ideation-strategist.md
+.claude/agents/fhir-architect.md
+.claude/skills/karpathy-guidelines/SKILL.md
+.claude/skills/karpathy-guidelines/README.md
+openspec/changes/add-architecture-agents/design.md
+openspec/changes/add-architecture-agents/tasks.md
+.claude/skills/openspec-explore/SKILL.md
+.claude/skills/openspec-propose/SKILL.md
+.kbd-orchestrator/phases/agent-dev-team/evidence/change2-preloaded-skills.txt
+.kbd-orchestrator/phases/agent-dev-team/evidence/smoke-architecture-agents.txt

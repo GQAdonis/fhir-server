@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "5",
+  "generatedBy": "kbd-runtime",
+  "projectionContractVersion": 2,
+  "sourceRevision": 253,
+  "derivedRevision": 253,
+  "frontier": {
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 253
+  },
+  "conflictCount": 0,
+  "projectId": "98eeab9c-ff3e-4471-a109-52e79b939f28",
+  "runId": "agent-dev-team-20260924T112402Z",
+  "path": [
+    "agent-dev-team"
+  ],
+  "phaseIds": [
+    "agent-dev-team"
+  ],
+  "activePhaseId": "agent-dev-team",
+  "activePhase": "agent-dev-team",
+  "phase": "agent-dev-team",
+  "parentPhase": "agent-dev-team",
+  "childPointer": null,
+  "change": "document-and-verify-agent-team",
+  "currentTask": "4",
+  "status": "ready",
+  "completionMetric": "implementation",
+  "implementationCompleted": 7,
+  "implementationTotal": 8,
+  "planRevision": 2,
+  "revision": 253,
+  "exactNextCommand": "/opsx:apply add-hooks-typescript-toolchain",
+  "nextChange": "document-and-verify-agent-team",
+  "nextTask": "4",
+  "updatedAt": "2026-09-24T14:00:36.859207Z"
+}

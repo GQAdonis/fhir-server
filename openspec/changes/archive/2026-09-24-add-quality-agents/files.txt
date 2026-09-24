@@ -1,0 +1,10 @@
+.claude/agents/fhir-code-reviewer.md
+.claude/agents/fhir-security-compliance-reviewer.md
+.claude/agents/fhir-conformance-validator.md
+docs/agent-team.md
+openspec/changes/add-quality-agents/tasks.md
+.kbd-orchestrator/phases/agent-dev-team/evidence/smoke-quality-agents.txt
+.kbd-orchestrator/constraints.md
+.claude/skills/karpathy-guidelines/SKILL.md
+.claude/skills/openspec-verify-change/SKILL.md
+.claude/agents/fhir-tech-lead.md

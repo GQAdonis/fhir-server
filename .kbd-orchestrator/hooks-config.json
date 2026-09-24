@@ -1,0 +1,41 @@
+{
+  "__description": "Project KBD hooks for the WSO2 FHIR Server. The three augment entries record successful KBD boundaries with the Karpathy progress recorder through a Node bridge, so recording works where the built-in python/shell entries do not (e.g. Windows) and every outcome lands in .prometheus/agent-ledger.jsonl. On Unix the built-in entries also run; the recorder is idempotent, so the second call reports `duplicate`. See openspec/specs/agent-tooling/karpathy-logging (decision D-005).",
+  "hooks": [
+    {
+      "id": "karpathy-boundary-node-task",
+      "event": "task:after",
+      "mode": "augment",
+      "description": "Node bridge to record-progress.py for task boundaries.",
+      "action": {
+        "type": "command",
+        "command": "node .claude/hooks/dist/karpathy-boundary.mjs --boundary task",
+        "timeout": 15,
+        "on_failure": "warn"
+      }
+    },
+    {
+      "id": "karpathy-boundary-node-change",
+      "event": "change:after",
+      "mode": "augment",
+      "description": "Node bridge to record-progress.py for change boundaries.",
+      "action": {
+        "type": "command",
+        "command": "node .claude/hooks/dist/karpathy-boundary.mjs --boundary change",
+        "timeout": 15,
+        "on_failure": "warn"
+      }
+    },
+    {
+      "id": "karpathy-boundary-node-phase",
+      "event": "phase:after",
+      "mode": "augment",
+      "description": "Node bridge to record-progress.py for phase boundaries.",
+      "action": {
+        "type": "command",
+        "command": "node .claude/hooks/dist/karpathy-boundary.mjs --boundary phase",
+        "timeout": 15,
+        "on_failure": "warn"
+      }
+    }
+  ]
+}

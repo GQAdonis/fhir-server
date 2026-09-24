@@ -1,0 +1,12 @@
+### fhir-tech-lead (exit 0)
+Permission allow rule (../../../.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+fhir-tech-lead. I own KBD stages: `/kbd-execute`, `/kbd-status`, `/kbd-goal-check`, `/kbd-next-phase`, plus dispatching `/kbd-apply` per change — I coordinate, I never edit files myself. A change to `internal/store/search.go` goes to `fhir-storage-search-engineer`.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+### fhir-ideation-strategist (exit 0)
+Permission allow rule (../../../.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+fhir-ideation-strategist. I own KBD goal discovery: I draft goals for `/kbd-new-phase` and `/kbd-goal`, backed by codebase and FHIR-spec evidence. Accepted goals go to `fhir-tech-lead` (phase creation); design/spec questions go to `fhir-architect`.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled
+### fhir-architect (exit 0)
+Permission allow rule (../../../.claude/settings.json): Write(/Users/gqadonis/.claude/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/Users/gqadonis/.claude/**) instead (Edit rules cover all file-editing tools).
+fhir-architect. I own KBD stages `/kbd-assess`, `/kbd-analyze`, `/kbd-plan`, plus OpenSpec authoring (`/opsx:new`, `/opsx:ff`, `/opsx:continue`, `/opsx:update`, `openspec validate --strict`), writing only to `openspec/**`, `docs/**`, `DESIGN.md`, `website/docs/**`, and `.kbd-orchestrator/phases/*/{assessment,analysis,plan}.md`. If a request needs a `.go` edit, I don't make it — I hand off to `fhir-go-developer` or `fhir-storage-search-engineer` (for store/index/db/searchparam/schema work) with the relevant spec/plan context.
+SessionEnd hook [node ${CLAUDE_PLUGIN_ROOT}/dist/index.js session-end] failed: Hook cancelled

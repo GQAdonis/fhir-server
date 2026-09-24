@@ -1,0 +1,30 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/dist/scan-prometheus.mjs",
+      "line": 33,
+      "claim": "The scan CLI prints allowlisted literals verbatim, which can expose PHI or secrets in the scan output.",
+      "evidence": "The hunk logs `scan-prometheus: allowlisted literal (reviewed): ${literal}`, while `openspec/specs/agent-tooling/karpathy-logging/spec.md` requires scan reports to provide file/line without echoing matched text and the scanner comments state it reports positions only, never matched text.",
+      "suggested_fix": "Do not print allowlist literal values; report only a count or a stable non-sensitive identifier such as `allowlisted literal #N`."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".claude/hooks/src/lib/scan.mts",
+      "claim": "The new PHI/secret scanner behavior has no accompanying tests in the diff.",
+      "evidence": "The warning constraint `tests-for-new-features` requires new behaviour to have tests next to the code, and the diff adds scanner implementation files and a `test` script but no `*_test` or `.test.mjs` files covering scan matches, allowlist behavior, binary/oversize fail-closed handling, or non-disclosure of matched text.",
+      "suggested_fix": "Add Node test files under `.claude/hooks/test/` that exercise `scanText`, `parseAllowlist`, and the CLI output/exit-code behavior."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

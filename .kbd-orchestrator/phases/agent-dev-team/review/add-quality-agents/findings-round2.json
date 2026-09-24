@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-conformance-validator.md",
+      "line": 35,
+      "claim": "The conformance validator is specified as read-only but instructs itself to run `npm ci`, which writes to the working tree.",
+      "evidence": "Acceptance criterion 1.3 requires `fhir-conformance-validator` to be `read-only`; the agent also says at line 22, `Use Bash only for verification and read-only commands. Never edit files`, but the command table includes line 35: ```.claude/hooks/** | `npm --prefix .claude/hooks ci && ...` ```, and `npm ci` installs/removes `node_modules` content.",
+      "suggested_fix": "Replace `npm --prefix .claude/hooks ci` with a non-mutating prerequisite check, or explicitly delegate hook dependency installation to a non-read-only setup step outside this validator."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/skills/openspec-verify-change/SKILL.md",
+      "line": 4,
+      "claim": "The read-only conformance validator preloads a skill whose tool allowance and instructions include OpenSpec write/archive commands.",
+      "evidence": "Acceptance criterion 1.3 requires the conformance validator to be read-only, and `.claude/agents/fhir-conformance-validator.md` preloads `openspec-verify-change`; the skill frontmatter grants `allowed-tools: Bash(openspec:*)`, and its store-selection text says commands may `read or write specs and changes` including `new change` and `archive`.",
+      "suggested_fix": "Restrict the skill to read-only OpenSpec commands needed for verification, such as `status`, `instructions`, `list`, `show`, and `validate`, and remove/archive/write command guidance from this repo-resident skill."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-go-developer.md",
+      "line": 8,
+      "claim": "The fhir-go-developer agent does not declare the required skills in its frontmatter, so they cannot be verified as resolving for the agent.",
+      "evidence": "Acceptance criterion 1.1 requires `golang-patterns, tdd-workflow, karpathy-guidelines, surgical-patch, kbd-apply` and says to verify frontmatter parses and skills resolve, but the frontmatter `skills:` list only contains `karpathy-guidelines` and `openspec-apply-change`.",
+      "suggested_fix": "Add the required skills to the frontmatter `skills:` list or adjust the criterion if these are intentionally only optional runtime invocations."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-storage-search-engineer.md",
+      "line": 7,
+      "claim": "The fhir-storage-search-engineer agent does not declare the required storage/search skills in its frontmatter.",
+      "evidence": "Acceptance criterion 1.2 requires `postgres-patterns, database-migrations`, but the frontmatter `skills:` list only contains `karpathy-guidelines` and `openspec-apply-change`.",
+      "suggested_fix": "Add `postgres-patterns` and `database-migrations` to the agent frontmatter `skills:` list, ensuring those skill directories exist/resolution succeeds."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-test-engineer.md",
+      "line": 7,
+      "claim": "The fhir-test-engineer agent does not declare the required testing skills in its frontmatter, so the required skill-resolution check is not satisfied.",
+      "evidence": "Acceptance criterion 1.3 requires `golang-testing, test-driven-development, verification-loop`, but the frontmatter `skills:` list only contains `karpathy-guidelines` and `openspec-verify-change`.",
+      "suggested_fix": "Add the required testing skills to the frontmatter `skills:` list and ensure they resolve."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

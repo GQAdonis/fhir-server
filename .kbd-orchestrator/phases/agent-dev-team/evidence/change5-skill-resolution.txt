@@ -1,0 +1,34 @@
+# skill resolution for engineering agents 2026-09-24T13:08:00Z
+Rule: frontmatter preloads only repo-resident skills; prompt 'Invoke when needed' skills are machine-local (documented as prerequisites in change document-and-verify-agent-team).
+## fhir-go-developer
+preloaded:
+  karpathy-guidelines      .claude/skills/karpathy-guidelines/SKILL.md
+  openspec-apply-change    .claude/skills/openspec-apply-change/SKILL.md
+invoke-when-needed:
+  kbd-apply                /Users/gqadonis/.claude/skills/kbd-apply/SKILL.md
+  golang-patterns          /Users/gqadonis/.claude/skills/golang-patterns/SKILL.md
+  golang-testing           /Users/gqadonis/.claude/skills/golang-testing/SKILL.md
+  tdd-workflow             /Users/gqadonis/.claude/skills/tdd-workflow/SKILL.md
+  surgical-patch           /Users/gqadonis/.claude/skills/surgical-patch/SKILL.md
+  go-build-resolver        /Users/gqadonis/.claude/agents/go-build-resolver.md
+## fhir-storage-search-engineer
+preloaded:
+  karpathy-guidelines      .claude/skills/karpathy-guidelines/SKILL.md
+  openspec-apply-change    .claude/skills/openspec-apply-change/SKILL.md
+invoke-when-needed:
+  kbd-apply                /Users/gqadonis/.claude/skills/kbd-apply/SKILL.md
+  postgres-patterns        /Users/gqadonis/.claude/skills/postgres-patterns/SKILL.md
+  database-migrations      /Users/gqadonis/.claude/skills/database-migrations/SKILL.md
+  golang-patterns          /Users/gqadonis/.claude/skills/golang-patterns/SKILL.md
+  golang-testing           /Users/gqadonis/.claude/skills/golang-testing/SKILL.md
+  database-reviewer        /Users/gqadonis/.claude/agents/database-reviewer.md
+## fhir-test-engineer
+preloaded:
+  karpathy-guidelines      .claude/skills/karpathy-guidelines/SKILL.md
+  openspec-verify-change   .claude/skills/openspec-verify-change/SKILL.md
+invoke-when-needed:
+  golang-testing           /Users/gqadonis/.claude/skills/golang-testing/SKILL.md
+  test-driven-development  /Users/gqadonis/.claude/skills/test-driven-development/SKILL.md
+  tdd-workflow             /Users/gqadonis/.claude/skills/tdd-workflow/SKILL.md
+  verification-loop        /Users/gqadonis/.claude/skills/verification-loop/SKILL.md
+  e2e-testing              /Users/gqadonis/.claude/skills/e2e-testing/SKILL.md

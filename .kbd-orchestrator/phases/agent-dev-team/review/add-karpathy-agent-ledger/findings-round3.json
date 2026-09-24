@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "claim": "The hooks toolchain pins an unpublished TypeScript version, so the required `check:dist` verification cannot be installed/run from a fresh checkout.",
+      "evidence": "Acceptance criterion 5.1 requires verifying `npm --prefix .claude/hooks run check:dist`; `scripts/check-dist.mjs` refuses to run without `node_modules/typescript/bin/tsc`; `.claude/hooks/package.json` adds `\"typescript\": \"7.0.2\"`, which is not a published npm TypeScript release.",
+      "suggested_fix": "Pin a published TypeScript version, e.g. a current 5.x release, and include the corresponding package lock if `npm ci` is the expected setup path."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

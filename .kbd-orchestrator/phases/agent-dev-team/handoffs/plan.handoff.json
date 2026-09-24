@@ -1,0 +1,11 @@
+{
+  "stage": "plan",
+  "completedAt": "2026-09-24T11:44:36Z",
+  "outputs": [
+    "plan.md"
+  ],
+  "nextStage": "execute",
+  "summaryForNext": "8 OpenSpec changes in 4 rounds. Round 1 is add-hooks-typescript-toolchain in parallel with add-architecture-agents; round 2 is the Karpathy ledger, guardrail hooks, engineering and quality agents; round 3 is infra and knowledge agents; round 4 is docs plus 3-OS CI. Apply add-hooks-typescript-toolchain first. WARNING: round-2 review fixes in change 2 (recorder resolution and degrade, pk-absent acceptance) are not re-reviewed, so fhir-conformance-validator must check them; the commit-everything choice for .prometheus depends on the change-2 PHI scanner.",
+  "skipped": false,
+  "skipReason": null
+}

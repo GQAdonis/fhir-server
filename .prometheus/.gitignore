@@ -1,0 +1,8 @@
+# Local-only Karpathy hook state (everything else in .prometheus/ is committed; see docs/agent-team.md)
+.flush.lock
+.flush-cursor
+*.tmp
+# Conversation text and local-path caches are never committed (decision D-006).
+knowledge/wiki/karpathy-session-*.md
+knowledge/.prompt-snapshots/
+events.jsonl

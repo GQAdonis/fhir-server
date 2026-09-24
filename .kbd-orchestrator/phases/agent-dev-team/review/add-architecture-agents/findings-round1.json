@@ -1,0 +1,47 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-tech-lead.md",
+      "line": 7,
+      "claim": "The tech lead agent is granted non-read-only tools despite the acceptance criterion requiring Agent plus read-only tools.",
+      "evidence": "Acceptance criterion 2.1 requires `.claude/agents/fhir-tech-lead.md` to use \"Agent + read-only tools\"; the frontmatter lists `tools: Agent, Read, Grep, Glob, Bash, SendMessage`, and `Bash` can mutate the repository or environment.",
+      "suggested_fix": "Remove `Bash` from the tech lead tool list, or narrow the criterion if mutation-capable tools are intentionally allowed."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-ideation-strategist.md",
+      "line": 8,
+      "claim": "The ideation strategist lists a required skill that is not vendored or otherwise shown to resolve locally.",
+      "evidence": "Acceptance criterion 2.2 says to \"verify frontmatter parses and skills resolve\"; the frontmatter lists `idea-refine`, but the diff only vendors `.claude/skills/karpathy-guidelines/` and adds no `.claude/skills/idea-refine/`.",
+      "suggested_fix": "Vendor the `idea-refine` skill locally, remove it from frontmatter, or add the prerequisite/resolution mechanism required by the agent loader."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-tech-lead.md",
+      "line": 8,
+      "claim": "The tech lead lists a required skill that is not vendored or otherwise shown to resolve locally or documented as a prerequisite.",
+      "evidence": "Acceptance criterion 2.1 requires \"every listed skill resolves locally or is noted as a prerequisite\"; the frontmatter lists `kbd-process-orchestrator`, but the diff only adds `.claude/skills/karpathy-guidelines/` and no prerequisite document for `kbd-process-orchestrator`.",
+      "suggested_fix": "Vendor `kbd-process-orchestrator` locally, remove it from frontmatter, or add an explicit prerequisite note in the agent documentation."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-architect.md",
+      "line": 8,
+      "claim": "The architect lists a required skill that is not vendored or otherwise shown to resolve locally.",
+      "evidence": "Acceptance criterion 2.3 says to \"verify frontmatter parses and skills resolve\"; the frontmatter lists `kbd-plan`, but the diff only adds `.claude/skills/karpathy-guidelines/` and no `.claude/skills/kbd-plan/`.",
+      "suggested_fix": "Vendor the `kbd-plan` skill locally, remove it from frontmatter, or add the prerequisite/resolution mechanism required by the agent loader."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

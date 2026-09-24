@@ -1,0 +1,9 @@
+# scan:prometheus gate — run by the orchestrating session (fhir-tech-lead role) at 2026-09-24T13:32:03Z
+$ npm --prefix .claude/hooks run scan:prometheus
+scan-prometheus: clean (95 file(s) scanned)
+exit=0
+
+$ git status --short --ignored .prometheus | awk "{print \$1}" | sort | uniq -c
+  21 !!
+  11 ??
+   5 A

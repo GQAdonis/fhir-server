@@ -1,0 +1,36 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-infra-release-engineer.md",
+      "claim": "The required infrastructure/release agent file is not added by the diff.",
+      "evidence": "Acceptance criterion 1.1 requires writing `.claude/agents/fhir-infra-release-engineer.md`, but the diff contains only `.claude/skills/karpathy-guidelines/SKILL.md`, `.prometheus/.gitignore`, and `docs/agent-team.md`.",
+      "suggested_fix": "Add `.claude/agents/fhir-infra-release-engineer.md` with the required frontmatter, scope, SHA-pin rule, CI/make parity, helm placeholder guidance, and documented invoke-when-needed skills."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-knowledge-curator.md",
+      "claim": "The required knowledge-curator agent file is not added by the diff.",
+      "evidence": "Acceptance criterion 1.2 requires writing `.claude/agents/fhir-knowledge-curator.md`, but the diff contains no changes under `.claude/agents/`.",
+      "suggested_fix": "Add `.claude/agents/fhir-knowledge-curator.md` with the required frontmatter, write-scope restrictions, ledger/flush/outbox/rotation/scan-before-commit behavior, and documented invoke-when-needed skills."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "claim": "The required smoke command cannot be verified because the diff adds no hook package or scan script changes showing `npm --prefix .claude/hooks run scan:prometheus` exists or passes.",
+      "evidence": "Acceptance criterion 2.1 requires verifying the knowledge curator runs `npm --prefix .claude/hooks run scan:prometheus` with exit 0; the diff includes no `.claude/hooks` changes and no smoke fixture/output.",
+      "suggested_fix": "Add or update the hook package/scripts as needed and include the fixture/smoke verification artifact or test demonstrating the command exits 0."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,101 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { parseAgent, asList, invokeSkills, documentedPrerequisites, lintAll } from "../dist/lib/agent-lint.mjs";
+
+const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "dist");
+const repoRoot = path.resolve(dist, "..", "..", "..");
+const cli = path.join(dist, "lint-agents.mjs");
+
+/** A minimal repo with one agent, one vendored skill and a doc. */
+function fixtureRepo({ agentSkills = ["karpathy-guidelines"], invoke = "`golang-patterns`", prereqs = ["golang-patterns"], model = "sonnet" } = {}) {
+  const root = mkdtempSync(path.join(tmpdir(), "lint-"));
+  mkdirSync(path.join(root, ".claude", "agents"), { recursive: true });
+  mkdirSync(path.join(root, ".claude", "skills", "karpathy-guidelines"), { recursive: true });
+  writeFileSync(path.join(root, ".claude", "skills", "karpathy-guidelines", "SKILL.md"), "---\nname: karpathy-guidelines\n---\n");
+  const sections = ["Role", "Owns", "Domain rules", "Workflow", "Hand-offs", "Skills", "Karpathy", "Output contract"]
+    .map((h) => (h === "Skills" ? `## Skills\n\n- Invoke when needed: ${invoke}.\n` : `## ${h}\n\ntext\n`))
+    .join("\n");
+  writeFileSync(
+    path.join(root, ".claude", "agents", "fhir-demo.md"),
+    `---\nname: fhir-demo\ndescription: demo agent\nmodel: ${model}\ntools: Read, Grep\nskills:\n${agentSkills.map((s) => `  - ${s}`).join("\n")}\n---\n\n# fhir-demo\n\n${sections}`,
+  );
+  mkdirSync(path.join(root, "docs"));
+  writeFileSync(
+    path.join(root, "docs", "agent-team.md"),
+    `# Agent team\n\n| \`fhir-demo\` |\n\n\`\`\`yaml\nprerequisites:\n${prereqs.map((p) => `  - name: ${p}\n    kind: skill\n    source: x\n    used_by: [fhir-demo]`).join("\n")}\n\`\`\`\n`,
+  );
+  return root;
+}
+
+const noLocal = (root) => ({ repoRoot: root, localSkillDirs: [], localAgentDirs: [] });
+
+test("parseAgent handles scalars, inline lists and block lists", () => {
+  const { frontmatter } = parseAgent("---\nname: a\ntools: Read, Grep\nskills:\n  - x\n  - y\n---\nbody\n");
+  assert.equal(frontmatter.name, "a");
+  assert.deepEqual(asList(frontmatter.tools), ["Read", "Grep"]);
+  assert.deepEqual(frontmatter.skills, ["x", "y"]);
+  assert.throws(() => parseAgent("---\n{ flow: map }\n---\n"), /unsupported frontmatter line/);
+  assert.throws(() => parseAgent("no frontmatter"), /missing YAML frontmatter/);
+});
+
+test("invokeSkills and documentedPrerequisites extract names", () => {
+  assert.deepEqual(invokeSkills("## Skills\n\n- Invoke when needed: `a-b`, `superpowers:c` (x).\n\n## Karpathy\n"), ["a-b", "superpowers:c"]);
+  assert.deepEqual([...documentedPrerequisites("```yaml\nprerequisites:\n  - name: foo\n    kind: skill\n```")], ["foo"]);
+});
+
+test("a clean fixture passes", () => {
+  const root = fixtureRepo();
+  try {
+    assert.deepEqual(lintAll(noLocal(root)), { agents: 1, problems: [] });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("an unknown skill that is neither local nor documented fails", () => {
+  const root = fixtureRepo({ invoke: "`golang-patterns`, `mystery-skill`" });
+  try {
+    const { problems } = lintAll(noLocal(root));
+    assert.equal(problems.length, 1);
+    assert.match(problems[0], /skill "mystery-skill" neither resolves locally nor appears in docs\/agent-team\.md prerequisites/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a machine-local preload and a bad model are rejected", () => {
+  const root = fixtureRepo({ agentSkills: ["karpathy-guidelines", "golang-patterns"], model: "gpt" });
+  try {
+    const { problems } = lintAll(noLocal(root));
+    assert.ok(problems.some((p) => /preloaded skill "golang-patterns" is not repo-resident/.test(p)));
+    assert.ok(problems.some((p) => /unknown model "gpt"/.test(p)));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("the real .claude/agents pass with only documented prerequisites (as on a CI runner)", () => {
+  const { agents, problems } = lintAll(noLocal(repoRoot));
+  assert.equal(agents, 11);
+  assert.deepEqual(problems, []);
+});
+
+test("CLI exits 1 on problems and 0 when clean", () => {
+  const root = fixtureRepo({ invoke: "`nope-skill`" });
+  try {
+    const bad = spawnSync(process.execPath, [cli, root], { encoding: "utf8", env: { ...process.env, HOME: root, USERPROFILE: root } });
+    assert.equal(bad.status, 1);
+    assert.match(bad.stderr, /nope-skill/);
+    const good = spawnSync(process.execPath, [cli, repoRoot], { encoding: "utf8" });
+    assert.equal(good.status, 0, good.stderr);
+    assert.match(good.stdout, /lint-agents: OK \(11 agents\)/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

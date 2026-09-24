@@ -1,0 +1,47 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-architect.md",
+      "line": 17,
+      "claim": "The architect agent is allowed to write outside the paths permitted by the acceptance criteria.",
+      "evidence": "Acceptance criteria says the architect's writes are limited to `openspec/`, `docs/` and `DESIGN.md`; the agent prompt adds `website/docs/**` and `.kbd-orchestrator/phases/*/{assessment,analysis,plan}.md` to writable paths.",
+      "suggested_fix": "Remove `website/docs/**` and `.kbd-orchestrator/phases/*/{assessment,analysis,plan}.md` from the architect writable paths, or update the acceptance criteria/OpenSpec to explicitly allow them."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-architect.md",
+      "line": 7,
+      "claim": "The architect frontmatter lists a skill that is not vendored in the repo, violating the skills-resolve acceptance criterion.",
+      "evidence": "Acceptance criterion 2.3 requires skills resolve; frontmatter lists `openspec-propose`, but the diff only vendors `.claude/skills/karpathy-guidelines/` and the file tree does not show `.claude/skills/openspec-propose`.",
+      "suggested_fix": "Vendor `openspec-propose` under `.claude/skills/` or remove it from frontmatter and document it only as an optional/prerequisite skill outside the `skills:` block."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-ideation-strategist.md",
+      "line": 7,
+      "claim": "The ideation strategist frontmatter lists a skill that is not vendored in the repo, violating the skills-resolve acceptance criterion.",
+      "evidence": "Acceptance criterion 2.2 requires skills resolve; frontmatter lists `openspec-explore`, but the diff only vendors `.claude/skills/karpathy-guidelines/` and the file tree does not show `.claude/skills/openspec-explore`.",
+      "suggested_fix": "Vendor `openspec-explore` under `.claude/skills/` or remove it from frontmatter and document it only as an optional/prerequisite skill outside the `skills:` block."
+    },
+    {
+      "severity": "WARNING",
+      "file": "openspec/changes/add-architecture-agents/design.md",
+      "line": 16,
+      "claim": "The design document specifies a tech-lead tool grant that does not match the implemented agent frontmatter.",
+      "evidence": "`design.md` says the tech lead has `Agent, Read, Grep, Glob, Bash, TodoWrite, SendMessage`, but `.claude/agents/fhir-tech-lead.md` frontmatter lists `Agent, Read, Grep, Glob, Bash, SendMessage` and omits `TodoWrite`.",
+      "suggested_fix": "Either add `TodoWrite` to `.claude/agents/fhir-tech-lead.md` or update `design.md` to match the implemented tool grant."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

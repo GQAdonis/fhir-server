@@ -1,0 +1,39 @@
+# fhir-knowledge-curator smoke — fixture input (5 ledger lines, supplied inline in the prompt; no files written)
+{"ts":"2026-09-24T12:00:00Z","event":"SubagentStart","outcome":"started","session_id":"s1","agent_type":"fhir-go-developer","kbd_phase":"agent-dev-team","kbd_change":"c1"}
+{"ts":"2026-09-24T12:09:00Z","event":"PostToolUseFailure","outcome":"failed","session_id":"s1","tool_name":"Bash"}
+{"ts":"2026-09-24T12:10:00Z","event":"SubagentStop","outcome":"stopped","session_id":"s1","agent_type":"fhir-go-developer"}
+{"ts":"2026-09-24T12:11:00Z","event":"boundary_degraded","outcome":"task:no-python","kbd_phase":"agent-dev-team","kbd_change":"c1"}
+{"ts":"2026-09-24T12:12:00Z","event":"UserPromptSubmit","outcome":"submitted","session_id":"s1","prompt_chars":412}
+
+# curator output (session summary + lessons + scan gate) follows
+---
+
+## Scan Gate Report
+
+**Exit status:** 0 (pass) ✓
+
+**Output:** `scan-prometheus: clean (97 file(s) scanned)`
+
+**Result:** No privacy violations detected. All `.prometheus/` content is metadata-only, with no prompt text, tool output, file contents, or patient data. The scan cleared all 97 files.
+
+---
+
+## Summary
+
+| Metric | Value |
+|--------|-------|
+| Window | 2026-09-24 12:00–12:12 |
+| Session count | 1 |
+| PostToolUseFailure | 1 |
+| boundary_degraded | 1 |
+| Subagent balance | ✓ (1 start / 1 stop) |
+| Outbox pending | 0 (no flush yet) |
+| pk lint | skipped |
+| scan:prometheus | exit 0 |
+
+**Lessons ready for hand-off:**
+1. Bash tool failure handling → `fhir-tech-lead` (hook configuration)
+2. KBD boundary recorder availability → `fhir-security-compliance-reviewer` & `fhir-tech-lead` (PreSessionStart check)
+3. Early halt on boundary_degraded → `fhir-tech-lead` (SubagentStop handler logic)
+
+No files written. Fixture analysis complete.

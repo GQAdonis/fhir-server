@@ -1,0 +1,47 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/settings.json",
+      "line": 14,
+      "claim": "The registered hooks invoke dist/*.mjs files that are not added by this diff, so a fresh checkout will not be able to run the hooks until an untracked build is performed.",
+      "evidence": ".claude/settings.json registers `${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/agent-ledger.mjs` and `${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/karpathy-flush.mjs`, while the diff adds only `.claude/hooks/src/**/*.mts` and tests importing `../dist/...`; acceptance criterion 5.1 says `check:dist` must pass and the Impact section says new dist files are included.",
+      "suggested_fix": "Commit the generated `.claude/hooks/dist/**/*.mjs` artifacts and the `scripts/check-dist.mjs`/tsconfig needed to validate them, or change registrations to run a committed executable entrypoint."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".kbd-orchestrator/hooks-config.json",
+      "line": 12,
+      "claim": "The KBD boundary hook registration is not Windows-capable because it relies on POSIX `$PWD` shell expansion.",
+      "evidence": "The task/change/phase commands are strings like `node \"$PWD/.claude/hooks/dist/karpathy-boundary.mjs\" --boundary task --project-root \"$PWD\"`, but acceptance criterion 4 and the spec require KBD boundaries to be recorded on every platform through a Node entry point.",
+      "suggested_fix": "Use a cross-platform exec/args form supported by the KBD dispatcher, or pass the project root via an environment variable/dispatcher placeholder that works on Windows instead of `$PWD`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/pk.mts",
+      "line": 12,
+      "claim": "The knowledge-base ingestion timeout is 120 seconds, not the required 10 seconds.",
+      "evidence": "Acceptance criterion 3.1 requires `pk ingest --scope project --source claude-hooks` with a 10s timeout, but `PK_DRAIN_TIMEOUT_MS` is set to `120_000` and `ingest()` defaults to that timeout.",
+      "suggested_fix": "Use a 10_000 ms timeout for the `pk ingest` call or update the accepted requirement before shipping this behavior."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/ledger.mts",
+      "line": 57,
+      "claim": "The ledger privacy boundary can still commit secrets because identifier sanitization allows credentialed DSNs and email-shaped values into committed JSONL fields.",
+      "evidence": "`sanitizeId()` accepts `[A-Za-z0-9._:@/+-]+`, which permits values such as `postgres://user:pass@host` and `alice@example.org`; `entryFromHook()` writes sanitized `session_id`, `agent_type`, `agent_id`, and `tool_name` directly to `.prometheus/agent-ledger.jsonl`, while the change rationale says committed `.prometheus/` logs must carry no patient data or secrets by construction.",
+      "suggested_fix": "Tighten identifier validation to disallow `@`, URL schemes, and credential separators, or run the same PHI/secret scan against ledger lines before appending."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

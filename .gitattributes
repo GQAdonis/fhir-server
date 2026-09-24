@@ -1,0 +1,5 @@
+# Agent ledgers are machine-appended logs
+.prometheus/**/*.jsonl linguist-generated=true
+# Hook sources and compiled output are byte-compared by check:dist; keep LF on
+# every platform (Windows runners default to CRLF checkouts).
+.claude/hooks/** text eol=lf

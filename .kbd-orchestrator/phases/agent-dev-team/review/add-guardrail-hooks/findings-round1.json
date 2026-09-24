@@ -1,0 +1,39 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/dist/gofmt-check.mjs",
+      "line": 3,
+      "claim": "The rebuilt dist hooks import dist helper modules that are not added by this diff, so executing the registered hooks will fail with module resolution errors.",
+      "evidence": "New dist files import `./lib/hook-io.mjs` and `./lib/paths.mjs` (`.claude/hooks/dist/gofmt-check.mjs` lines 3 and 5; similarly guard-generated/license-header/session-context), but the diff only adds these helpers under `.claude/hooks/src/lib/` and does not add `.claude/hooks/dist/lib/hook-io.mjs` or `.claude/hooks/dist/lib/paths.mjs`, despite criterion 4.1 requiring rebuilt dist and working registered hooks.",
+      "suggested_fix": "Run the hook build so `.claude/hooks/dist/lib/hook-io.mjs` and `.claude/hooks/dist/lib/paths.mjs` are generated and committed, or remove dist artifacts and adjust registration to run built sources consistently."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/settings.json",
+      "line": 121,
+      "claim": "The PreToolUse registration does not match the required matcher and timeout.",
+      "evidence": "Acceptance criterion 4.1 requires `PreToolUse/PostToolUse matcher Edit|Write|MultiEdit, 10s timeout`; the PreToolUse registration uses `\"matcher\": \"Edit|Write|MultiEdit|NotebookEdit\"` and `\"timeout\": 5`.",
+      "suggested_fix": "Change the PreToolUse matcher to `Edit|Write|MultiEdit` and set the guard hook timeout to 10 seconds."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".claude/hooks/src/lib/go-checks.mts",
+      "line": 24,
+      "claim": "The license-header hook can silently accept Go files without the required WSO2 Apache header if any leading line merely contains the words `Apache License`.",
+      "evidence": "Constraint `license-header` requires every `.go` file to start with the WSO2 Apache 2.0 license header, but `hasLicenseHeader` returns true for any of the first 30 lines matching `/Apache License/`, not for the actual header at the top of the file.",
+      "suggested_fix": "Validate the expected header prefix, or at least require the canonical `Licensed under the Apache License`/`Apache License, Version 2.0` lines in the leading comment block before `package`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,6 @@
+### fhir-storage-search-engineer (exit 0)
+I fail closed: return `UnsupportedParamError` → `OperationOutcome`, never silently drop the predicate. DESIGN.md §4 is explicit that a registry-known composite parameter without engine support must reject the search rather than widen the result set — that's a data-safety bug (patients see records they shouldn't). Heuristic typing (`buildHeuristicExists`) only applies to parameters *absent* from the registry, not to known-but-unimplemented ones. I'd flag the gap to `fhir-architect` if adding real support requires a design decision not yet in DESIGN.md.
+### fhir-test-engineer (exit 0)
+`go test -race -tags integration -timeout 1200s ./internal/store/... ./internal/handler/...`
+### fhir-go-developer (exit 0)
+fhir-go-developer. I own internal/handler, validate, fhirpath, fhirxml, fhirttl, patch, config, ig, terminology, compartment, obs, version, cmd/server. Changes to internal/db/schema.sql go to fhir-storage-search-engineer, not me.

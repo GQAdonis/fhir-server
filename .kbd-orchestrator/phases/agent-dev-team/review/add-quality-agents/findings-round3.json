@@ -1,0 +1,47 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-conformance-validator.md",
+      "line": 34,
+      "claim": "The validator can issue a passing verdict without running the blocking `make lint` constraint.",
+      "evidence": "Diff says: `make lint` is blocking, but then allows `report LINT: PENDING-CI` and `Give the verdict PASS (lint pending CI) only when everything else passed`; constraint `golangci-lint-clean` is blocking and says `command: 'make lint'`.",
+      "suggested_fix": "Do not allow PASS or archive when `make lint` cannot be run; return BLOCK/PENDING until `make lint` exits 0 or CI evidence is available before archive."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-tech-lead.md",
+      "line": 43,
+      "claim": "The tech lead is instructed to archive changes even when the blocking lint constraint is still pending.",
+      "evidence": "Diff says: `A PASS (lint pending CI) from the validator allows archive`; constraint `golangci-lint-clean` is under `Blocking Constraints (prevent archiving until resolved)` and requires `make lint`.",
+      "suggested_fix": "Require a real successful `make lint` result, or documented green CI lint result, before archive."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-conformance-validator.md",
+      "line": 31,
+      "claim": "The license-header check is weaker than the blocking constraint and can pass Go files that do not start with the required WSO2 Apache header.",
+      "evidence": "Diff uses `grep -L 'Apache License' $(git ls-files '*.go')` and only requires it to print nothing; constraint `license-header` says `Every .go file starts with the WSO2 Apache 2.0 license header` and uses `grep -L 'Licensed under the Apache License\\|Apache License,' $(git ls-files '*.go')`.",
+      "suggested_fix": "Use the project constraint check verbatim, and add a start-of-file/header validation if the gate must enforce `starts with` rather than merely containing the phrase anywhere."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".claude/agents/fhir-tech-lead.md",
+      "line": 22,
+      "claim": "The tech lead calls `make build` a read-only target even though the new reviewer/validator instructions say it writes `./fhir-server` into the repo.",
+      "evidence": "Diff says in fhir-tech-lead: `Use Bash only for ... the read-only make targets (build, vet, test)`; diff says in fhir-conformance-validator: `Never run make build (it writes ./fhir-server into the repo)` and in fhir-code-reviewer: `never run make build (it writes a binary into the repo)`.",
+      "suggested_fix": "Remove `build` from the read-only make target list or instruct the agent to use `go build ./...` when it must avoid repository writes."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

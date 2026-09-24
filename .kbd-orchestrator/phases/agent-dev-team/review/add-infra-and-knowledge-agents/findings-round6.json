@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/scan-prometheus.mts",
+      "line": 69,
+      "claim": "The scan gate never scans `.prometheus/scan-allowlist.json`, so PHI or real secrets placed in the committed allowlist can pass with exit 0.",
+      "evidence": "The scanner explicitly skips the allowlist file with `if (path.resolve(file) === path.resolve(allowlistFile)) continue;`, while `openspec/specs/agent-tooling/karpathy-logging/spec.md` requires that committed `.prometheus/` content pass the PHI/secret scan and the knowledge curator must run this scan before proposing any commit of `.prometheus/`.",
+      "suggested_fix": "Scan `scan-allowlist.json` as well, or add a dedicated validation step that rejects allowlist entries matching PHI/secret rules unless they are known synthetic fixtures under a separate reviewed mechanism."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

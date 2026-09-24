@@ -1,0 +1,44 @@
+I can't pass this change yet because I couldn't run the required scan. `npm --prefix .claude/hooks run scan:prometheus` needs an approval this non-interactive session can't give, and running the compiled `node .claude/hooks/dist/scan-prometheus.mjs` directly needed approval too. Every other finding from my earlier block is fixed. If someone runs the scan and it exits 0, this becomes a PASS with no code changes.
+
+```
+VERDICT: BLOCK
+SENSITIVE PATHS: .prometheus/** (agent-ledger.jsonl, raw/, session-log.md, progress-memory-receipts/, project.json, knowledge/wiki/, knowledge/.prompt-snapshots/, events.jsonl, .gitignore), .claude/hooks/src/lib/{ledger,scan}.mts, .claude/hooks/src/scan-prometheus.mts, .claude/hooks/dist/{lib/scan,scan-prometheus}.mjs, openspec/specs/agent-tooling/karpathy-logging/spec.md
+
+Threat model: anything under .prometheus/ that is not ignored will end up in git history for good, where everyone with repo access can read it. The regex scanner is the only automated check, and nothing makes it run yet (the CI step is a tracked follow-up, as you asked).
+
+FINDINGS:
+- [CRITICAL] .claude/hooks (scan:prometheus gate) — no scan result on record.
+  evidence: The npm script and the direct node call both needed an approval this session can't give. D-003 requires exit 0 over the full tree before `.prometheus/` is committed. My manual greps for the same patterns (SSN, MRN, phone, email, bearer, sk-, AKIA, private key, credential DSN, absolute /Users/ paths) found nothing in any file that would be committed. A grep is not the gate, though.
+  fix: Have fhir-tech-lead or the operator run `npm --prefix .claude/hooks run scan:prometheus` and record the exit code in the evidence file. Exit 0 turns this into a PASS. Note that the scanner also walks gitignored files (the wiki session files and prompt snapshots), so a hit may be in a file that won't be committed. Check the path it reports before deciding.
+
+- RESOLVED (was CRITICAL) .prometheus/.gitignore:5-8 — D-006 applied.
+  evidence: `git check-ignore -v` matches line 6 for knowledge/wiki/karpathy-session-*.md, line 7 for knowledge/.prompt-snapshots/, and line 8 for events.jsonl. `git status --short --ignored` marks all 16 session files, the snapshot directory and events.jsonl as ignored (!!). The wiki files that are not ignored (index.md, log.md and the 7 claude-hooks-activity-*.md pages) hold only titles, event counts, session UUIDs and KBD IDs. They contain no reply text.
+
+- RESOLVED (was WARNING) .claude/hooks/src/lib/scan.mts:40-42 — the allowlist now needs an exact match of at least 8 characters.
+  evidence: `matched === literal` together with MIN_ALLOWLIST_LENGTH = 8. scan-prometheus.mts:37-39 prints each allowlisted literal so reviewers can see it. The compiled dist/lib/scan.mjs:18 matches the source.
+
+- RESOLVED (was WARNING) .claude/hooks/src/scan-prometheus.mts:53-58 — binary files now fail closed.
+  evidence: A NUL-byte file now prints a message and adds to the finding count (`hits += 1`), the same way the over-5 MB case does (lines 47-51). The compiled dist matches.
+
+- RESOLVED (was WARNING) .claude/hooks/src/lib/ledger.mts:14-25,113-114 — D-007 applied.
+  evidence: prompt_sha256 has been removed from LEDGER_FIELDS, and only prompt_chars is written. grep finds prompt_sha256 in neither .prometheus/agent-ledger.jsonl nor .claude/hooks/src. Its only other appearance is test/ledger.test.mjs:46, which checks that the field is absent. Spec line 24 now forbids any prompt hash.
+
+- RESOLVED (was SUGGESTION) .prometheus/events.jsonl — absolute paths containing the username are now gitignored. No committable file contains an absolute /Users/ path.
+
+- [CHECKED] .prometheus/agent-ledger.jsonl — all 44 lines use only allowlisted keys (ts, session_id, agent_type, agent_id, event, tool_name, outcome, kbd_phase, kbd_change, prompt_chars), matching spec line 16.
+
+- [CHECKED] .prometheus/progress-memory-receipts/*.json and project.json — these are metadata only: IDs, hashes, a commit SHA, repo-relative paths and a status. No conversation text.
+
+- [SUGGESTION] .prometheus/progress-memory-receipts/8f95dfec…json:18-519 — touchedFiles lists hundreds of .claude/hooks/node_modules/** paths.
+  evidence: This is noise, not a security problem. It makes the files bigger and harder to review.
+  fix: Have the recorder leave out gitignored paths when it builds touchedFiles. Route through fhir-tech-lead; not blocking.
+
+- [WARNING, tracked follow-up] Nothing forces the scan to run before a commit yet. The CI step is task 3.1 in document-and-verify-agent-team. As you asked, this does not block this change.
+
+PROMETHEUS SCAN: npm --prefix .claude/hooks run scan:prometheus → exit n/a (not run: needs approval in this non-interactive session; a manual grep equivalent over committable files found nothing)
+```
+
+Hand-offs:
+- **Scan:** the scan run is the only thing left before a PASS. It goes to fhir-tech-lead or the operator.
+- **Recorder:** the touchedFiles clean-up goes to the implementing persona, through fhir-tech-lead.
+

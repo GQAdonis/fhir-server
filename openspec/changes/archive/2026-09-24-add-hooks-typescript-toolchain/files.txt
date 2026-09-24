@@ -1,0 +1,12 @@
+.claude/hooks/package.json
+.claude/hooks/tsconfig.json
+.claude/hooks/.gitignore
+.claude/hooks/src/lib/hook-io.mts
+.claude/hooks/src/lib/paths.mts
+.claude/hooks/scripts/check-dist.mjs
+.claude/hooks/test/lib.test.mjs
+.claude/settings.json
+internal/config/example_parse_test.go
+.claude/hooks/package-lock.json
+.claude/hooks/dist/lib/hook-io.mjs
+.claude/hooks/dist/lib/paths.mjs

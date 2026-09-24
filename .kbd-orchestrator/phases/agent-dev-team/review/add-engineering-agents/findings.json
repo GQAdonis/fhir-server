@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 checked each acceptance criterion against the added agent files, repo-resident skill files, documented prerequisites, and smoke evidence; the required agents, frontmatter fields, skill placement, ownership/rules, verification commands, and smoke answers are present in the diff.",
+    "Correctness \u2014 checked for internally contradictory agent instructions or malformed task coverage in the changed markdown/YAML frontmatter; no concrete defect is evident from the packet.",
+    "Regressions \u2014 checked for modifications to existing production code, generated files, schema, store/search behavior, handler interfaces, or tests; the diff only adds agent/docs/orchestrator files and an OpenSpec task file.",
+    "Security \u2014 checked for hardcoded credentials/DSNs, PHI-like data, unsafe command guidance, or tenant/RLS weakening; no secret or PHI-bearing production change is present.",
+    "Constraint breaches \u2014 checked blocking constraints that apply to this diff, including no Go files requiring license/gofmt, no resource_json GIN/schema changes, no store/handler/index/db changes triggering race integration gate, and no generated/golden file edits.",
+    "Silent failure \u2014 checked for instructions that swallow verification failures or permit marking tasks done despite failed checks; the agent prompts require reporting real command outcomes and not marking failed work done."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

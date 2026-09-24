@@ -1,0 +1,20 @@
+{
+  "name": "fhir-server-claude-hooks",
+  "private": true,
+  "description": "Cross-platform Claude Code hooks for the WSO2 FHIR Server agent team (TypeScript 7 -> Node .mjs).",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "node --test test/**/*.test.mjs",
+    "check:dist": "node scripts/check-dist.mjs",
+    "scan:prometheus": "node dist/scan-prometheus.mjs",
+    "lint:agents": "node dist/lint-agents.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,25 @@
+# Team acceptance — fresh headless sessions 2026-09-24T13:56:59Z
+## 1. Agent tool listing (new session; hyphens were stripped by the capture filter — names are fhir-architect … fhir-test-engineer, 11 total)
+fhirarchitect
+fhircodereviewer
+fhirconformancevalidator
+fhirgodeveloper
+fhirideationstrategist
+fhirinfrareleaseengineer
+fhirknowledgecurator
+fhirsecuritycompliancereviewer
+fhirstoragesearchengineer
+fhirtechlead
+fhirtestengineer
+## 2. Role confirmation per agent
+- fhir-architect (exit 0): **fhir-architect** — owns `/kbd-assess`, `/kbd-analyze`, `/kbd-plan`, OpenSpec authoring (`/opsx:*`), and `DESIGN.md`. 
+- fhir-code-reviewer (exit 0): **fhir-code-reviewer** — I own the code-review gate in the per-change QA flow, before `fhir-conformance-validator`. I check Go builds, tests, linting, domain rules (search fail-closed, RLS tenancy, write-time indexing, G
+- fhir-conformance-validator (exit 0): **fhir-conformance-validator** — final gate before archive (`kbd-apply verify`, `/opsx:verify`) and phase-level goal checks (`/kbd-goal-check`). 
+- fhir-go-developer (exit 0): **fhir-go-developer** — I own implementation of changes through `/kbd-apply`, covering Go packages (handler, validate, fhirpath, fhirxml, fhirttl, patch, config, ig, terminology, compartment, obs, version, cmd/server), p
+- fhir-ideation-strategist (exit 0): **fhir-ideation-strategist** — KBD stage: goal discovery. Gates: none (I draft goals for `/kbd-new-phase`; `fhir-tech-lead` creates phases). 
+- fhir-infra-release-engineer (exit 0): **fhir-infra-release-engineer** — I own CI/CD workflows (`.github/workflows/**`), Dockerfile, Helm charts, and the Makefile's CI-facing targets. My gates: CI parity validation, supply-chain pinning audit, and handoff to 
+- fhir-knowledge-curator (exit 0): **karpathy-curator** — I own Karpathy continuous-improvement: `.prometheus/` metadata ledger, raw notes, lessons, and the health gates (`boundary_degraded`, `flush_blocked`, `kb_deferred`, `PostToolUseFailure` counts, su
+- fhir-security-compliance-reviewer (exit 0): **fhir-security-compliance-reviewer** — I own the security gate in the per-change QA flow for sensitive paths (`internal/db`, `internal/store`, `internal/tenant`, `internal/handler`, `internal/obs`, `internal/ig`, `inter
+- fhir-storage-search-engineer (exit 0): **fhir-storage-search-engineer** — I own the correctness-critical storage, search indexing, SQL construction, and schema layers. KBD stages: `/kbd-apply` routed to `internal/store`, `internal/index`, `internal/db`, `inte
+- fhir-tech-lead (exit 0): **fhir-tech-lead** — owns KBD stages `/kbd-execute`, `/kbd-status`, `/kbd-goal-check`, `/kbd-next-phase`, and the archive gates (`/kbd-apply` dispatch, reviewer verdicts, conformance validation before commit). 
+- fhir-test-engineer (exit 0): I'm **fhir-test-engineer**, owning `*_test.go` across the repo, test utilities, conformance tests, golden files, and benchmarks. I drive integration and unit test suites, verify CI parity, and report coverage and test re
