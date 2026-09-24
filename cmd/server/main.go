@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
@@ -129,6 +130,18 @@ func run() error {
 	if err := registry.Load(ctx, pool); err != nil {
 		return fmt.Errorf("load search params: %w", err)
 	}
+
+	// Keep the shared registry in sync across replicas (SEARCH_PARAM_WATCH).
+	var background sync.WaitGroup
+	if cfg.SearchParams.Watch {
+		watcher := searchparam.NewWatcher(pool, registry)
+		background.Add(1)
+		go func() {
+			defer background.Done()
+			watcher.Run(ctx)
+		}()
+	}
+	slog.Info("search parameter registry watcher configured", "enabled", cfg.SearchParams.Watch)
 
 	// Store + HTTP (server starts immediately; IGs load in background)
 	searchTuning := store.SearchTuning{
@@ -260,7 +273,10 @@ func run() error {
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer shutdownCancel()
-	return srv.Shutdown(shutdownCtx)
+	err = srv.Shutdown(shutdownCtx)
+	cancel()
+	background.Wait()
+	return err
 }
 
 func setupLogging(level string) {

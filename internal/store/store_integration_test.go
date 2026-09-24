@@ -27,6 +27,9 @@ import (
 	"net/http/httptest"
 	"sync"
 	"testing"
+	"time"
+
+	"github.com/jackc/pgx/v5"
 
 	"github.com/wso2/fhir-server/internal/store"
 	"github.com/wso2/fhir-server/internal/terminology"
@@ -2028,6 +2031,39 @@ func TestSyncSearchParameter_UpsertAndLookup(t *testing.T) {
 	}
 	if def.ParamType != "string" {
 		t.Errorf("expected type=string, got %q", def.ParamType)
+	}
+}
+
+func TestSyncSearchParameter_NotifiesChange(t *testing.T) {
+	pool := testutil.MustSeededDB(t)
+	reg := testutil.MustRegistry(t, pool)
+	s := store.New(pool, reg)
+	ctx := context.Background()
+
+	conn, err := pgx.ConnectConfig(ctx, pool.Config().ConnConfig.Copy())
+	if err != nil {
+		t.Fatalf("connect: %v", err)
+	}
+	defer conn.Close(context.Background())
+	if _, err := conn.Exec(ctx, "LISTEN search_param_definitions_changed"); err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+
+	spBody := map[string]any{
+		"resourceType": "SearchParameter",
+		"code":         "notify-param",
+		"type":         "string",
+		"base":         []any{"Patient"},
+		"expression":   "Patient.extension('http://example.com/notify')",
+	}
+	if err := s.SyncSearchParameter(ctx, spBody); err != nil {
+		t.Fatalf("SyncSearchParameter: %v", err)
+	}
+
+	waitCtx, waitCancel := context.WithTimeout(ctx, 5*time.Second)
+	defer waitCancel()
+	if _, err := conn.WaitForNotification(waitCtx); err != nil {
+		t.Fatalf("wait for notification: %v", err)
 	}
 }
 

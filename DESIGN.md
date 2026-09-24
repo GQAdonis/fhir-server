@@ -321,6 +321,20 @@ path. It also builds a reverse-include index (`targetType → [SourceType:param]
 The `ig_source` column distinguishes provenance: `''` = base R4, `'user'` = a custom
 `SearchParameter` resource written via the API, `'name@version'` = from an IG package.
 
+### Cross-replica consistency
+
+The registry is process-local, so a `SearchParameter` written on one replica is invisible
+to the others until they see the change. Each process runs a watcher
+(`internal/searchparam/watcher.go`) that reloads the registry when a writer announces a
+change over Postgres `LISTEN/NOTIFY`. `NOTIFY` is not durable — a listener that is
+disconnected at commit time misses it — so the watcher also reloads on every (re)connect,
+retries a failed reload with backoff, and keeps its connection alive with TCP keepalive so
+a silent partition becomes a reconnect. Writers emit the notification inside their
+transaction, so it fires only if the change commits. Invalidation bounds the staleness
+window but cannot repair it: writes handled by a replica that did not yet know a parameter
+still miss that parameter's index rows, which is the reindex limitation in section 7. The watcher
+is off by default; enable it with `SEARCH_PARAM_WATCH=true` for multi-replica deployments.
+
 ### Custom `SearchParameter` resources
 
 Writing a `SearchParameter` resource updates both the DB and the in-memory registry
@@ -547,7 +561,7 @@ Ordered initialization in `cmd/server`:
 2. Connect to PostgreSQL.
 3. Create tables if requested / expected (idempotent schema).
 4. Seed base FHIR R4 search parameters (idempotent; non-fatal on failure).
-5. Load the search-parameter registry from the DB.
+5. Load the search-parameter registry from the DB and start its cross-replica watcher.
 6. Build the store and router.
 7. **Start listening immediately.**
 8. Load IG packages in **background goroutines** (one per package); set the `igReady`

@@ -166,8 +166,9 @@ database:
 config:
   # -- Extra environment variables, verbatim name/value pairs, covering any of the
   # knobs documented in config.example.yaml (LOG_LEVEL, BASE_URL, IG_PACKAGES,
-  # IG_REGISTRY_URL, SEARCH_PROBE_CAP, FHIR_VALIDATION_*, FHIR_TERMINOLOGY_URL,
-  # WRITE_*, ...) without the chart needing a bespoke value per setting.
+  # IG_REGISTRY_URL, SEARCH_PROBE_CAP, SEARCH_PARAM_WATCH, FHIR_VALIDATION_*,
+  # FHIR_TERMINOLOGY_URL, WRITE_*, ...) without the chart needing a bespoke value
+  # per setting.
   env:
     LOG_LEVEL: info
 

@@ -1136,6 +1136,10 @@ func (s *Store) SyncSearchParameter(ctx context.Context, body map[string]any) er
 		}
 	}
 
+	if err := searchparam.NotifyChange(ctx, tx, "custom search parameter "+code); err != nil {
+		return err
+	}
+
 	// Commit DB changes before updating the in-memory registry so that a
 	// failure or rollback never leaves the registry ahead of the database.
 	if err := tx.Commit(ctx); err != nil {
@@ -1193,10 +1197,21 @@ func (s *Store) DeleteSearchParameter(ctx context.Context, resourceID string) er
 		return nil
 	}
 
-	if _, err := s.pool.Exec(ctx,
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if _, err := tx.Exec(ctx,
 		`DELETE FROM search_param_definitions WHERE param_name = $1 AND is_custom = TRUE AND resource_type = ANY($2)`,
 		code, bases,
 	); err != nil {
+		return err
+	}
+	if err := searchparam.NotifyChange(ctx, tx, "deleted custom search parameter "+code); err != nil {
+		return err
+	}
+	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
 
