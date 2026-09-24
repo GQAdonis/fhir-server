@@ -1,6 +1,23 @@
 # Update Log
 
 ## 2026-09-24
+* **Creation**: [Claude hooks activity for agent-dev-team KB ingestion window](/claude-hooks-activity-for-agent-dev-team-kb-ingestion-window.md)
+* **Ingest**: [Karpathy session 44e994fad0ea](/karpathy-session-44e994fad0ea4bc5.md)
+* **Ingest**: [Karpathy session 414b273b2f64](/karpathy-session-414b273b2f645e8e.md)
+* **Creation**: [Empty Source Document](/empty-source-document.md)
+* **Ingest**: [Karpathy session a93d93288918](/karpathy-session-a93d93288918ab2f.md)
+* **Ingest**: [Karpathy session 9d33ec7cdcc7](/karpathy-session-9d33ec7cdcc7bcc4.md)
+* **Ingest**: [Karpathy session 2a4bce42eab5](/karpathy-session-2a4bce42eab5400d.md)
+* **Creation**: [Claude hooks activity for fhir curator Read failure window](/claude-hooks-activity-for-fhir-curator-read-failure-window.md)
+* **Creation**: [Claude hooks activity for short no-change agent-dev-team ingestion](/claude-hooks-activity-for-short-no-change-agent-dev-team-ingestion.md)
+* **Creation**: [Claude hooks activity for short no-change ingestion window](/claude-hooks-activity-for-short-no-change-ingestion-window.md)
+* **Creation**: [Claude hooks activity for single KB ingestion event](/claude-hooks-activity-for-single-kb-ingestion-event.md)
+* **Creation**: [Claude hooks activity for late no-change agent-dev-team window](/claude-hooks-activity-for-late-no-change-agent-dev-team-window.md)
+* **Ingest**: [Karpathy session 96840f7aa68d](/karpathy-session-96840f7aa68d8397.md)
+* **Ingest**: [Karpathy session b4c13cb2b21c](/karpathy-session-b4c13cb2b21cf4c5.md)
+* **Creation**: [Claude hooks activity for no-change agent-dev-team window](/claude-hooks-activity-for-no-change-agent-dev-team-window.md)
+* **Creation**: [Claude hooks activity for final agent-team verification ingestion](/claude-hooks-activity-for-final-agent-team-verification-ingestion.md)
+* **Ingest**: [Karpathy session eae84f652924](/karpathy-session-eae84f6529246195.md)
 * **Ingest**: [Karpathy session 8763617a184a](/karpathy-session-8763617a184ac184.md)
 * **Ingest**: [Karpathy session 18ac732c4d12](/karpathy-session-18ac732c4d12e000.md)
 * **Creation**: [Claude hooks activity for fhir-code-reviewer verification failure](/claude-hooks-activity-for-fhir-code-reviewer-verification-failure.md)
