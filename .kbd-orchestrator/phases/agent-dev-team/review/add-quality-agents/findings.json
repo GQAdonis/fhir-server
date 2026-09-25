@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": ".claude/agents/fhir-tech-lead.md",
+      "line": 1,
+      "claim": "The diff adds an extra `fhir-tech-lead` agent that is outside the requested quality-agent scope.",
+      "evidence": "Acceptance criteria list only three required agents: `.claude/agents/fhir-code-reviewer.md`, `.claude/agents/fhir-security-compliance-reviewer.md`, and `.claude/agents/fhir-conformance-validator.md`; the diff adds `.claude/agents/fhir-tech-lead.md` as a fourth new agent.",
+      "suggested_fix": "Remove `fhir-tech-lead.md` from this change or move it to a separate OpenSpec change with its own criteria."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

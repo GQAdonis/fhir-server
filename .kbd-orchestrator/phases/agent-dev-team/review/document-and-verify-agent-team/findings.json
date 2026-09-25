@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/project.json",
+      "line": 119,
+      "claim": "The committed KBD project configuration hard-codes the author's local checkout path, making KBD operations non-portable for other contributors.",
+      "evidence": "The new `.kbd-orchestrator/project.json` sets `focus_project_path` and `workspace.folders[0].path` to `/Users/gqadonis/Projects/TribeHealth/fhir-server`, and the same object says that folder is the active project and that all KBD operations target it.",
+      "suggested_fix": "Use a repository-relative or environment-expanded path instead of an author-specific absolute path, or omit the machine-local workspace binding from committed project configuration."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".claude/hooks/src/lib/agent-lint.mts",
+      "line": 84,
+      "claim": "Skill names from agent frontmatter are used directly in filesystem paths, so a malformed skill containing path separators or `..` can make the repo-resident check inspect outside `.claude/skills`.",
+      "evidence": "`repoResident(ctx, skill)` builds `path.join(ctx.repoRoot, \".claude\", \"skills\", skill, \"SKILL.md\")`, while `parseAgent`/`asList` accept arbitrary scalar/list values and `lintAgent` passes each `fm[\"skills\"]` value to `repoResident` without validating it.",
+      "suggested_fix": "Reject skill names containing `/`, `\\`, `.` path segments, or anything outside the allowed skill-name pattern before calling `path.join`; alternatively resolve the path and verify it remains under `<repo>/.claude/skills`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

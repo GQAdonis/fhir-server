@@ -1,0 +1,39 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "line": 1,
+      "claim": "`npm --prefix .claude/hooks ci` cannot succeed because the new npm package has no committed package-lock.json.",
+      "evidence": "Acceptance criterion 1.1 requires verifying `npm --prefix .claude/hooks ci` succeeds, but the diff adds `.claude/hooks/package.json` and does not add `.claude/hooks/package-lock.json`; `npm ci` requires an existing lockfile.",
+      "suggested_fix": "Run `npm --prefix .claude/hooks install --package-lock-only` or `npm --prefix .claude/hooks install`, commit the resulting `package-lock.json`, and verify `npm --prefix .claude/hooks ci`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/test/lib.test.mjs",
+      "line": 9,
+      "claim": "`npm --prefix .claude/hooks test` fails on a clean checkout because the tests import compiled files from `dist/`, but the diff does not commit any `dist/` outputs.",
+      "evidence": "Acceptance criterion 2.2 requires `npm --prefix .claude/hooks test` passes; line 9 imports `../dist/lib/hook-io.mjs` and line 10 imports `../dist/lib/paths.mjs`, while the diff contains only `src/lib/*.mts` and no `.claude/hooks/dist/` files.",
+      "suggested_fix": "Run `npm --prefix .claude/hooks run build` and commit `.claude/hooks/dist/lib/hook-io.mjs` and `.claude/hooks/dist/lib/paths.mjs`, or change the test script to build before running tests."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/scripts/check-dist.mjs",
+      "line": 44,
+      "claim": "`npm --prefix .claude/hooks run check:dist` fails because it compares the freshly compiled output against a non-existent committed `dist/` tree.",
+      "evidence": "Acceptance criterion 3.1 requires `check-dist` to exit 0 on a fresh build, and the acceptance text says to commit the compiled `dist/`; the script reads `const committed = new Set(listFiles(distDir));` at line 44, but the diff adds no `.claude/hooks/dist/` files, so every compiled file is reported as `missing from dist`.",
+      "suggested_fix": "Commit the compiled `.claude/hooks/dist/` output produced by the build."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

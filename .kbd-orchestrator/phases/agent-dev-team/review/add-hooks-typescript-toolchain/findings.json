@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": ".claude/hooks/scripts/check-dist.mjs",
+      "line": 39,
+      "claim": "`check-dist` leaks its temporary output directory whenever compilation or drift detection fails because it calls `process.exit(1)` inside the `try` block before cleanup can run.",
+      "evidence": "The script creates `freshDir` with `mkdtempSync(...)`, enters `try`, then calls `process.exit(1)` on compilation failure at line 39 and on stale/missing files at line 62, while cleanup is only in the `finally` block at lines 66-68.",
+      "suggested_fix": "Avoid `process.exit()` inside the `try`; set `process.exitCode = 1` and return after the `finally`, or throw an error and let the `finally` remove `freshDir` before exiting."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

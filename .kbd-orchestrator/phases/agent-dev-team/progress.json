@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "2",
+  "generatedBy": "kbd-runtime",
+  "projectionContractVersion": 2,
+  "sourceRevision": 269,
+  "derivedRevision": 269,
+  "frontier": {
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 269
+  },
+  "conflictCount": 0,
+  "phase": "agent-dev-team",
+  "phaseId": "agent-dev-team",
+  "parentPhase": null,
+  "last_updated": "2026-09-24T22:46:36.969149Z",
+  "last_updated_by": "kbd-runtime",
+  "changes_total": 8,
+  "changes_completed": 8,
+  "implementation_total": 8,
+  "implementation_completed": 8,
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 8,
+      "total": 8,
+      "status": "COMPLETE"
+    },
+    "evidence": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "completionScopes": {
+    "completion": "phase",
+    "runCompletion": "run"
+  },
+  "runCompletion": {
+    "scope": "run",
+    "runId": "agent-dev-team-20260924T112402Z",
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 8,
+      "total": 8,
+      "status": "COMPLETE"
+    },
+    "evidence": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "changes": [
+    {
+      "id": "add-hooks-typescript-toolchain",
+      "title": "TypeScript 7 hook toolchain",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 7,
+      "tasks_done": 7,
+      "last_task_completed": "4.1 Add the Apache 2.0 WSO2 header to `internal/config/example_parse_test.go`; verify `grep -L 'Apache License' $(git ls",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "add-architecture-agents",
+      "title": "Architecture persona agents",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 5,
+      "tasks_done": 5,
+      "last_task_completed": "3.1 Invoke each of the three agents through the Agent tool with a one-line role-confirmation prompt; verify each replies",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "add-karpathy-agent-ledger",
+      "title": "Karpathy agent ledger and boundary bridge",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 8,
+      "tasks_done": 8,
+      "last_task_completed": "5.1 Register `agent-ledger` and `karpathy-flush` in `.claude/settings.json` in exec form (flush on Stop, SessionEnd, Pre",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "add-guardrail-hooks",
+      "title": "Guardrail hooks",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 5,
+      "tasks_done": 5,
+      "last_task_completed": "4.1 Register all four hooks in `.claude/settings.json` (exec form; PreToolUse/PostToolUse matcher `Edit|Write|MultiEdit`",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "add-engineering-agents",
+      "title": "Engineering persona agents",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 5,
+      "tasks_done": 5,
+      "last_task_completed": "2.2 Ask `fhir-test-engineer` for the command that mirrors CI race coverage; verify it returns `go test -race -tags integ",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "add-quality-agents",
+      "title": "Quality persona agents",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 5,
+      "tasks_done": 5,
+      "last_task_completed": "2.2 Ask `fhir-conformance-validator` for its verification command list for a change touching `internal/store`; verify it",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "add-infra-and-knowledge-agents",
+      "title": "Infra and knowledge agents",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 3,
+      "tasks_done": 3,
+      "last_task_completed": "2.1 Give `fhir-knowledge-curator` a fixture ledger of five lines; verify it produces a session summary with no prompt/to",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "document-and-verify-agent-team",
+      "title": "Document and verify agent team",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 6,
+      "tasks_done": 6,
+      "last_task_completed": "4.2 Run `/kbd-goal-check agent-dev-team`; verify G1–G5 and constraints C1–C2 report MET, or record the remaining gaps as",
+      "next_task_pending": null,
+      "blockers": []
+    }
+  ],
+  "children": {},
+  "migrationStatus": null
+}

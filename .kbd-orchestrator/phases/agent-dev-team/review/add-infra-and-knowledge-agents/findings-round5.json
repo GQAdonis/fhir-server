@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/scan-prometheus.mts",
+      "line": 48,
+      "claim": "The `.prometheus` scan includes explicitly ignored local-only conversation/cache files, so a pre-commit scan can fail on files that must never be committed.",
+      "evidence": "`walk(root, files)` recursively adds every file and the loop only skips `scan-allowlist.json` (`if (path.resolve(file) === path.resolve(allowlistFile)) continue;`), while `.prometheus/.gitignore` lines 5-8 explicitly ignore `knowledge/wiki/karpathy-session-*.md`, `knowledge/.prompt-snapshots/`, and `events.jsonl`; the added `agent-tooling/karpathy-logging` requirement says conversation text/absolute-local-path files under `.prometheus/` MUST be excluded from version control and all other `.prometheus/` content must pass the PHI/secret scan.",
+      "suggested_fix": "Have `scan-prometheus` scan only tracked/staged-or-committable `.prometheus` files, or explicitly skip the local-only ignored paths listed in `.prometheus/.gitignore`."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".prometheus/.gitignore",
+      "line": 3,
+      "claim": "`.prometheus/.flush-cursor` is marked local-only even though the knowledge-curator persona is instructed to reset it during monthly ledger rotation.",
+      "evidence": "`.prometheus/.gitignore` ignores `.flush-cursor`, but `.claude/agents/fhir-knowledge-curator.md` says writable paths include `.prometheus/.flush-cursor` during monthly rotation, and the acceptance criterion for 1.2 requires rotation of `agent-ledger.jsonl` and `.flush-cursor`.",
+      "suggested_fix": "Either remove `.flush-cursor` from `.prometheus/.gitignore` if rotation state is intended to be committed, or change the curator/spec wording to make it clear the cursor is uncommitted local state."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,11 @@
+.claude/agents/fhir-go-developer.md
+.claude/agents/fhir-storage-search-engineer.md
+.claude/agents/fhir-test-engineer.md
+.kbd-orchestrator/phases/agent-dev-team/evidence/smoke-engineering-agents.txt
+.kbd-orchestrator/constraints.md
+.claude/skills/openspec-apply-change/SKILL.md
+.claude/skills/openspec-verify-change/SKILL.md
+.claude/skills/karpathy-guidelines/SKILL.md
+.kbd-orchestrator/phases/agent-dev-team/evidence/change5-skill-resolution.txt
+openspec/changes/add-engineering-agents/tasks.md
+docs/agent-team.md

@@ -1,0 +1,55 @@
+{
+  "mode": "artifact",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The assessment relies on CI workflow facts that are not supported by the provided file tree.",
+      "evidence": "assessment.md claims: \"It has a green unit suite and a four-workflow GitHub Actions setup\" and later names \"ci.yml\", \"release.yml\", \"docs-publish.yml\" and \"fhir262-conformance-pages.yml\". The provided file_tree contains no `.github/` directory or workflow files at all.",
+      "suggested_fix": "Either include `.github/workflows/*` in the packet evidence/file tree or downgrade these CI claims to unverified and assess the CI gap from the files actually present."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The skill inventory is presented as verified even though the packet contains no evidence for the user- and plugin-scoped skills that drive the proposed agent roster.",
+      "evidence": "assessment.md says: \"Every skill the roster below assigns was resolved on disk. 50 of 50 are present; 0 are missing\" and lists 41 skills under `~/.claude/skills/` plus 2 plugin skills. The provided file_tree only covers the repo and shows `.claude/skills`, `.claude/commands`, `.agents/skills`, `.opencode/skills`, and `.kimi-code/skills`; it contains no `~/.claude/skills/` or plugin cache evidence.",
+      "suggested_fix": "Mark user/plugin skill availability as unverified in the assessment, or add concrete provenance for the external skill locations before using them as inputs to the roster."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The assessment claims exact local build and test results that are not evidenced by the packet.",
+      "evidence": "assessment.md states: \"build check ... PASS. Ran the exact constraint command `make build && make vet`\" and \"unit tests ... PASS. Ran the exact constraint command `make test`\". The packet provides no command output or test log; the only supporting repository evidence is the presence of `Makefile` in file_tree.",
+      "suggested_fix": "Attach or quote the relevant command output, or classify build/test health as unverified for this assessment packet."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The assessment asserts a specific license-header violation without packet evidence.",
+      "evidence": "assessment.md says: \"known violations: `internal/config/example_parse_test.go` is missing the Apache license header\" and repeats this under CONSTRAINT CHECK. The provided file_tree only lists directories under `internal/config`, not files or file contents, so this violation cannot be confirmed from the packet.",
+      "suggested_fix": "Quote the first lines of `internal/config/example_parse_test.go` or provide the output of the configured `license-header` check."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The assessment's `.prometheus/` git-status conclusion is unsupported by the packet.",
+      "evidence": "assessment.md states: \"`.prometheus/` is untracked and not gitignored. Evidence: `git status --short .prometheus` \u2192 `?? .prometheus/`, and `git check-ignore -v .prometheus/project.json` \u2192 no match.\" The file_tree includes `.prometheus/` paths but does not encode tracked/ignored status, and the packet contains no git command output beyond the assessment's own assertion.",
+      "suggested_fix": "Include the actual command output in the packet or restate this as a finding requiring verification in the next stage."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

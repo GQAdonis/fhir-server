@@ -1,0 +1,11 @@
+# agent-tooling.yml steps run locally (Darwin, node v24.16.0) 2026-09-24T13:56:25Z
+yaml OK; jobs: ['hooks'] matrix: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+actionlint OK
+all actions SHA-pinned
+$ npm --prefix .claude/hooks ci → exit 0 :: added 4 packages, and audited 5 packages in 481ms 
+$ npm --prefix .claude/hooks run check:dist → exit 0 :: check-dist: dist/ is up to date (20 files) 
+$ npm --prefix .claude/hooks test → exit 0 :: ✔ clean flush writes a note, ingests it, and advances the cursor (71.132416ms) ✔ gofmt-check: feedback for an unformatte
+$ npm --prefix .claude/hooks run lint:agents → exit 0 :: lint-agents: OK (11 agents) 
+$ npm --prefix .claude/hooks run scan:prometheus → exit 0 :: scan-prometheus: clean (74 file(s) scanned) 
+exec-form hook OK on darwin: {"ts":"2026-09-24T13:56:30.597Z","session_id":"ci-darwin","agent_type":"fhir-code-reviewer","agent_id":"ci","event":"SubagentStop","outcome":"stopped"}
+exec-form step exit=0

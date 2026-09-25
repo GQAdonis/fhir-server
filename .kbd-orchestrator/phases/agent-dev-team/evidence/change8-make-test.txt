@@ -1,0 +1,24 @@
+# make test (full) on e0987cf — 2026-09-24T16:31:19Z
+go test -race -count=1 ./...
+ok  	github.com/wso2/fhir-server	1.440s
+?   	github.com/wso2/fhir-server/cmd/server	[no test files]
+ok  	github.com/wso2/fhir-server/internal/basedef	8.464s
+?   	github.com/wso2/fhir-server/internal/compartment	[no test files]
+ok  	github.com/wso2/fhir-server/internal/config	1.557s
+?   	github.com/wso2/fhir-server/internal/db	[no test files]
+ok  	github.com/wso2/fhir-server/internal/fhirpath	1.896s
+ok  	github.com/wso2/fhir-server/internal/fhirttl	2.073s
+ok  	github.com/wso2/fhir-server/internal/fhirxml	2.253s
+ok  	github.com/wso2/fhir-server/internal/handler	1.778s
+ok  	github.com/wso2/fhir-server/internal/ig	1.857s
+ok  	github.com/wso2/fhir-server/internal/index	1.231s
+?   	github.com/wso2/fhir-server/internal/obs	[no test files]
+ok  	github.com/wso2/fhir-server/internal/patch	2.034s
+ok  	github.com/wso2/fhir-server/internal/searchparam	2.255s
+?   	github.com/wso2/fhir-server/internal/seed	[no test files]
+ok  	github.com/wso2/fhir-server/internal/store	2.304s
+?   	github.com/wso2/fhir-server/internal/tenant	[no test files]
+ok  	github.com/wso2/fhir-server/internal/terminology	2.140s
+ok  	github.com/wso2/fhir-server/internal/validate	2.147s
+ok  	github.com/wso2/fhir-server/internal/version	2.128s
+exit=0

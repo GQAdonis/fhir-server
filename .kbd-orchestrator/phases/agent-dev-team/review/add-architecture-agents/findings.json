@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": "openspec/changes/add-architecture-agents/tasks.md",
+      "line": 12,
+      "claim": "The smoke verification is marked complete without any committed evidence showing the three agents were invoked and returned the required role-confirmation responses.",
+      "evidence": "Acceptance criterion 3.1 requires: \"Invoke each of the three agents through the Agent tool with a one-line role-confirmation prompt; verify each replies naming its owned KBD stages and no errors are reported for its frontmatter\"; the diff only adds `.kbd-orchestrator/phases/agent-dev-team/evidence/change2-preloaded-skills.txt`, which records skill files, not Agent-tool invocation responses.",
+      "suggested_fix": "Add evidence capturing the three Agent-tool smoke prompts/responses and any frontmatter-load status, or uncheck task 3.1 until that verification is actually performed."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

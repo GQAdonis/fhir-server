@@ -1,0 +1,39 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "line": 12,
+      "claim": "`npm --prefix .claude/hooks run check:dist` cannot pass because the script points to a file that is not added by this change.",
+      "evidence": "Acceptance criterion 5.1 requires verifying `npm --prefix .claude/hooks run check:dist` passes, but `.claude/hooks/package.json` defines `\"check:dist\": \"node scripts/check-dist.mjs\"` and the diff contains no `.claude/hooks/scripts/check-dist.mjs` file.",
+      "suggested_fix": "Add `.claude/hooks/scripts/check-dist.mjs` or remove/replace the script with an implemented check."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/agent-ledger.mts",
+      "line": 4,
+      "claim": "The TypeScript source tree is incomplete and `npm --prefix .claude/hooks run build` will fail because source files import modules that are only present in `dist/`.",
+      "evidence": "`.claude/hooks/src/agent-ledger.mts` imports `./lib/hook-io.mjs` and `./lib/paths.mjs`, and other src files import `./lib/paths.mjs`, but the diff adds only `.claude/hooks/dist/lib/hook-io.mjs` and `.claude/hooks/dist/lib/paths.mjs`; no `.claude/hooks/src/lib/hook-io.mts` or `.claude/hooks/src/lib/paths.mts` hunks are present.",
+      "suggested_fix": "Add the missing `.claude/hooks/src/lib/hook-io.mts` and `.claude/hooks/src/lib/paths.mts` sources and ensure the TypeScript build emits the committed dist files."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/flush.mts",
+      "line": 143,
+      "claim": "Flush advances the cursor before the session note is safely written and queued, so a write/rename/outbox failure permanently drops ledger entries from future flushes.",
+      "evidence": "Acceptance criterion 3.1 requires the cursor-based ledger delta to be summarized, written to `.prometheus/raw/`, and queued under `.prometheus/outbox/`; however `flush()` calls `writeCursor(root, end)` immediately after scanning, before `writeFileSync(tmp, text)`, `renameSync(tmp, note)`, and `writeFileSync(path.join(outbox, name), text)`.",
+      "suggested_fix": "Move `writeCursor(root, end)` until after the raw note and outbox entry have both been successfully persisted; for scan-blocked notes, only advance the cursor if intentionally discarding the blocked delta is the desired behavior and document that."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

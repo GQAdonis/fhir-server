@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-conformance-validator.md",
+      "line": 31,
+      "claim": "The final conformance gate can PASS Go changes without running the repository's blocking lint command.",
+      "evidence": "The validator's Any `.go` file command list includes `make build && make vet`, `make test`, gofmt, and license checks, but omits `make lint`; the blocking constraint `golangci-lint-clean` requires `command: 'make lint'`, and acceptance criterion 1.3 requires the validator to provide the exact verification command list.",
+      "suggested_fix": "Add `make lint` to the `.go` verification command set, or explicitly require it as a blocking command before PASS."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".claude/agents/fhir-code-reviewer.md",
+      "line": 48,
+      "claim": "The code reviewer checklist does not run the required build or project lint commands for Go changes.",
+      "evidence": "Workflow step 3 says to run `gofmt -l <touched .go files>`, `make vet`, and `make test` when Go changed, while the blocking constraints require `make build && make vet` and `make lint`.",
+      "suggested_fix": "Change the checklist to run `make build && make vet` and `make lint` for Go changes, matching `.kbd-orchestrator/constraints.md`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

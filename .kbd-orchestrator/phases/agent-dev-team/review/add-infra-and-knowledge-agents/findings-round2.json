@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-infra-release-engineer.md",
+      "line": 17,
+      "claim": "The infra agent grants itself write access outside the accepted edit scope.",
+      "evidence": "Acceptance criterion 1.1 requires edit scope `.github/`, `helm/`, `Dockerfile`, `docker-compose.yml`; the agent's `Writable paths, and only these` also includes `Makefile`, `version.txt`, and `.gitignore` entries.",
+      "suggested_fix": "Restrict the writable paths to the criterion's scope, or update the accepted scope before allowing the agent to edit `Makefile`, `version.txt`, or `.gitignore`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-knowledge-curator.md",
+      "line": 18,
+      "claim": "The knowledge curator's writable path rules are too narrow to perform its own required ledger rotation.",
+      "evidence": "The `Owns` section permits writes only to `.prometheus/raw/`, `.prometheus/outbox/`, `.prometheus/ledger/`, and a reflection section, but the same file's `Ledger rotation` rule requires moving lines out of `.prometheus/agent-ledger.jsonl` and resetting `.prometheus/.flush-cursor` to 0.",
+      "suggested_fix": "Include `.prometheus/agent-ledger.jsonl` and `.prometheus/.flush-cursor` in the curator's writable scope, or remove ledger rotation from this agent's responsibilities."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

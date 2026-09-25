@@ -1,0 +1,40 @@
+VERDICT: BLOCK
+
+The block comes from two things, and neither is PHI or a secret actually found. First, `.prometheus/knowledge/` holds conversation text (assistant replies), and under D-003 it will be committed. Second, the required `scan:prometheus` gate never ran, because the command needed an approval this session couldn't get. The hook code does what the spec asks: the ledger is metadata-only, and notes are scanned before they are written.
+
+SENSITIVE PATHS: `.prometheus/**` (ledger, `raw/`, `session-log.md`, `events.jsonl`, `progress-memory-receipts/`, `knowledge/wiki/`, `knowledge/.prompt-snapshots/`), `.claude/hooks/src/lib/{ledger,scan,flush,pk}.mts`, `.claude/hooks/src/{agent-ledger,karpathy-flush,karpathy-boundary,pk-drain,scan-prometheus}.mts`, `.claude/settings.json`, `.kbd-orchestrator/hooks-config.json`
+
+Threat model: `.prometheus/` goes into git history, which can't be taken back. Anything a model, a hook or a human writes there is effectively public to everyone with repo access. The regex scanner is the only automated check, and today nothing forces it to run before a commit.
+
+FINDINGS:
+- [CRITICAL] `.prometheus/knowledge/wiki/karpathy-session-*.md` (for example `karpathy-session-d585a81dd17bea6d.md:18-35` and `karpathy-session-9d1da888e40b01f5.md:18`), plus `.prometheus/knowledge/.prompt-snapshots/project/generations/*.json` (the `content` fields, e.g. `56121339…json:11`) — these would commit conversation text, not metadata.
+  evidence: The user-level `pk` Stop hook writes the assistant's final reply word for word into a `## Delta` section. One record is a full persona response of 18 lines. The prompt-snapshot files are a cache of about 285 KB that repeats those wiki entries. D-003 forbids tool output and file contents in `.prometheus/`; a subagent's reply is Task-tool output, and replies routinely quote file contents. None of these files are tracked yet, and the ones I read contain no PHI or secrets. But nothing structural stops a future reply from quoting a fixture or a log line. The regex scanner also can't detect names, dates of birth or clinical text. The ledger change's own review left this as an open item (`review/add-karpathy-agent-ledger/resolution.md:19`).
+  fix: The smallest fix is to add `knowledge/wiki/karpathy-session-*.md` and `knowledge/.prompt-snapshots/` to `.prometheus/.gitignore`. The only other option is for the operator to amend D-003 on the record to allow reply text. **This is a policy question for the operator, routed through `fhir-tech-lead`. I haven't decided it.**
+- [WARNING] `.claude/hooks/src/lib/scan.mts:34-36` and `.claude/hooks/src/scan-prometheus.mts:42` — the allowlist can switch the scanner off.
+  evidence: A match counts as allowed if it merely contains an allowlist entry (a substring check). An entry like `.com` or `@` would therefore let every email through. The allowlist file itself is also left out of the scan.
+  fix: Compare against the whole match exactly, require entries of at least 8 characters, and have the scan print the allowlist entries so reviewers see them.
+- [WARNING] `.claude/hooks/src/scan-prometheus.mts:49` — "binary" files are skipped silently.
+  evidence: Any file with a NUL byte in its first 8 KB is skipped and not counted as a finding. That includes UTF-16 text, or text placed after a NUL, so it fails open. The over-5 MB case, by contrast, is reported as a finding.
+  fix: Count skipped binaries as findings, just as the over-size case already is.
+- [WARNING] `.claude/hooks/src/lib/ledger.mts:120` — the prompt hash has no salt or key, so short prompts can be guessed.
+  evidence: The ledger stores a plain SHA-256 of each prompt. A short prompt, such as one that is only a name or a record number, can be recovered by hashing candidate values. The spec requires this field, so this is a policy question for the operator.
+  fix: Use an HMAC with a local key that is never committed, or drop the hash and keep only `prompt_chars`.
+- [WARNING] Nothing enforces the scan before a commit today.
+  evidence: The CI step is only planned, in the unchecked `document-and-verify-agent-team` task 3.1. There is no pre-commit hook, and `.github` doesn't mention the scan.
+  fix: Land that CI task before any commit that includes `.prometheus/`. A local pre-commit hook running `scan:prometheus` would add a second guard.
+- [SUGGESTION] `.prometheus/events.jsonl:1-7`, the wiki `Project:` lines (for example `karpathy-session-9d1da888e40b01f5.md:33`) and the prompt snapshots — these contain absolute paths that include the local username.
+  evidence: This is not PHI, but it is personal information that would sit in a shared repo.
+  fix: Store paths relative to the repo, or gitignore `events.jsonl`.
+
+Checked and clean:
+- **Ledger:** 40 lines, and every key is on the spec's allowlist (`ts`, `session_id`, `agent_type`, `agent_id`, `event`, `outcome`, `kbd_phase`, `kbd_change`, `prompt_chars`, `prompt_sha256`).
+- **Ledger code:** each line is built only from those allowlisted fields. `sanitizeId` rejects `@`, `/` and `+` and runs every value through the scanner. `flush` scans the note before it writes to `raw/` or `outbox/`. A blocked note writes only a match count.
+- **Other `.prometheus/` files:** the 6 `raw/` notes, `session-log.md` and the receipts contain only metadata: file paths, commit SHAs and IDs.
+- **Manual grep:** `@` appears only in `@types` package paths. There are no SSN-shaped strings, tokens, keys or credential-bearing DSNs, and no password, API-key or `postgres://` strings.
+- **Hook config:** `.claude/settings.json` and `hooks-config.json` use exec-form `node` with no secrets or hardcoded values. Every outbound child process (`pk`, the Python recorder) has a timeout.
+
+PROMETHEUS SCAN: `npm --prefix .claude/hooks run scan:prometheus` → exit n/a, not run. The command needed approval, which this non-interactive session can't grant, so I did the manual grep review above instead. This needs a re-run: the gate needs exit 0 over the full tree, including the untracked `knowledge/` files.
+
+Hand-offs: the `.gitignore` or D-003 decision, and the prompt-hash question, go to the operator through `fhir-tech-lead`. The scanner hardening goes to the implementing persona through `fhir-tech-lead`.
+
+Several MCP connectors (asana, atlassian, datadog, github, linear, notion, pagerduty, slack) need authorising via `/mcp` or your claude.ai connector settings, and browseros-neo, claude-design, open-design and paper failed to connect. This review didn't need any of them.

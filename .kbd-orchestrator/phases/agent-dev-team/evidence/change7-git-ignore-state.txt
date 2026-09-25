@@ -1,0 +1,20 @@
+# git state of local-only .prometheus files — 2026-09-24T13:48:58Z
+Note: the review packet's file tree is a filesystem listing; it cannot show git ignore/tracking status.
+$ git ls-files --error-unmatch .prometheus/events.jsonl
+  not tracked
+$ git check-ignore -v .prometheus/events.jsonl
+  .prometheus/.gitignore:8:events.jsonl	.prometheus/events.jsonl
+$ git ls-files --error-unmatch .prometheus/knowledge/.prompt-snapshots
+  not tracked
+$ git check-ignore -v .prometheus/knowledge/.prompt-snapshots
+  .prometheus/.gitignore:7:knowledge/.prompt-snapshots/	.prometheus/knowledge/.prompt-snapshots
+$ git ls-files --error-unmatch .prometheus/knowledge/wiki/karpathy-session-0489a051e0df42f6.md
+  not tracked
+$ git check-ignore -v .prometheus/knowledge/wiki/karpathy-session-0489a051e0df42f6.md
+  .prometheus/.gitignore:6:knowledge/wiki/karpathy-session-*.md	.prometheus/knowledge/wiki/karpathy-session-0489a051e0df42f6.md
+$ git ls-files --error-unmatch .prometheus/.flush-cursor
+  not tracked
+$ git check-ignore -v .prometheus/.flush-cursor
+  .prometheus/.gitignore:3:.flush-cursor	.prometheus/.flush-cursor
+$ git ls-files .prometheus | grep -cE 'events.jsonl|karpathy-session|prompt-snapshots'
+0

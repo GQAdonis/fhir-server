@@ -1,0 +1,9 @@
+# Live guard verification: 2026-09-24, in the running Claude Code session (hot-loaded .claude/settings.json)
+
+1. Write → .kbd-orchestrator/current-waypoint.md
+   Result: PreToolUse:Write hook error: .kbd-orchestrator/current-waypoint.md is protected. KBD runtime projection. Use `prometheus kbd` commands.
+   The file was not created.
+
+2. Write → internal/basedef/profiles-types.min.json.gz
+   Result: PreToolUse:Write hook error: internal/basedef/profiles-types.min.json.gz is protected. Embedded FHIR R4 definition bundles are generated. Regenerate them with `make refresh-definitions`.
+   `git status internal/basedef/` shows no modification.

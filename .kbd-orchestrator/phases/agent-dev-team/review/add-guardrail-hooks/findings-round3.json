@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/dist/agent-ledger.mjs",
+      "line": 5,
+      "claim": "New registered hooks are added directly under compiled dist output without corresponding source files, so the required dist/source rebuild parity is not satisfied.",
+      "evidence": "Acceptance criterion 4.1 requires registering the hooks and rebuilding dist with `check:dist`; `.claude/hooks/dist/agent-ledger.mjs` and `.claude/hooks/dist/karpathy-flush.mjs` are added and registered in `.claude/settings.json`, but the diff adds no matching `.claude/hooks/src/agent-ledger.mts`, `.claude/hooks/src/karpathy-flush.mts`, `src/lib/ledger.mts`, or `src/lib/flush.mts`; `.claude/hooks/dist/lib/protected-paths.mjs` also states dist is compiled output and source should be edited then rebuilt.",
+      "suggested_fix": "Add the corresponding source files and generated dist from a rebuild, or remove the dist-only hook files and their registrations from `.claude/settings.json`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

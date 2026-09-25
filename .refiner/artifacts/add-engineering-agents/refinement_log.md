@@ -1,0 +1,12 @@
+# refine-validate — add-engineering-agents (2026-09-24T13:06:34Z)
+- PASS  agent fhir-go-developer (frontmatter, repo-resident preloads, sections)
+- PASS  agent fhir-storage-search-engineer (frontmatter, repo-resident preloads, sections)
+- PASS  agent fhir-test-engineer (frontmatter, repo-resident preloads, sections)
+- PASS  storage prompt cites constraint search-fail-closed
+- PASS  storage prompt cites constraint no-gin-on-resource-json
+- PASS  storage prompt cites constraint rls-tenant-scope
+- PASS  storage prompt cites constraint store-handler-race-clean
+- PASS  storage prompt cites constraint schema-migration-noted
+- PASS  smoke 3/3
+- PASS  openspec-strict
+- PASS  scan-prometheus-clean

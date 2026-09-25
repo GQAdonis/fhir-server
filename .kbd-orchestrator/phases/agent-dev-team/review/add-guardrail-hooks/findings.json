@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": ".claude/hooks/src/lib/go-checks.mts",
+      "line": 29,
+      "claim": "The license-header hook can silently accept a Go file that does not start with the WSO2 Apache header.",
+      "evidence": "The blocking constraint `license-header` says every `.go` file starts with the WSO2 Apache 2.0 license header, but `hasLicenseHeader` collects any `//` comments before `package` within the first 30 split chunks and only checks the joined block for `Copyright ... WSO2 LLC`, `Apache License`, and `Version 2.0`; non-comment/non-package preamble lines are ignored rather than causing failure.",
+      "suggested_fix": "Make `hasLicenseHeader` validate the actual leading file preamble: allow only optional `//go:build`/`// +build` lines and required blank separator before the license, then require the license block immediately before `package`; reject other text or comments before the header."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

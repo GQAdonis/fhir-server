@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": ".claude/settings.json",
+      "line": 1,
+      "claim": "The hook behavior/configuration change is not reflected in the required project documentation locations.",
+      "evidence": "The diff adds new hook configuration in `.claude/settings.json` and `.kbd-orchestrator/hooks-config.json`, while warning constraint `docs-updated` requires behavior or config changes to be reflected in `DESIGN.md`, `config.example.yaml`, and `website/docs`; the diff only adds OpenSpec files and does not modify those required documentation paths.",
+      "suggested_fix": "Update `DESIGN.md` and the relevant `website/docs` page to describe the Karpathy ledger/flush/boundary hooks and any operator-visible configuration; update `config.example.yaml` if this behavior is configurable, or explicitly document that no server config key is involved."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

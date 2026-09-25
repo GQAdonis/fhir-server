@@ -1,0 +1,11 @@
+# KBD augment verification 2026-09-24T12:40:09Z
+[hooks] normalised task:after → task:after (id=karpathy-progress-task-boundary)
+[hooks] normalised change:after → change:after (id=karpathy-progress-change-boundary)
+[hooks] normalised phase:after → phase:after (id=karpathy-progress-phase-boundary)
+[hooks] normalised task:after → task:after (id=karpathy-boundary-node-task)
+[hooks] normalised change:after → change:after (id=karpathy-boundary-node-change)
+[hooks] normalised phase:after → phase:after (id=karpathy-boundary-node-phase)
+Completed task 6 out of 8:   add-karpathy-agent-ledger:6
+karpathy-boundary: boundary_recorded:task:duplicate
+## ledger tail
+{"ts":"2026-09-24T12:40:14.446Z","event":"boundary_recorded","outcome":"task:duplicate","kbd_phase":"agent-dev-team","kbd_change":"add-karpathy-agent-ledger"}

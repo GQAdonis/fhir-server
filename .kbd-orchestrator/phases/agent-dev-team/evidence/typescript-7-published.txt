@@ -1,0 +1,14 @@
+# npm registry evidence 2026-09-24T12:49:17Z
+$ npm view typescript dist-tags.latest version
+dist-tags.latest = '7.0.2'
+version = '7.0.2'
+$ npm view typescript@7.0.2 dist.integrity time.7.0.2
+sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==
+2026-07-08T15:55:18.431Z
+$ grep resolved/integrity for typescript in package-lock.json
+7.0.2
+https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz
+sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==
+$ npm --prefix .claude/hooks ci (fresh)
+added 4 packages in 755ms
+Version 7.0.2

@@ -1,0 +1,39 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/settings.json",
+      "line": 82,
+      "claim": "The new Claude settings wire Stop/SessionEnd/PreCompact to `.claude/hooks/dist/karpathy-flush.mjs`, but this diff does not add that compiled entrypoint, so the configured hook will fail at runtime in a clean checkout of this change.",
+      "evidence": "The settings hunk invokes `${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/karpathy-flush.mjs` for Stop, SessionEnd, and PreCompact, while the diff only adds `.claude/hooks/src/karpathy-flush.mts` and no corresponding `.claude/hooks/dist/karpathy-flush.mjs` file.",
+      "suggested_fix": "Add the compiled `.claude/hooks/dist/karpathy-flush.mjs` artifact or change the settings to invoke an entrypoint that exists in the repository."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/test/lib.test.mjs",
+      "line": 10,
+      "claim": "The newly added hook test suite imports `../dist/lib/paths.mjs`, but this diff does not add either `dist/lib/paths.mjs` or its source, so `npm --prefix .claude/hooks test` will fail if that file is not already present.",
+      "evidence": "The test hunk imports `toPosix, rel, projectDir` from `../dist/lib/paths.mjs`; the diff adds `dist/lib/flush.mjs`, `dist/lib/hook-io.mjs`, `dist/lib/scan.mjs`, and `dist/scan-prometheus.mjs`, but no `dist/lib/paths.mjs`.",
+      "suggested_fix": "Include the missing `paths` implementation in both `src/lib/paths.mts` and compiled `dist/lib/paths.mjs`, or remove/update the tests to reference an existing module."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/phases/agent-dev-team/evidence/smoke-knowledge-curator.txt",
+      "line": 27,
+      "claim": "The smoke evidence does not demonstrate the required five-line fixture session-summary generation because it states no files were written and does not show a five-line fixture or generated summary artifact.",
+      "evidence": "Acceptance criterion 2.1 requires: `Give fhir-knowledge-curator a fixture ledger of five lines; verify it produces a session summary with no prompt/tool content and runs npm --prefix .claude/hooks run scan:prometheus with exit 0`; the evidence file reports `No files written. Fixture analysis complete.` and only includes aggregate metrics plus the scan result.",
+      "suggested_fix": "Add evidence showing the five input ledger lines and the generated metadata-only session summary, or adjust the smoke artifact to include the summary output while still excluding prompt/tool content."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

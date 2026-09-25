@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1",
+  "generatedBy": "kbd-runtime",
+  "projectionContractVersion": 2,
+  "sourceRevision": 270,
+  "derivedRevision": 270,
+  "frontier": {
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 270
+  },
+  "conflictCount": 0,
+  "updatedAt": "2026-09-24T22:46:37.189824Z",
+  "cursor": [
+    "agent-dev-team",
+    "reflect"
+  ],
+  "root": {
+    "type": "phase",
+    "id": "98eeab9c-ff3e-4471-a109-52e79b939f28",
+    "status": "ready",
+    "progress": {
+      "done": 8,
+      "total": 8
+    },
+    "children": [
+      {
+        "type": "phase",
+        "id": "agent-dev-team",
+        "canonicalId": "agent-dev-team",
+        "status": "COMPLETE",
+        "progress": {
+          "done": 8,
+          "total": 8
+        },
+        "children": [
+          {
+            "type": "change",
+            "id": "add-hooks-typescript-toolchain",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 7,
+              "total": 7
+            }
+          },
+          {
+            "type": "change",
+            "id": "add-architecture-agents",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 5,
+              "total": 5
+            }
+          },
+          {
+            "type": "change",
+            "id": "add-karpathy-agent-ledger",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 8,
+              "total": 8
+            }
+          },
+          {
+            "type": "change",
+            "id": "add-guardrail-hooks",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 5,
+              "total": 5
+            }
+          },
+          {
+            "type": "change",
+            "id": "add-engineering-agents",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 5,
+              "total": 5
+            }
+          },
+          {
+            "type": "change",
+            "id": "add-quality-agents",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 5,
+              "total": 5
+            }
+          },
+          {
+            "type": "change",
+            "id": "add-infra-and-knowledge-agents",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 3,
+              "total": 3
+            }
+          },
+          {
+            "type": "change",
+            "id": "document-and-verify-agent-team",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 6,
+              "total": 6
+            }
+          }
+        ],
+        "annotations": []
+      }
+    ],
+    "annotations": []
+  }
+}

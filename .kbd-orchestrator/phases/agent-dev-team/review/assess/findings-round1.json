@@ -1,0 +1,50 @@
+{
+  "mode": "artifact",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "claim": "The assessment claims the existing agent/skill inventory goal is met without actually inventorying or validating the skills it assigns to agents.",
+      "evidence": "Goal: \"Analyze the fhir-server codebase, CI, and existing agent/skill inventory\". Artifact says \"G1... MET\" and assigns many skills such as \"superpowers:brainstorming\", \"openspec-propose/ff/continue/update\", \"postgres-patterns\", \"hipaa-compliance\", and \"verification-loop\", but the packet's file_tree only shows skill directories like \"./.claude/skills\" and \"./.agents/skills\" with no files, and the assessment contains no concrete inventory of available skills or missing-skill gap analysis.",
+      "suggested_fix": "Add an explicit inventory of project/user/global skills used by the roster, mark which are present, which are external, and which are missing before declaring G1 met."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "claim": "The assessment bases the Karpathy hook plan on existing hook files and a recorder script that the packet marks as missing.",
+      "evidence": "Artifact says \"What exists: `karpathy-progress-memory` is installed and wired into the global KBD `hooks.json`\" and \"those entries run `python3 \u2026/record-progress.py`\", but cited_paths lists \"MISSING  hooks.json\" and \"MISSING  record-progress.py\".",
+      "suggested_fix": "Either cite the actual existing global paths outside the repo and distinguish them from repo files, or change the finding to say the recorder/hook wiring could not be verified and must be discovered or created in plan/apply."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "claim": "The assessment reports blocking constraints as clear even though it did not run the required commands for at least the race-enabled unit-test constraint.",
+      "evidence": "Constraint `unit-tests-pass` requires command `make test` with description \"Unit tests pass under the race detector\". Artifact instead reports \"unit tests: PASS. `go test -count=1 ./...`\" and later says under constraint check \"All others: none detected.\"",
+      "suggested_fix": "Mark `unit-tests-pass` as UNKNOWN unless `make test` was run successfully, and do not include it in \"All others: none detected.\""
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "claim": "The build-health assessment uses different commands than the blocking build constraint, so its PASS result does not establish the required constraint.",
+      "evidence": "Constraint `build-passes` requires `make build && make vet`; artifact reports \"build check: PASS. `go build ./... && go vet ./...`\".",
+      "suggested_fix": "Report the exact constraint command result, or mark `build-passes` as partially checked/UNKNOWN and note the substitute command separately."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "claim": "The assessment makes repository state claims about `.prometheus/` tracking/ignore status without packet evidence.",
+      "evidence": "Artifact says \"`.prometheus/` is untracked and not gitignored.\" The file_tree only shows `.prometheus/`, `.prometheus/knowledge`, and `.prometheus/project.json`; it contains no git status output or `.gitignore` evidence.",
+      "suggested_fix": "Support the claim with `git status --short .prometheus` and `.gitignore` inspection, or rephrase it as an open question to verify."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-go-developer.md",
+      "line": 56,
+      "claim": "Machine-local prerequisite skills are referenced as documented in a file that is not present in the repository.",
+      "evidence": "Acceptance criteria 1.1 requires every skill named in the prompt to resolve locally or be a documented prerequisite; the agent says \"Sources are listed in `docs/agent-team.md`\", but the supplied file_tree under `./docs` contains only `images` and `performance-tuning.md`, and the diff does not add `docs/agent-team.md`.",
+      "suggested_fix": "Add `docs/agent-team.md` documenting the machine-local prerequisite skills, or change the agent prompts to point to an existing documented prerequisite location."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-storage-search-engineer.md",
+      "line": 69,
+      "claim": "Machine-local prerequisite skills are referenced as documented in a file that is not present in the repository.",
+      "evidence": "Acceptance criteria 1.2 requires postgres-patterns and database-migrations handling and verification of skill availability/prerequisites; the agent says \"Sources are listed in `docs/agent-team.md`\", but the supplied file_tree under `./docs` contains only `images` and `performance-tuning.md`, and the diff does not add `docs/agent-team.md`.",
+      "suggested_fix": "Add `docs/agent-team.md` documenting these machine-local prerequisite skills, or update the prompt to cite an existing prerequisite document."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents/fhir-test-engineer.md",
+      "line": 54,
+      "claim": "Machine-local prerequisite skills are referenced as documented in a file that is not present in the repository.",
+      "evidence": "Acceptance criteria 1.3 requires every skill named in the prompt to resolve locally or be a documented prerequisite; the agent says \"Sources are listed in `docs/agent-team.md`\", but the supplied file_tree under `./docs` contains only `images` and `performance-tuning.md`, and the diff does not add `docs/agent-team.md`.",
+      "suggested_fix": "Add `docs/agent-team.md` documenting the machine-local prerequisite skills, or change the prompt to point to an existing documented prerequisite location."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

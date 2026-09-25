@@ -1,0 +1,36 @@
+### fhir-code-reviewer (exit 0)
+VERDICT: BLOCK
+CRITERIA CHECKED:
+- Fail-closed handling of known-but-unsupported search parameter types (`DESIGN.md` §4, constraint `search-fail-closed`)
+- No silent widening of search results for registry-known parameters the engine cannot evaluate
+
+FINDINGS:
+- [CRITICAL] internal/store/search.go:413-415 — Composite search parameters are now silently skipped instead of rejected, violating the fail-closed rule (`search-fail-closed`). A registry-known `composite` parameter the engine can't evaluate must return `UnsupportedParamError`, not `nil`, or the search silently returns a wider result set than the client requested (correctness/security regression: predicate is dropped, not enforced).
+  evidence:
+  ```
+  -		return &UnsupportedParamError{Param: def.Name, Reason: "composite search parameters are not supported"}
+  +		// Composite params are not supported yet; skip them so the search still returns results.
+  +		return nil
+  ```
+  fix: Revert to returning `&UnsupportedParamError{Param: def.Name, Reason: "composite search parameters are not supported"}` so the handler returns an OperationOutcome instead of silently dropping the predicate.
+
+COMMANDS: (not run — smoke test, diff-only review per instructions) → exit n/a
+### fhir-conformance-validator (exit 0)
+VERDICT: BLOCK
+CHANGE: <unspecified>   TOUCHED: internal/store/search.go, internal/store/search_test.go
+COMMANDS:
+- openspec validate <change> --strict → not run (change id unknown — needed to locate openspec/changes/<id>)
+- gofmt -l internal/store/search.go internal/store/search_test.go → not run
+- make build && make vet → not run
+- make test → not run (unit, race, -count=1 ./...)
+- go test -race -tags integration -timeout 1200s ./internal/store/... ./internal/handler/... → not run (CI parity for internal/store)
+- grep -L 'Apache License' internal/store/search.go internal/store/search_test.go → not run
+- golangci-lint run → not run locally (CI enforces)
+- make test-conformance → not run (only if search.go changes affect FHIR REST search semantics — check diff)
+
+SCENARIO EVIDENCE:
+- No change id / tasks.md provided → cannot map spec scenarios to evidence
+
+REVIEWERS: code=n/a security=n/a
+
+Per the instructions, this is a smoke test only — no tools invoked. Note that this list is a fixed minimum, not a full determination: I still need the actual change id to run `openspec validate <change> --strict` and read `openspec/changes/<change>/tasks.md`, and I need to inspect the diff to confirm whether it touches FHIR REST search semantics (→ `make test-conformance`) or fail-closed search-parameter behavior, since `internal/store/search.go` is the query builder referenced in `CLAUDE.md`. I cannot issue a PASS or a definitive BLOCK without running these against real output — this response only enumerates the required commands as requested.

@@ -1,0 +1,10 @@
+# live flush verification 2026-09-24T12:37:08Z in temp project
+## flush with real pk (pk 1.9.0)
+flush exit=0
+20260924T123708Z-agent-activity.md
+## pk list (temp project)
+[agent-activity-snapshot-for-live-verify-on-2026-09-24] Agent Activity Snapshot for live-verify on 2026-09-24 (rev 0)
+## seeded SSN run
+{"systemMessage":"karpathy-flush: session note withheld — PHI/secret scan found 1 match(es); nothing was written to .prometheus/raw/"}
+raw notes before=1 after=1
+{"ts":"2026-09-24T12:37:16.451Z","event":"flush_blocked","outcome":"blocked:1"}

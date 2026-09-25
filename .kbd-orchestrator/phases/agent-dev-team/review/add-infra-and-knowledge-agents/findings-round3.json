@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/package.json",
+      "line": 13,
+      "claim": "The required `npm --prefix .claude/hooks run scan:prometheus` smoke command cannot run from this diff because the script points to a non-existent committed entry point.",
+      "evidence": "Acceptance criterion 2.1 requires running `npm --prefix .claude/hooks run scan:prometheus` with exit 0, but `.claude/hooks/package.json` defines `\"scan:prometheus\": \"node dist/scan-prometheus.mjs\"` and the diff/file tree do not add `.claude/hooks/dist/scan-prometheus.mjs`.",
+      "suggested_fix": "Add the committed `dist/scan-prometheus.mjs` implementation or change the script to an existing committed entry point, then update the smoke evidence from an actual run."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

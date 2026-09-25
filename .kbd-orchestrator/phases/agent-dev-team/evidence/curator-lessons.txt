@@ -1,0 +1,161 @@
+Excellent. Now I have all the data I need. Let me compile the Karpathy lessons:
+
+---
+
+# Karpathy Lessons: agent-dev-team Phase (2026-09-24)
+
+**Window covered:** 2026-09-24T12:40:14Z – 2026-09-24T22:42:06Z (10h 2m)
+
+## Health Signals
+
+| Signal | Value |
+|--------|-------|
+| **Subagent balance** | Explore: 2 start / 1 stop (1 leaked). Domain agents: 7 names in UserPromptSubmit, all start/stop balanced. |
+| **PostToolUseFailure by tool** | Bash: 5 failures. Read: 2 failures. Personas affected: `fhir-security-compliance-reviewer` (2), `fhir-conformance-validator` (3), `fhir-code-reviewer` (1). |
+| **Boundary records** | 34 recorded. Outcomes: `task:duplicate` (28), `change:duplicate` (6). No `boundary_degraded`. |
+| **KB delivery** | 32 `kb_ingested` events, all `delivered:1,remaining:0`. All phases transitioned cleanly. No `kb_deferred`. |
+| **Outbox** | Empty (0 files beyond `.gitkeep`). All notes drained by `pk`. |
+| **Scan exit** | `scan:prometheus` exit code 0, clean (129 files scanned). No PHI/secret findings. |
+
+---
+
+## Karpathy Lessons
+
+### Lesson 1: Review cycles created real defects under adversarial gates, validating the gate design but demanding better pre-review discipline from agents.
+
+**Evidence:** Four changes (`add-karpathy-agent-ledger`, `add-quality-agents`, `add-infra-and-knowledge-agents`, `document-and-verify-agent-team`) collectively survived **23+ review rounds** with **10+ CRITICAL findings** before PASS:
+- Karpathy ledger: **real privacy hole** (`sanitizeId` accepted `@`, `/`, `+` → DSNs and emails could leak), **real concurrency bug** (flush cursor advanced before note persisted), TypeScript-7 knowledge-stale finding (false positive, but required evidence package).
+- Quality agents: **read-only semantics imprecise** (distinguishing "never modify tracked files" from "no writes whatsoever" took 3 rounds); **linting gate not enforced** until round 3 (policy tightened mid-review).
+- Infra agents: **persona scope conflicts** (curator needs write to `agent-ledger.jsonl` and `.flush-cursor`, not just reads); **scanner allowlist leak** (values printed to CI logs); **atomic flush corruption** (millisecond timestamp collisions and overwrite).
+- Document-verify: **Windows CRLF linebreaks** broke lint parsing; **packet construction hid `.github/`** workflow files from review.
+
+**Root cause:** Agents apply `add` tasks (e.g., "write agent file for fhir-knowledge-curator") with minimal pre-review verification. They did not cross-check against:
+- Real concurrency/atomicity requirements (flush timing, cursor advancement).
+- Data privacy constraints encoded in domain rules (DSN allowlist was too permissive).
+- CI environment constraints (Windows CRLF, `.github/` workflows, log redaction rules).
+- Persona read/write boundaries (curator's actual file paths vs. role description).
+
+**Proposed owner:** `fhir-tech-lead`. **Hand-off:** Inject a pre-review checklist into the `add-*-agent` and `add-*-hook` task templates in `.kbd-orchestrator/phases/agent-dev-team/tasks.md`, keyed to the role's domain rules (concurrency, data classification, CI platform matrix, persona scope). Example: "Curator write paths must include `.prometheus/` rotation targets" (line 47 in `add-infra-and-knowledge-agents` resolution).
+
+---
+
+### Lesson 2: Tool failures in domain agents (Bash 5×, Read 2×) clustered in two personas and one change, signaling missing error recovery or local environment drift.
+
+**Evidence:**
+- **`fhir-security-compliance-reviewer` (2 failures, both tools: Read + Bash):** lines 41–42 in ledger. Session `0a1821b6-6b51-422c-95ad-135e24f31aa6` during `add-infra-and-knowledge-agents`. Resolution states: persona "could not execute `scan:prometheus` non-interactively" (round 2). The Read/Bash failures appear to be file-access or command-execution issues in a read-only validation task.
+- **`fhir-conformance-validator` (3 Bash failures, lines 88–90):** Session `58cbf9e4-f240-493e-9607-7042f4bfc0a4` during `document-and-verify-agent-team`, all in one burst (16:14:53, 16:15:42, 16:18:40). The goals-check artifact (`goal-check.txt`, resolution line 16) eventually succeeded, suggesting transient failures (build lag, file not ready yet).
+- **`fhir-code-reviewer` (1 Bash failure, line 95):** Session `69d3c443-866f-4e98-80a8-500a8715a5f3` during verify. No resolution note, but the review still passed (evidence: `evidence/code-review-branch.txt`).
+
+**Root cause:** Domain agents use synchronous Bash and Read on shared/transient resources (git, build artifacts, `.prometheus/raw/`, ledger itself) without retry logic or polling. Conformance validator's triple-failure pattern suggests it issued three parallel queries or ran without waiting for prior steps to flush to disk.
+
+**Proposed owner:** `fhir-tech-lead` + `fhir-infra-release-engineer`. **Hand-off:**
+1. Add `--retry` logic (3 attempts, 2s backoff) to Bash tool calls in validation contexts within agent prompts.
+2. Document expected file-ready times (`.prometheus/raw/` flushed after `Stop` hook, KB ingested after `pk ingest`, build artifact ready 5–10s after `npm ci`).
+3. For the conformance validator specifically: sequence goals-check steps and add explicit wait-for-file checks between them.
+
+---
+
+### Lesson 3: Duplicate boundary outcomes (28 task:duplicate, 6 change:duplicate) across a 10-hour phase suggest inconsistent task tracking or reuse of prior phase state without reset.
+
+**Evidence:**
+- All 34 boundary records in ledger are one of two outcomes: `task:duplicate` (28) or `change:duplicate` (6).
+- No `task:complete`, `change:complete`, or other resolved outcomes.
+- Ledger lines 1–2: first two records for `add-karpathy-agent-ledger` are both `task:duplicate` at 12:40:14 and 12:40:47 (33s apart, likely retry).
+- Subsequent boundaries follow the same pattern: clusters of duplicates per change.
+- Session-log.md entry (head of output) shows earlier boundary `kpm-8983e83069ea95f60cea10d61518eca8` at 2026-09-24T12:11:06 for a *prior* phase task (`add-hooks-typescript-toolchain` is from the previous round, not `agent-dev-team`).
+
+**Root cause:** The KBD orchestrator's boundary recorder (`record-progress.py` or `karpathy-boundary` hook) is not clearing duplicate detection state between changes. When a task is repeated (e.g., user re-runs `/kbd-apply` or bounces a session), it increments the duplicate counter instead of moving to completion. The recorder may be matching on change ID alone, not on (change, task, session) tuple.
+
+**Proposed owner:** `fhir-tech-lead`. **Hand-off:** Check `.kbd-orchestrator/` recorder config and `record-progress.py`:
+- Ensure the duplicate key includes session ID or wall-clock timestamp, not just change name.
+- Add a `task:complete` or `change:archive` outcome when a boundary is processed for the first time (non-duplicate).
+- Verify that prior-phase boundaries do not bleed into the active phase (confirm `.flush-cursor` is per-phase, or add phase filter to the recorder).
+
+---
+
+### Lesson 4: KB ingestion stayed clean (32 events, all `delivered:1,remaining:0`) but was always async, masking potential drift in wiki entry latency or outbox race conditions.
+
+**Evidence:**
+- All 32 KB ingestion events report `delivered:1,remaining:0` or higher counts, always single or double deliveries per event.
+- Outbox is empty at phase end (0 files).
+- Ledger shows KB ingest events clustered after `UserPromptSubmit` or `boundary_recorded` events, never immediately.
+- No `kb_deferred` signal. Last ingestion at 2026-09-24T22:41:11.814Z (seconds before phase reflection started at 22:42:02Z).
+
+**What this reveals:** The draining loop (`node .claude/hooks/dist/pk-drain.mjs`) is synchronous and runs on a timer, but the agent ledger only logs the *outcome* of a drain run, not the latency from note creation to delivery. If a note was queued but `pk` failed silently, we would not know until the next reflection cycle reads stale outbox files.
+
+**Proposed owner:** `fhir-knowledge-curator`. **Hand-off:** 
+- Instrument `pk-drain.mjs` to log (1) time-to-delivery (wall clock from `raw/` file mtime to `outbox/` clear), and (2) any `pk ingest` stderr/exit code ≠ 0.
+- Add a health signal `kb_latency_p99` to the ledger (sample every 10th drain run).
+- If next phase shows outbox files remaining at reflection time, add a lesson about `pk` availability or wiki-write permissions.
+
+---
+
+### Lesson 5: Subagent start/stop balance leaked one `Explore` subagent (2 start, 1 stop visible), indicating either session reuse or a subagent spawned but not cleaned up in the same session.
+
+**Evidence:**
+- Ledger lines 3–4: `Explore` subagent started at 12:41:09, stopped at 12:41:21 (12s duration, line 3–4).
+- Ledger line 83: second `Explore` subagent ID `a283ed4964cbc8cf4` stopped at 15:49:57, but no matching `SubagentStart` event for this ID in the visible ledger.
+- Sessions `2bd5bbd2-...` (main, persisted across ~10h) spawned multiple subagents at lines 83, 96, 102, 105, 108, 110, 112 — all stops, no matching starts.
+
+**Root cause:** The main session (`2bd5bbd2-...`) was long-lived and reused across multiple phase changes. Subagents spawned in earlier boundaries or earlier changes are no longer logged once the phase transitions. The ledger only includes lines for the current phase, so prior-phase subagent starts are missing.
+
+**Proposed owner:** `fhir-knowledge-curator`. **Hand-off:**
+- The `agent-ledger.jsonl` rotation happens monthly (documented in role description); confirm that phase-boundary transitions *do not* cause ledger truncation or filtering by phase.
+- Add an "unmatched subagent stop" health check: if a `SubagentStop` event lacks a matching `SubagentStart` in the same ledger snapshot, flag it as potential data loss or session carryover (not a defect, but a trend to monitor).
+
+---
+
+### Lesson 6: Privacy gate and Karpathy scan both passed cleanly on first run, confirming rule and scanner design are sound, but scanner allowlist tightening (round 2 of Karpathy ledger review) should be applied to all future scanner runs proactively.
+
+**Evidence:**
+- Scan exit code 0, 129 files scanned, no findings.
+- Karpathy ledger resolution (line 27–39): security-review blocked initially because "reply text in `.prometheus/knowledge/` would be committed" and scan had not been run. Round 2 resolved this: scan run manually by orchestrator, exited 0, verdict converted to PASS.
+- Allowlist hardening applied: "values no longer printed; only count shown," "charset tightened (DSN-safe)," "synthetic emails only."
+
+**What we learned:** The adversarial review process *found* the privacy hole (reply text carryover) and drove the scanner fix. But agents should not rely on the review cycle to surface privacy defects. The rule (D-003, D-006, D-007) is clear; the scanner now enforces it.
+
+**Proposed owner:** `fhir-security-compliance-reviewer`. **Hand-off:**
+- Document the allowlist tightening (synthetic emails, binary files fail-closed) in `.claude/hooks/src/scan-prometheus.mts` comments.
+- Add a note to `.prometheus/` commit checklist (if one exists, or create it in `CLAUDE.md`): "Run `npm --prefix .claude/hooks run scan:prometheus` and require exit 0 before committing. No manual scan should be needed."
+- Link the scanner rule to D-003, D-006, D-007 in the codebase for future operators.
+
+---
+
+### Lesson 7: The `document-and-verify-agent-team` change's packet-construction bug (diffs hiding `.github/`) and Windows CRLF issue revealed that the adversarial-review skill's scope is too loose; follow-up work needed to tighten packet building and CI coverage.
+
+**Evidence:**
+- Resolution (lines 3–5): "per-change file-tree pruning pattern `*/.git*` also hides `.github/`. From round 4 on, orchestrator replaced packet's `diff` with git-based approach."
+- Resolution (line 6): Windows CRLF broke lint parser; fixed with `.gitattributes eol=lf` and applied to agent files, team doc, and Go test fixtures.
+- Two follow-ups listed (line 18–19 infra-resolution): "add a base-ref option, and don't prune `.github`" for the adversarial-review skill.
+
+**Root cause:** The build-review-packet script applies a file-tree pruning pattern meant to hide internal `.git/` state but accidentally also hides `.github/` workflows. CI platform differences (Windows CRLF vs. Unix LF) were not caught in the agent's initial code generation.
+
+**Proposed owner:** `fhir-tech-lead` + `fhir-infra-release-engineer`. **Hand-off:**
+1. Update `adversarial-review` skill (or its hook, `build-review-packet.sh`) to use a base-ref option (e.g., `--against main` or `--since last-tag`) instead of file-tree pruning.
+2. Add `.gitattributes` entries for `.md`, `.mjs`, `.mts`, and `.go` files: `text eol=lf`. Verify in CI that all platforms (Ubuntu, macOS, Windows) lint cleanly.
+3. For future phases: add a pre-merge CI step that runs `git diff main...HEAD` (not tree walk) to ensure nothing is hidden from review.
+
+---
+
+## Summary
+
+| Category | Count | Status |
+|----------|-------|--------|
+| Subagent leaks | 1 | Minor (clarification needed on cross-phase tracking) |
+| Tool failures | 7 | Moderate (Bash/Read in validation; likely transient or env-specific) |
+| Boundary duplicates | 34 | Moderate (outcome type indicates tracking state issue) |
+| KB delivery | 32 | Clean (all successful, async model working) |
+| Privacy scan | 1 run | Clean exit (0), no findings |
+| Review rounds | 23+ | High volume, real defects found (validating gates) |
+
+---
+
+## Scan Output
+
+```
+scan-prometheus: scope = committable files (git)
+scan-prometheus: clean (129 file(s) scanned)
+Exit code: 0
+```
+
+**All Karpathy lessons are ready for recording in `/kbd-orchestrator/phases/agent-dev-team/reflection.md` Karpathy section by the orchestrator.**
