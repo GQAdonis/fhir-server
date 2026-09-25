@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "line": 154,
+      "claim": "The generated manifest cannot satisfy the requirement to record the agent-team-creator worktree path and commit in `.agent-team/team.json` `native.*.version` because the manifest has no native version metadata.",
+      "evidence": "Acceptance criteria Risks / Trade-offs require: \"record its path and commit in `.agent-team/team.json` `native.*.version` and in evidence.\" `buildManifest` returns only `{ schemaVersion, id, outcome, scope, harness, roles }`, and `nativeFor` emits per-role `claude`, `codex`, `opencode`, and `minimax` objects without any `version` field.",
+      "suggested_fix": "Add checked-in config fields for the agent-team-creator path and commit, emit them into the generated manifest under the required `native.*.version` location, and cover this in `build-manifest.test.mjs`."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".agent-team/roles/fhir-integration-specialist.md",
+      "line": 10,
+      "claim": "`fhir-integration-specialist` owns `docs/interop/**`, but the change does not create that owned documentation path or README stub.",
+      "evidence": "The role header declares `owns: [docs/interop/**]`; the acceptance criteria task 1.2 requires owned doc paths with README stubs and the diff only adds `docs/integrations/README.md`, `docs/sync/README.md`, `docs/billing/README.md`, and `docs/compliance/README.md`.",
+      "suggested_fix": "Either add `docs/interop/README.md` with owner and PHI rule, or change the role to own an already-created path such as a subpath under `docs/integrations/`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

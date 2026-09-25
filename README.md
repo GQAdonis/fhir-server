@@ -120,6 +120,8 @@ Review each source before installing; skills run with full agent permissions. Co
    /plugin install healthcare@healthcare
    ```
 
+   The project's `.claude/settings.json` registers this marketplace but does **not** enable the plugin (ATH-D-007). The plugin starts two local Node MCP servers and five hosted connectors automatically, and it tracks the repository's default branch (only tag `v1.0.0` exists), so review it before you install it.
+
    The hosted connectors (`hcls.mcp.claude.com`) are **not** approved for real patient data. Use them with synthetic or public data only; see *Patient-data policy* below.
 
 2. **Healthcare agents and skills** ([ajhcs/healthcare-agents](https://github.com/ajhcs/healthcare-agents), Apache-2.0, commit `81b239763c06`).
@@ -166,7 +168,7 @@ Review each source before installing; skills run with full agent permissions. Co
 
 7. **Other machine-local skills and agents** used by the team: the KBD orchestrator and Prometheus skill pack, the ECC skill collection, and the `superpowers` plugin. They are listed with their sources in the `prerequisites` block of [docs/agent-team.md](./docs/agent-team.md). Agents name any missing skill and continue without it.
 
-MiniMax Code reads agents only from its data directory. For this repo, run it with `MINIMAX_DATA_DIR="$PWD/.minimax" mcode` so it picks up the project's agents (decision ATH-D-003).
+MiniMax Code reads agents only from its data directory, and that directory also holds its **login, provider config, session state and logs**. Running `MINIMAX_DATA_DIR="$PWD/.minimax" mcode` (decision ATH-D-003) puts all of that inside the repo's working tree, where other agents can read it. It is gitignored, and `lint:agents` fails if anything but the generated team files would be committed. Until the operator decides on ATH-D-003, prefer copying `.minimax/agents/` into your user data dir (`~/.minimax/agents/`) and running `mcode` normally. See *Per-harness limitations* in [docs/agent-team.md](./docs/agent-team.md).
 
 ### Patient-data policy (decision ATH-D-001)
 
@@ -180,7 +182,7 @@ MiniMax Code reads agents only from its data directory. For this repo, run it wi
 
 | Round | Change | What it delivers |
 |---|---|---|
-| 1 | `install-domain-skills` | Anthropic's healthcare plugin enabled for Claude (not copied into the repo); the ajhcs and PhenoML skills copied in with attribution; four project skills (EHR onboarding, sync runbook, payer documentation rules, patient-data lane policy); the Firecrawl research written up per role in `evidence/skill-research.md` |
+| 1 | `install-domain-skills` | Anthropic's healthcare marketplace registered for Claude, with the plugin per-user opt-in (ATH-D-007; not copied into the repo); the ajhcs and PhenoML skills copied in with attribution; four project skills (EHR onboarding, sync runbook, payer documentation rules, patient-data lane policy); the Firecrawl research written up per role in `evidence/skill-research.md` |
 | 2 | `define-portable-team-manifest` | `.agent-team/team.json` as the single source: 14 roles with separate write paths, a patient-data lane rule in every prompt, and a card listing each role's skills, tools and model per harness |
 | 3 | `export-team-to-harnesses` | Agent files generated and installed for Claude, Codex, OpenCode, Kimi and MiniMax Code; a check that fails if a generated file is hand-edited; `AGENTS.md` generated from `CLAUDE.md` |
 | 4 | `wire-hooks-per-harness` and `retire-merged-agents` (in parallel) | The protected-file guard and ledger hooks wired into each harness's own hook system, with a table of which harnesses support what; the ideation-strategist and knowledge-curator agents removed after their merge |

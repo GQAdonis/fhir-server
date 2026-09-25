@@ -1,0 +1,39 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".kbd-orchestrator/phases/agent-team-hardening/evidence/skill-research.md",
+      "line": 5,
+      "claim": "The research record does not include the required Firecrawl result URLs.",
+      "evidence": "Acceptance criterion 1.1 requires `Firecrawl queries, result URLs, provenance ...`; the `## Queries` table lists only query text and roles, and the candidate table lists repositories/provenance but no Firecrawl result URLs.",
+      "suggested_fix": "Add a result URL column or per-query result list with the Firecrawl-returned URLs used for each selection/rejection decision."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/mirror-skills.mjs",
+      "line": 33,
+      "claim": "The mirror check ignores generated repository skills listed in SOURCES.json, so it does not enforce the required mirror invariant for every skill under .agents/skills.",
+      "evidence": "Acceptance criterion `Skills are available in every harness` says `WHEN a skill exists in .agents/skills/ THEN the same skill directory exists in the four harness mirrors with identical SKILL.md content`; `.agents/skills/SOURCES.json` lists generated skills such as `openspec-apply-change`, but `mirroredSkills()` returns only `sources.project` and `Object.keys(sources.thirdParty)`.",
+      "suggested_fix": "Include `sources.generated` in `mirroredSkills()` or add a separate check that every directory under `.agents/skills/` with a `SKILL.md` has matching `SKILL.md` content in all four harness mirrors."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/phases/agent-team-hardening/evidence/skill-research.md",
+      "line": 16,
+      "claim": "The research record falsely says the Anthropic healthcare plugin is enabled through project settings.",
+      "evidence": "The acceptance criterion for Anthropic healthcare skills requires the marketplace be registered and `the plugin is not enabled at project scope`; the candidate decision says it is `enabled via extraKnownMarketplaces + enabledPlugins in .claude/settings.json`, while `.claude/settings.json` contains only `extraKnownMarketplaces` and no `enabledPlugins`.",
+      "suggested_fix": "Change the decision text to state that the marketplace is registered only and `healthcare@healthcare` remains per-user opt-in."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

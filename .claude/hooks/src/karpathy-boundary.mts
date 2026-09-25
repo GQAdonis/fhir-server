@@ -17,7 +17,8 @@ import { appendEntry, makeEntry, readKbdPosition, sanitizeId } from "./lib/ledge
 import { projectDir } from "./lib/paths.mjs";
 
 const BOUNDARIES = new Set(["task", "change", "phase"]);
-const PROBE_TIMEOUT_MS = 2_000;
+// Generous: under parallel load an interpreter (or pyenv shim) can take seconds to answer.
+const PROBE_TIMEOUT_MS = 10_000;
 const RECORD_TIMEOUT_MS = 12_000;
 
 export interface Interpreter {

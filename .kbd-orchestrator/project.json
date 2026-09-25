@@ -1,7 +1,7 @@
 {
   "name": "WSO2 FHIR Server",
   "description": "Open-source FHIR R4 REST server written in Go and backed by PostgreSQL.",
-  "activePhase": "agent-dev-team",
+  "activePhase": "agent-team-hardening",
   "worktreeRoot": "${HOME}/.claude/worktrees",
   "maxChildDepth": 4,
   "ux_profile": "advanced",
@@ -64,7 +64,7 @@
       "creator-persist": "small"
     },
     "active_environment": "local",
-    "__registry_note": "local lane = Claude Code agent team (docs/agent-team.md): small=Haiku 4.5 (fhir-knowledge-curator), medium=Sonnet 5 (developer/test/review/validate/infra), frontier=Opus 5.5 (tech-lead/ideation/architect/storage-search/security). t4/l4 are self-hosted GPU lanes and keep their open-weight models for small/medium."
+    "__registry_note": "local lane = Claude Code agent team (docs/agent-team.md): small=Haiku 4.5 (no role assigned since knowledge curation merged into fhir-tech-lead, ATH-D-002), medium=Sonnet 5 (go-developer/test/code-review/validate/infra/ehr-integration-manager/data-sync-coordinator), frontier=Opus 5.5 (tech-lead/architect/storage-search/security/hipaa-privacy-officer/fhir-integration-specialist/billing-prior-auth-specialist). Team source: .agent-team/team.json. t4/l4 are self-hosted GPU lanes and keep their open-weight models for small/medium."
   },
   "agents_config": {
     "antigravity": {
@@ -134,5 +134,5 @@
   },
   "integration_test_command": "make test-integration",
   "conformance_test_command": "make test-conformance",
-  "updatedAt": "2026-09-24T11:16:23Z"
+  "updatedAt": "2026-09-24T23:37:25Z"
 }

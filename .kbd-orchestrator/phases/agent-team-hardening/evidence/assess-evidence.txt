@@ -1,0 +1,99 @@
+# assess evidence — 2026-09-25T10:27:50Z
+## agent-team-creator guide areas (guidance.mts)
+  { key: 'areas', question: 'Which kinds of work are involved?', choices: ['code', 'design', 'mobile', 'security', 'docs', 'marketing', 'product'] },
+const specialists: Record<string, { id: string; why: string; output: string; skills: string[] }> = {
+  design: { id: 'designer', why: 'Decide layout, interaction and visual acceptance before implementation.', output: 'Design specification and assets', skills: ['frontend-design', 'impeccable'] },
+  mobile: { id: 'mobile-specialist', why: 'Resolve platform navigation, accessibility and device constraints.', output: 'Mobile implementation plan', skills: ['flutter', 'dart'] },
+  security: { id: 'security-reviewer', why: 'Review the actual trust boundaries and required controls.', output: 'Threat model and evidence-backed findings', skills: ['agent-runtime-security'] },
+  docs: { id: 'documentation-specialist', why: 'Keep operator and developer instructions consistent with the delivered behavior.', output: 'Updated documentation', skills: ['documentation-and-adrs'] },
+  marketing: { id: 'marketing-specialist', why: 'Develop audience, positioning and measurable campaign deliverables.', output: 'Campaign brief and copy', skills: ['brand'] },
+  product: { id: 'product-manager', why: 'Translate desired outcomes into priorities and acceptance criteria.', output: 'Prioritized requirements', skills: ['domain-modeling'] },
+## guide output (areas code,design,security,docs,product)
+{"ready":false,"proposedRoles":["implementer","designer","security-reviewer","documentation-specialist","product-manager","reviewer"]}
+## guide with research/infra
+{"error":"Unknown work area"}
+
+## harness versions + default models
+codex-cli 0.154.0
+1.18.25-fork
+0.42.0
+0.5.4
+mmx 1.0.26
+model = "gpt-6-astra"
+kimi-for-coding/k3
+default_model = "kimi-code/k3"
+defaultModel: minimax/MiniMax-M3
+## per-harness agent dirs
+.claude/agents: 11
+.codex/agents: 0
+.opencode/agents: 0
+.kimi-code/agents: 0
+~/.minimax/agents: coder explore general km-chief-content-officer km-conversational-designer km-creative-director km-devops-engineer km-frontend-engineer km-marketing-officer km-product-owner km-qa-engineer km-rust-engineer km-security-officer mavis verifier worker 
+## hooks registered only in
+.claude/settings.json
+absent: .codex/config.toml
+absent: opencode.json
+absent: .kimi-code/config.toml
+## skill candidate provenance
+anthropics/healthcare stars=413 license=none pushed=2026-08-27
+ajhcs/healthcare-agents stars=51 license=Apache-2.0 pushed=2026-07-19
+PhenoML/ClaudeFHIRSkill stars=51 license=Apache-2.0 pushed=2026-06-02
+jmandel/health-skillz stars=82 license=none pushed=2026-06-08
+Upstream-Intelligence/upstream-mcp stars=1 license=MIT pushed=2026-08-09
+Cloverhound/epic-fhir-cli stars=1 license=none pushed=2026-03-10
+## anthropics/healthcare skills
+clinical-note-extract clinical-trial-protocol contracts doc-extract fhir-developer fhir fraud-detection icd10-cm prior-auth procedure-coding 
+## anthropics/healthcare MCP servers
+CMS Coverage: https://hcls.mcp.claude.com/cms_coverage/mcp
+ICD10 Codes: https://hcls.mcp.claude.com/icd10_codes/mcp
+NPI Registry: https://hcls.mcp.claude.com/npi_registry/mcp
+Clinical Trials: https://hcls.mcp.claude.com/clinical_trials/mcp
+PubMed: https://pubmed.mcp.claude.com/mcp
+Contracts Analyzer: node
+FHIR: node
+## ajhcs relevant agents
+agents/clinical-documentation-improvement-specialist.md
+agents/clinical-prior-authorization-specialist.md
+agents/healthit-epic-applications-analyst.md
+agents/healthit-interoperability-engineer.md
+agents/payer-relations-specialist.md
+agents/quality-compliance-officer.md
+agents/revenue-340b-program-manager.md
+agents/revenue-chargemaster-analyst.md
+agents/revenue-contract-analyst.md
+agents/revenue-cycle-specialist.md
+agents/revenue-finance-manager.md
+agents/revenue-medical-coding-specialist.md
+## local ECC healthcare skills
+~/.TOOLS/skills/claude/hipaa-compliance
+~/.TOOLS/skills/claude/healthcare-phi-compliance
+~/.claude/agents/healthcare-reviewer.md
+
+## references/native-harnesses.md (skill dir: /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/.worktrees/agent-team-creator/dist/plugins/claude/prometheus-skill-pack/skills/agent-team-creator) — Harnesses table
+| Codex | `.codex/agents/<name>.toml`, optional `.codex/config.toml` | Required `name`, `description`, `developer_instructions`; native `model` and other config keys are retained. [Standalone subagent docs](https://learn.chatgpt.com/docs/agent-configuration/subagents). Plugin skill support does not verify an `agents` plugin manifest field, so none is invented. |
+| Claude Code | `.claude/agents/<name>.md`, optional `.claude/settings.json`; alternative plugin `plugins/<team>/agents/` and `.claude-plugin/plugin.json`; `.claude-plugin/marketplace.json` | Native subagents, not automatic experimental agent-team creation. Install either project agents or the plugin copy. [Subagents](https://code.claude.com/docs/en/sub-agents), [plugin structure](https://github.com/anthropics/claude-code/blob/main/plugins/plugin-dev/skills/plugin-structure/SKILL.md), [marketplace schema example](https://github.com/anthropics/claude-code/blob/main/.claude-plugin/marketplace.json). |
+| Kimi Code | `.kimi-code/agents/<name>.md`; alternative `plugins/<team>/kimi.plugin.json` with `agents` directories, and v2 `marketplace.json` | Current MoonshotAI/kimi-code, not archived kimi-cli. Role model frontmatter is ignored; choose invocation/global secondary model separately. Project or plugin agent discovery does not create a running team. [Agents](https://github.com/MoonshotAI/kimi-code/blob/main/docs/en/customization/agents.md), [plugins and v2 marketplace](https://github.com/MoonshotAI/kimi-code/blob/main/docs/en/customization/plugins.md), [manifest schema](https://github.com/MoonshotAI/kimi-code/blob/main/packages/klient/src/contract/global/plugins.ts). |
+| MiniMax | `agents/<name>/agent.md`, relative to the active user-data directory | Inspected `@minimax-ai/code` 0.4.12. Destination is `MINIMAX_DATA_DIR`, `MAVIS_DATA_DIR`, or default `~/.minimax`, not an assumed project agent directory. `mcode exec` lacks a custom-agent selector. Plugin manifest has no agent mapping. [Canonical frontmatter](https://github.com/MiniMax-AI/minimax-code/blob/main/packages/local-runtime-v2/src/service/agent/storage/canonical-agent-config.ts), [CLI contract](https://github.com/MiniMax-AI/minimax-code/blob/main/packages/tui/src/cli/contract.ts). |
+| OpenCode | `.opencode/agents/<name>.md`, optional `opencode.json` | Deployed singular `agent`, `permission`, `prompt` schema. Colliding config/Markdown agent names fail. Plugins are a separate JS/TS/npm facility. [Agents](https://opencode.ai/docs/agents/), [plugins](https://opencode.ai/docs/plugins/). |
+
+## existing .claude/agents (name: description)
+fhir-architect: Specification, design and planning for the WSO2 FHIR Server. Use when running /kbd-assess, /kbd-analyze or /kbd-plan, writing O
+fhir-code-reviewer: Read-only diff review for the WSO2 FHIR Server against its conventions, blocking constraints and domain rules. Use after any im
+fhir-conformance-validator: Final archive gate for WSO2 FHIR Server changes. Use after implementation and code/security review, before /opsx:archive or kbd
+fhir-go-developer: General Go implementation for the WSO2 FHIR Server outside the storage/search core. Use for changes in internal/handler, valida
+fhir-ideation-strategist: Feature discovery and idea validation for the WSO2 FHIR Server. Use when exploring what to build next, researching FHIR R4 beha
+fhir-infra-release-engineer: CI/CD, deployment and release engineering for the WSO2 FHIR Server. Use for changes to .github/workflows (ci, release, docs-pub
+fhir-knowledge-curator: Karpathy continuous-improvement curator for the WSO2 FHIR Server agent team. Use at phase end or on request to summarize the ag
+fhir-security-compliance-reviewer: Read-only security and healthcare-compliance review for the WSO2 FHIR Server. Use for any change touching authentication, tenan
+fhir-storage-search-engineer: Storage, search, indexing, schema and tenancy specialist for the WSO2 FHIR Server. Use for any change to internal/store (search
+fhir-tech-lead: Orchestrates the WSO2 FHIR Server agent team through the KBD lifecycle. Use when starting or resuming a KBD phase, deciding whi
+fhir-test-engineer: Test engineering for the WSO2 FHIR Server. Use when designing or writing unit tests, testcontainers-based integration tests, ra
+## grep for requested role keywords in agent names
+(no agent file names match hipaa|integration|sync|billing|prior)
+
+## skill dir counts
+.agents/skills: 12 -> openspec-apply-change openspec-archive-change openspec-bulk-archive-change openspec-continue-change openspec-explore openspec-ff-change openspec-new-change openspec-onboard openspec-propose openspec-sync-specs openspec-update-change openspec-verify-change 
+.claude/skills: 13 -> karpathy-guidelines openspec-apply-change openspec-archive-change openspec-bulk-archive-change openspec-continue-change openspec-explore openspec-ff-change openspec-new-change openspec-onboard openspec-propose openspec-sync-specs openspec-update-change openspec-verify-change 
+.opencode/skills: 12 -> openspec-apply-change openspec-archive-change openspec-bulk-archive-change openspec-continue-change openspec-explore openspec-ff-change openspec-new-change openspec-onboard openspec-propose openspec-sync-specs openspec-update-change openspec-verify-change 
+.kimi-code/skills: 12 -> openspec-apply-change openspec-archive-change openspec-bulk-archive-change openspec-continue-change openspec-explore openspec-ff-change openspec-new-change openspec-onboard openspec-propose openspec-sync-specs openspec-update-change openspec-verify-change 
+~/.minimax/skills: 385 total; openspec-*: 12

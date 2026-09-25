@@ -13,11 +13,20 @@ The repository SHALL contain `docs/agent-team.md`, listing every `fhir-*` agent 
 - **THEN** they can list the skills and tools they must install for every agent to be fully capable
 
 ### Requirement: Agent definitions are linted
-A lint command SHALL fail when any `.claude/agents/fhir-*.md` has invalid frontmatter, a model other than `opus`, `sonnet`, `haiku`, `fable` or `inherit`, a skill that neither resolves locally nor appears in the prerequisites table, or a missing required prompt section.
+A lint command SHALL fail when any of the following holds:
+- a generated agent definition in any harness location (`.claude/agents/`, `.codex/agents/`, `.opencode/agents/`, `.kimi-code/agents/`, `.minimax/agents/`) has invalid structure for its format;
+- a Claude definition names a model other than `opus`, `sonnet`, `haiku`, `fable` or `inherit`;
+- a skill neither resolves locally nor appears in the prerequisites table;
+- a required prompt section, the PHI-lane block or the Harness card is missing;
+- any installed definition differs from a fresh export of `.agent-team/team.json`.
 
 #### Scenario: Unknown skill added
 - **WHEN** an agent lists a skill that is neither installed nor documented as a prerequisite
 - **THEN** the lint exits non-zero naming the agent and the skill
+
+#### Scenario: Drift
+- **WHEN** an installed definition differs from the manifest export
+- **THEN** the lint exits non-zero naming the harness and file
 
 ### Requirement: Agent tooling is verified on three operating systems
 Continuous integration SHALL, on Ubuntu, macOS and Windows runners, install the hook package, compile it (the dist-freshness check compiles `src/` into a temporary directory and requires byte equality with the committed `dist/`; CI does not overwrite `dist/`, so drift cannot be masked), run its tests against the committed `dist/`, lint agents, scan `.prometheus/`, and execute at least one compiled hook in exec form with a fixture payload.

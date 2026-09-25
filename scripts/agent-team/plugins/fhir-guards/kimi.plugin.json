@@ -1,0 +1,11 @@
+{
+  "name": "fhir-guards",
+  "version": "1.0.0",
+  "description": "WSO2 FHIR Server guardrails: refuses edits to generated files and KBD projections, and records metadata-only agent activity, using the repo's own compiled hooks.",
+  "hooks": [
+    { "event": "PreToolUse", "matcher": "WriteFile|StrReplaceFile|Edit|Write", "command": "node ./hooks/run.mjs kimi guard", "timeout": 10 },
+    { "event": "SessionStart", "command": "node ./hooks/run.mjs kimi ledger", "timeout": 10 },
+    { "event": "UserPromptSubmit", "command": "node ./hooks/run.mjs kimi ledger", "timeout": 10 },
+    { "event": "PostToolUseFailure", "command": "node ./hooks/run.mjs kimi ledger", "timeout": 10 }
+  ]
+}

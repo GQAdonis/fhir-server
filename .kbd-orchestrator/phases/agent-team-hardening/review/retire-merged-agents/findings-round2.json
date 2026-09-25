@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".agent-team/roles/fhir-architect.md",
+      "line": 19,
+      "claim": "Retired-agent references remain outside the single docs redirect note.",
+      "evidence": "Acceptance criterion 1.2 requires grep outside the stated exclusions to return only the redirect note, and the change states \"Keep a redirect note in docs/agent-team.md\"; the packet shows `.agent-team/roles/fhir-architect.md:19` still says \"absorbed the former ideation-strategist role\" and `.agent-team/roles/fhir-tech-lead.md:19` still says \"absorbed the former knowledge-curator role\".",
+      "suggested_fix": "Remove retired-role mentions from role sources and generated harness files; keep the only retired-agent-name redirect in `docs/agent-team.md`."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/project.json",
+      "line": 118,
+      "claim": "The committed KBD project config contains a user-specific absolute local path.",
+      "evidence": "The new `.kbd-orchestrator/project.json` sets `focus_project_path` and workspace folder path to `/Users/gqadonis/Projects/TribeHealth/fhir-server`, while the constraints state all commands run from the repo root.",
+      "suggested_fix": "Use a repo-relative path, omit machine-local workspace paths from committed config, or replace them with a portable placeholder resolved at runtime."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

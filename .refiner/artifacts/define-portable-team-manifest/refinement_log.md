@@ -1,0 +1,35 @@
+# refine-validate — define-portable-team-manifest (2026-09-25T14:32:22Z)
+- PASS  openspec-strict
+- PASS  manifest-tests
+- PASS  manifest-check
+- PASS  creator-validate
+- PASS  roster-14
+- PASS  model-map-all-tiers
+- PASS  owned-doc-paths
+- PASS  port-diff-recorded
+- PASS  roles-and-docs-scan-clean
+- PASS  local-state-ignored
+- PASS  workflow-yaml-parses
+- PASS  mirror-in-sync
+- PASS  lint-agents
+- PASS  hooks-tests
+- PASS  check-dist
+- PASS  prometheus-scan
+- N/A   Go build/test/lint/gofmt/license-header (no Go files touched)
+
+# refine-validate — define-portable-team-manifest round 2 (2026-09-25T15:17:48Z), after 15 judge rounds
+- PASS  openspec-strict
+- PASS  manifest-tests-16
+- PASS  manifest-check-with-creator-validate
+- PASS  roster-14
+- PASS  native-5-per-role
+- PASS  owned-doc-paths
+- PASS  roles-and-docs-scan-clean
+- PASS  local-state-ignored
+- PASS  workflow-yaml-parses
+- PASS  mirror-in-sync
+- PASS  lint-agents
+- PASS  hooks-tests
+- PASS  check-dist
+- PASS  prometheus-scan
+- N/A   Go build/test/lint/gofmt/license-header (no Go files touched)

@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "line": 355,
+      "claim": "`build-manifest --check` can succeed without running `agent-team-creator validate`, violating the requirement that `--check` fail when validation is unavailable or not passing.",
+      "evidence": "Acceptance criterion: `.agent-team/team.json` SHALL pass `agent-team-creator validate`, and SHALL define exactly the roles listed...; `build-manifest --check` fails otherwise. Diff hunk: `if (v === undefined) { if (process.argv.includes(\"--require-validate\")) problems.push(...); else console.log(\"build-manifest: agent-team-creator not found; validate skipped ...\") }`, so plain `--check` only logs a skip and continues.",
+      "suggested_fix": "Make `--check` always add a problem when `agent-team-creator` is unavailable, or change the accepted check command and requirement to require `--require-validate` everywhere."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

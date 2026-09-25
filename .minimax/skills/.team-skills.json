@@ -1,0 +1,11 @@
+{
+  "generatedBy": "scripts/agent-team/mirror-skills.mjs",
+  "skills": [
+    "ehr-integration-onboarding",
+    "fhir-data-sync-runbook",
+    "fhir-software",
+    "healthcare-agents",
+    "payer-documentation-rules",
+    "phi-lane-policy"
+  ]
+}

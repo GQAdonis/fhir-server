@@ -2,24 +2,26 @@
   "schemaVersion": "1",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 270,
-  "derivedRevision": 270,
+  "sourceRevision": 507,
+  "derivedRevision": 507,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 270
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 507
   },
   "conflictCount": 0,
-  "updatedAt": "2026-09-24T22:46:37.189824Z",
+  "updatedAt": "2026-09-25T21:56:07.071073Z",
   "cursor": [
-    "agent-dev-team",
-    "reflect"
+    "agent-team-hardening",
+    "execute",
+    "configure-phi-lanes",
+    "1.1"
   ],
   "root": {
     "type": "phase",
     "id": "98eeab9c-ff3e-4471-a109-52e79b939f28",
     "status": "ready",
     "progress": {
-      "done": 8,
-      "total": 8
+      "done": 13,
+      "total": 15
     },
     "children": [
       {
@@ -102,6 +104,82 @@
             "progress": {
               "done": 6,
               "total": 6
+            }
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "type": "phase",
+        "id": "agent-team-hardening",
+        "canonicalId": "agent-team-hardening",
+        "status": "IN_PROGRESS",
+        "progress": {
+          "done": 5,
+          "total": 7
+        },
+        "children": [
+          {
+            "type": "change",
+            "id": "install-domain-skills",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 6,
+              "total": 12
+            }
+          },
+          {
+            "type": "change",
+            "id": "define-portable-team-manifest",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 7,
+              "total": 14
+            }
+          },
+          {
+            "type": "change",
+            "id": "export-team-to-harnesses",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 7,
+              "total": 14
+            }
+          },
+          {
+            "type": "change",
+            "id": "retire-merged-agents",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 3,
+              "total": 6
+            }
+          },
+          {
+            "type": "change",
+            "id": "wire-hooks-per-harness",
+            "status": "COMPLETE",
+            "progress": {
+              "done": 6,
+              "total": 12
+            }
+          },
+          {
+            "type": "change",
+            "id": "configure-phi-lanes",
+            "status": "PENDING",
+            "progress": {
+              "done": 0,
+              "total": 7
+            }
+          },
+          {
+            "type": "change",
+            "id": "document-and-verify-cross-harness-team",
+            "status": "PENDING",
+            "progress": {
+              "done": 0,
+              "total": 5
             }
           }
         ],

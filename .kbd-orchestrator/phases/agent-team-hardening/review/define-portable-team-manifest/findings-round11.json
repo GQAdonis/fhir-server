@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "line": 319,
+      "claim": "`build-manifest --check` does not run or enforce `agent-team-creator validate`, so an invalid `.agent-team/team.json` can pass the required check.",
+      "evidence": "Acceptance criterion: \"`.agent-team/team.json` SHALL pass `agent-team-creator validate` ...; `build-manifest --check` fails otherwise.\" In `main()`, `problems` is built only from `rosterDocProblems`, `ownershipProblems`, `skillProblems`, `cardProblems`, `ownsStatementProblems`, and drift; no `cli.mjs validate` invocation or validation-result check is present.",
+      "suggested_fix": "Have `--check` invoke the recorded agent-team-creator CLI validate command against the generated manifest/team request, or embed the same validation as a required check and fail with its errors."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".agent-team/roles/fhir-test-engineer.md",
+      "line": 21,
+      "claim": "`fhir-test-engineer` grants itself write ownership outside its manifest `owns`, undermining the required disjoint ownership map.",
+      "evidence": "Header `owns` is only `[internal/testutil/**, internal/conformance/**, internal/store/testdata/**]`, but the prompt says it owns \"`*_test.go` across the repo\" and may edit production code for test seams; those paths overlap other roles' owns such as `fhir-go-developer` owning `internal/handler/**` and `fhir-storage-search-engineer` owning `internal/store/*.go`.",
+      "suggested_fix": "Either add explicit, disjoint test-file ownership globs to the manifest and adjust other roles accordingly, or remove the broad `*_test.go`/test-seam permission and route package-local tests through the package-owning roles."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

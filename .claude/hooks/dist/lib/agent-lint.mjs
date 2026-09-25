@@ -1,6 +1,7 @@
-// Lint rules for .claude/agents/fhir-*.md, checked against docs/agent-team.md.
+// Lint rules for .claude/agents/*.md, checked against docs/agent-team.md.
 // Dependency-free: a frontmatter parser for the YAML subset agent files use
-// (scalars, comma-separated inline lists, and `- item` block lists).
+// (scalars, comma-separated inline lists, and `- item` block lists), plus the
+// JSON frontmatter (valid YAML) that the team exporter generates.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 export const MODELS = new Set(["opus", "sonnet", "haiku", "fable", "inherit"]);
@@ -22,6 +23,27 @@ export function parseAgent(source) {
     if (match === null)
         throw new Error("missing YAML frontmatter");
     const frontmatter = {};
+    if (match[1].trimStart().startsWith("{")) {
+        let obj;
+        try {
+            obj = JSON.parse(match[1]);
+        }
+        catch (err) {
+            throw new Error(`invalid JSON frontmatter: ${err instanceof Error ? err.message : String(err)}`);
+        }
+        if (obj === null || typeof obj !== "object" || Array.isArray(obj))
+            throw new Error("JSON frontmatter must be an object");
+        for (const [key, value] of Object.entries(obj)) {
+            if (typeof value === "string")
+                frontmatter[key] = value;
+            else if (Array.isArray(value) && value.every((v) => typeof v === "string"))
+                frontmatter[key] = value;
+            // Nested native settings (e.g. OpenCode `permission`) are kept as JSON text.
+            else
+                frontmatter[key] = JSON.stringify(value);
+        }
+        return { frontmatter, body: text.slice(match[0].length) };
+    }
     let listKey;
     for (const line of match[1].split("\n")) {
         if (line.trim() === "")
@@ -141,9 +163,9 @@ export function lintAll(ctx) {
     const doc = existsSync(docPath) ? readFileSync(docPath, "utf8") : "";
     const problems = doc === "" ? ["docs/agent-team.md is missing"] : [];
     const prerequisites = documentedPrerequisites(doc);
-    const files = existsSync(dir) ? readdirSync(dir).filter((f) => /^fhir-.*\.md$/.test(f)).sort() : [];
+    const files = existsSync(dir) ? readdirSync(dir).filter((f) => /^[a-z0-9][a-z0-9-]*\.md$/.test(f)).sort() : [];
     if (files.length === 0)
-        problems.push("no .claude/agents/fhir-*.md files found");
+        problems.push("no .claude/agents/*.md files found");
     for (const f of files) {
         problems.push(...lintAgent(f, readFileSync(path.join(dir, f), "utf8"), ctx, prerequisites, doc));
     }

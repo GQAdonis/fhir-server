@@ -6,5 +6,14 @@
 # Go source is LF everywhere (gofmt emits LF; CRLF checkouts fail gofmt -l on Windows).
 *.go text eol=lf
 # Agent definitions and the team doc are parsed by lint-agents; keep LF.
-.claude/agents/*.md text eol=lf
+.claude/agents/** text eol=lf
 docs/agent-team.md text eol=lf
+# The team manifest and role catalog are byte-compared by build-manifest --check.
+.agent-team/** text eol=lf
+AGENTS.md text eol=lf
+# Harness agent definitions generated from .agent-team/team.json are compared
+# byte-for-byte by install-exports --check; keep them LF on every platform.
+.codex/** text eol=lf
+.opencode/agents/** text eol=lf
+.kimi-code/agents/** text eol=lf
+.minimax/agents/** text eol=lf
