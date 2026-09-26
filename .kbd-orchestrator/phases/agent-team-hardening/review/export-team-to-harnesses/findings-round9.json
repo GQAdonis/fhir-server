@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/install-exports.mjs",
+      "line": 163,
+      "claim": "The installer overwrites `.codex/config.toml`, clobbering existing Codex project configuration instead of installing only generated role files without touching native config.",
+      "evidence": "Acceptance criteria state exports must be installed \"without clobbering existing native configuration\" and the Decisions section says `install-exports.mjs` \"copies only role files from staging to their harness location\"; the diff adds `export const CODEX_CONFIG = \".codex/config.toml\"` and in `main()` writes it with `writeFileSync(codexConfig, wantConfig)` when not in `--check`, while docs/agent-team.md also says `.codex/config.toml` is \"wholly generated\" and edits are overwritten.",
+      "suggested_fix": "Do not own the entire `.codex/config.toml`; either generate a separate includeable/team-owned config if Codex supports it, or parse/merge only `[agents.<id>]` blocks while preserving unrelated settings, and refuse to overwrite an existing non-generated config without an explicit migration path."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".claude/hooks/src/lib/harness-lint.mts",
+      "line": 151,
+      "claim": "MiniMax committable-file validation silently succeeds when `git ls-files` fails, masking possible runtime credential files under `.minimax`.",
+      "evidence": "`minimaxCommittableProblems()` runs `spawnSync(\"git\", [\"ls-files\", ...])` and immediately returns `[]` when `r.status !== 0`, even though README/docs warn MiniMax runtime data can hold credentials and the QA evidence relies on this check to ensure only generated files are committable.",
+      "suggested_fix": "Return a lint problem when `git ls-files` exits non-zero, including stderr/stdout, so CI fails closed if the committable-file check cannot run."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

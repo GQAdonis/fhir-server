@@ -1,6 +1,6 @@
 # Agent team
 
-The WSO2 FHIR Server ships a team of eleven Claude Code subagents (`.claude/agents/fhir-*.md`) and a set of cross-platform hooks (`.claude/hooks/`). Together they run the KBD lifecycle (assess → plan → execute → reflect) with OpenSpec changes as the unit of work. Every agent is prefixed `fhir-`, so none silently replaces a user-level agent of the same name (decision D-001).
+The WSO2 FHIR Server's agent team has **fourteen roles**, defined once in `.agent-team/team.json` (see [Portable team roster](#portable-team-roster)) and generated for every harness, plus a set of cross-platform hooks (`.claude/hooks/`). Together they run the KBD lifecycle (assess → plan → execute → reflect) with OpenSpec changes as the unit of work. Engineering roles are prefixed `fhir-`, so none silently replaces a user-level agent of the same name (decision D-001). The five domain roles use descriptive names; none collides with a user-level agent in any of the five harnesses (checked 2026-09-25).
 
 Start a session led by the tech lead:
 
@@ -10,23 +10,73 @@ claude --agent fhir-tech-lead
 
 Any session can also delegate to a persona by name, for example "use fhir-storage-search-engineer for this". Project agents load at session start, so start a new session after adding or editing an agent file.
 
-## Roster
+## Retired agents
 
-| Agent | Lifecycle role | Model | Why this model | Tools |
-|---|---|---|---|---|
-| `fhir-tech-lead` | Orchestrates KBD, routes work, runs the QA gate before archive | opus | Cross-cutting judgement on sequencing, persona routing and gate decisions; a routing mistake is expensive downstream | Agent, read/inspect, Bash for KBD, OpenSpec and verify commands (Edit/Write disallowed) |
-| `fhir-ideation-strategist` | Feature discovery, FHIR/IG research, phase goals | opus | Open-ended research and synthesis across the spec, the code and the web | Read-only + web search/fetch + Firecrawl |
-| `fhir-architect` | Assess, analyze, plan; OpenSpec authoring; `DESIGN.md` steward | opus | Plan quality sets the scope and cost of every later change | Read + writes limited to design artifacts |
-| `fhir-go-developer` | Implementation outside the storage core | sonnet | Well-specified, test-first tasks; runs in an isolated worktree | Full edit + Bash |
-| `fhir-storage-search-engineer` | Store, search, index, schema, RLS | opus (effort high) | The correctness core: fail-closed search, tenancy and SQL mistakes are data-safety bugs | Full edit + Bash |
-| `fhir-test-engineer` | Unit, integration, race, conformance, golden tests | sonnet | Convention-heavy test work against the CI parity commands | Full edit + Bash |
-| `fhir-code-reviewer` | Diff review against project rules and constraints | sonnet | Checklist-driven review with evidence citation | Read-only + verify commands |
-| `fhir-security-compliance-reviewer` | PHI/HIPAA, tenant isolation, injection, secrets, `.prometheus/` | opus | Healthcare data and multi-tenant isolation need the deepest adversarial reasoning | Read-only + verify commands |
-| `fhir-conformance-validator` | Final archive gate; `/kbd-goal-check` | sonnet | Mechanical: runs the required commands and maps spec scenarios to evidence | Read-only + verify commands |
-| `fhir-infra-release-engineer` | GitHub Actions, Helm, Docker, releases | sonnet | Bounded, parity-driven pipeline edits | Edit limited to CI and deploy assets |
-| `fhir-knowledge-curator` | Karpathy loop: ledger → lessons → knowledge base | haiku | Frequent, low-risk summarization over metadata | Writes limited to `.prometheus/` and the reflection lessons section |
+`fhir-ideation-strategist` merged into `fhir-architect`, and `fhir-knowledge-curator` merged into `fhir-tech-lead` (decision ATH-D-002, change `retire-merged-agents`). Ask the merge target for that work. Their definitions are removed from every harness.
 
-The model mix is 5 opus, 5 sonnet and 1 haiku (decision D-002). Opus is reserved for orchestration, research, architecture, the storage core and security review. Models are the current family: Opus 5.5, Sonnet 5, Haiku 4.5.
+## Portable team roster
+
+The team is defined once, in `.agent-team/team.json`. It is built by `node scripts/agent-team/build-manifest.mjs` from `.agent-team/roles/<id>.md` and `.agent-team/team.config.json` (decision ATH-D-005), and `build-manifest --check` requires this table to list exactly the manifest roster, in order. The harness agent files for Claude Code, Codex, OpenCode, Kimi Code and MiniMax Code are generated from the manifest (change `export-team-to-harnesses`). 
+Fourteen roles (decision ATH-D-002):
+- the former ideation strategist merges into `fhir-architect`;
+- the former knowledge curator merges into `fhir-tech-lead`;
+- five domain roles are added.
+
+PHI lanes follow the `phi-lane-policy` skill (ATH-D-001):
+- `none`: never processes real PHI;
+- `policy-only`: reviews PHI policy and flows, not content;
+- `tribe-only`: real PHI only on a verified Tribe lane.
+
+| Role | Tier | PHI lane | Owns (primary write paths) |
+|---|---|---|---|
+| `fhir-tech-lead` | hard | none | `.kbd-orchestrator/phases/*/goals.md`, `.kbd-orchestrator/phases/*/execution.md`, `.kbd-orchestrator/phases/*/execute-dispatch.json`, `.kbd-orchestrator/phases/*/reflection.md`, `.prometheus/raw/**`, `.prometheus/outbox/**`, `.prometheus/ledger/**`, `.prometheus/agent-ledger.jsonl` |
+| `fhir-architect` | hard | none | `openspec/**`, `DESIGN.md`, `docs/*.md`, `docs/images/**`, `.kbd-orchestrator/phases/*/assessment.md`, `.kbd-orchestrator/phases/*/analysis.md`, `.kbd-orchestrator/phases/*/plan.md`, `.kbd-orchestrator/phases/*/evidence/**`, `.agent-team/team.json`, `.agent-team/roles/**` |
+| `fhir-go-developer` | medium | none | `internal/handler/**`, `internal/validate/**`, `internal/fhirpath/**`, `internal/fhirxml/**`, `internal/fhirttl/**`, `internal/patch/**`, `internal/config/**`, `internal/ig/**`, `internal/terminology/**`, `internal/compartment/**`, `internal/obs/**`, `internal/version/**`, `cmd/server/**`, `website/docs/**` |
+| `fhir-storage-search-engineer` | hard | none | `internal/store/*.go`, `internal/index/**`, `internal/db/**`, `internal/searchparam/**`, `internal/seed/**`, `internal/tenant/**` |
+| `fhir-test-engineer` | medium | none | `internal/testutil/**`, `internal/conformance/**`, `internal/store/testdata/**` |
+| `fhir-code-reviewer` | medium | none | `.agent-team/findings/fhir-code-reviewer/**` |
+| `fhir-security-compliance-reviewer` | hard | none | `.agent-team/findings/fhir-security-compliance-reviewer/**` |
+| `fhir-conformance-validator` | medium | none | `.agent-team/findings/fhir-conformance-validator/**` |
+| `fhir-infra-release-engineer` | medium | none | `.github/workflows/**`, `.github/CODEOWNERS`, `.github/*TEMPLATE*`, `.gitignore`, `helm/**`, `Dockerfile`, `docker-compose.yml`, `Makefile`, `version.txt`, `.claude/hooks/**`, `.claude/agents/**`, `.claude/settings.json`, `.claude/skills/**`, `.agents/skills/**`, `.codex/**`, `.opencode/**`, `.kimi-code/**`, `.minimax/**`, `scripts/agent-team/**`, `AGENTS.md` |
+| `hipaa-privacy-officer` | hard | policy-only | `docs/compliance/**` |
+| `fhir-integration-specialist` | hard | tribe-only | `docs/interop/**` |
+| `ehr-integration-manager` | medium | none | `docs/integrations/**` |
+| `data-sync-coordinator` | medium | tribe-only | `docs/sync/**` |
+| `billing-prior-auth-specialist` | hard | tribe-only | `docs/billing/**` |
+
+## Per-harness limitations
+
+Each harness has its own agent format and gaps. The generated Harness card on every role states the intended model, tools and permissions even where a harness ignores them.
+
+| Harness | Where agents live | Limitation and what to do |
+|---|---|---|
+| Claude Code | `.claude/agents/<id>.md` (JSON frontmatter) | Project agents load at session start: start a new session after regenerating. |
+| Codex | `.codex/agents/<id>.toml`, registered in `.codex/config.toml` | Codex does not auto-discover agent files; `install-exports` generates the `[agents.<id>]` registrations. Codex reads project config only after you **trust this project** in Codex. `install-exports` manages only the delimited `# >>> agent-team roles … >>>` block in `.codex/config.toml`: other project settings outside the markers are preserved, and editing inside the block fails the drift check. Gate roles run with `sandbox_mode = "read-only"`, and `lint:agents` rejects any other key in generated agents. |
+| OpenCode | `.opencode/agents/<id>.md` (subagents) | Read-only roles get `permission.edit = deny`, and shell commands ask for approval except a read-only verification allowlist. OpenCode has no read-only sandbox, so an approved shell command could still write. Other roles use the session defaults. |
+| Kimi Code | `.kimi-code/agents/<id>.md` | **Kimi ignores the per-agent model.** Choose it at invocation (`kimi -m kimi-code/k3 --agent <id>`). There is no per-agent permission field, so read-only roles are read-only by instruction. |
+| MiniMax Code | `.minimax/agents/<id>/agent.md` (ATH-D-003) | **`mcode exec` has no agent selector** and there is no agent-listing command; pick the agent in an interactive session. MiniMax reads agents from `MINIMAX_DATA_DIR`, which relocates **all** of its user data, including login and provider config. Keeping the data dir inside the repo puts MiniMax login, session state and logs in the working tree. There other agents can read them, `docker build` could copy them, and backups include them, even though they are gitignored and `lint:agents` fails if anything but generated team files under `.minimax/` would be committed. **Prefer a data dir outside the repo** (for example copy `.minimax/agents/` to `~/.minimax/agents/`) until the operator decides (ATH-D-003 is under review). There is no per-agent permission field. |
+
+Patient-data lanes apply in every harness: none of the models above is BAA-covered (see `phi-lane-policy`).
+
+## Hook coverage per harness
+
+The same compiled hooks (`.claude/hooks/dist/`) run in every harness that supports hooks, through `harness-hook.mjs`. It normalizes each harness's payload and answers in its native contract. Evidence: `.kbd-orchestrator/phases/agent-team-hardening/evidence/hook-capabilities.md`.
+
+| Hook | Claude Code | Codex | OpenCode | Kimi Code | MiniMax Code |
+|---|---|---|---|---|---|
+| Protected-path guard (`guard-generated`) | supported | supported | supported | partial | partial |
+| Agent ledger (`agent-ledger`, metadata only) | supported | supported | supported | partial | partial |
+| License header, gofmt checks | supported | unsupported | unsupported | unsupported | unsupported |
+| Karpathy flush / session context | supported | unsupported | unsupported | unsupported | unsupported |
+| How it is wired | `.claude/settings.json` | `.codex/hooks.json` | `.opencode/plugins/fhir-guards.js` (auto-loaded) | `scripts/agent-team/plugins/fhir-guards` (user install: `/plugins install`, then `run.mjs --allow <repo>`) | same plugin, Claude-compatible format (user install: `mcode plugin install`, then `run.mjs --allow <repo>`) |
+| Activation | always | **trust the project and each hook hash once** in Codex | always | after install; hooks are **fail-open** | after install and `mcode login`; not verified end to end |
+
+- **Reduced protection where a hook is partial or unsupported:** generated files and KBD projections can be hand-edited without a guard. `lint:agents` (drift) and CI still catch drift in generated agent files, but not in other protected files. Run `npm --prefix .claude/hooks run lint:agents` before committing.
+- The guard covers file-writing tools only (Edit/Write/patch). Shell commands are not guarded in any harness.
+- **The guard fails open in every harness:** an adapter error, a timeout (10 s), a missing or unbuilt adapter, or unparseable output allows the write. CI (`check:dist`, `lint:agents`) is the backstop for compiled hooks and generated agent files. KBD projections and golden `testdata` have no CI backstop. The Codex commands locate the repo with `git`: without git, outside a repository, or when git refuses a repo with "dubious ownership", the Codex guard is silently off. On Windows it relies on Codex running `commandWindows` through `cmd.exe` (not verified).
+- Sessions started in a subdirectory are guarded too. Every adapter resolves the git top level, and relative edit paths are resolved against the session directory first (so `../../AGENTS.md` from `internal/store` is denied).
+- The Kimi/MiniMax plugin runs a repo's hooks **only for repositories you allow**: `node scripts/agent-team/plugins/fhir-guards/hooks/run.mjs --allow <repo>`, run interactively (or with `--yes`). The allowlist lives in your user config dir; one stored inside a repo is ignored. It trusts a path, not content: whatever you check out or pull into an allowed repo runs at session start. Without it, the plugin does nothing, so another repo cannot run code through it.
+- The ledger records a harness session start as `SubagentStart` (with the harness as `agent_type`), plus prompt submits, and tool failures where the harness reports them: Claude, OpenCode (`session.error`), Kimi and MiniMax. **Codex has no tool-failure event, so Codex sessions record only session starts and prompts.** Per-turn stop events are not recorded.
 
 ## Persona → KBD stage and skill matrix
 
@@ -35,7 +85,7 @@ Preloaded skills are always repo-resident (see [Prerequisites](#prerequisites)).
 | Agent | KBD stages / commands owned | Preloaded skills | Invoke when needed |
 |---|---|---|---|
 | `fhir-tech-lead` | `/kbd-execute`, `/kbd-status`, `/kbd-goal-check`, `/kbd-next-phase`, `/kbd-apply` dispatch | karpathy-guidelines | kbd-process-orchestrator, kbd-status, kbd-execute, kbd-apply, kbd-goal-check, kbd-next-phase, kbd-reflect, adversarial-review |
-| `fhir-ideation-strategist` | `/kbd-new-phase` and `/kbd-goal` drafting | karpathy-guidelines, openspec-explore | idea-refine, superpowers:brainstorming, validate-idea, kbd-goal, kbd-new-phase, deep-research, firecrawl-search |
+| `fhir-architect` (goal discovery) | `/kbd-new-phase` and `/kbd-goal` drafting | karpathy-guidelines, openspec-explore | idea-refine, superpowers:brainstorming, validate-idea, kbd-goal, kbd-new-phase, deep-research, firecrawl-search |
 | `fhir-architect` | `/kbd-assess`, `/kbd-analyze`, `/kbd-plan`, `/opsx:new/ff/continue/update` | karpathy-guidelines, openspec-propose | kbd-assess, kbd-analyze, kbd-plan, openspec-*, documentation-and-adrs, api-design, postgres-patterns, adversarial-review |
 | `fhir-go-developer` | `/kbd-apply` tasks (non-storage packages) | karpathy-guidelines, openspec-apply-change | kbd-apply, golang-patterns, golang-testing, tdd-workflow, surgical-patch, go-build-resolver (agent) |
 | `fhir-storage-search-engineer` | `/kbd-apply` tasks (store, index, db, searchparam) | karpathy-guidelines, openspec-apply-change | kbd-apply, postgres-patterns, database-migrations, golang-patterns, golang-testing, database-reviewer (agent) |
@@ -44,12 +94,12 @@ Preloaded skills are always repo-resident (see [Prerequisites](#prerequisites)).
 | `fhir-security-compliance-reviewer` | Security gate for sensitive paths | karpathy-guidelines | security-review, hipaa-compliance, healthcare-phi-compliance, security-and-hardening, healthcare-reviewer / security-reviewer (agents) |
 | `fhir-conformance-validator` | Archive gate (`kbd-apply verify`, `/opsx:verify`), `/kbd-goal-check` | karpathy-guidelines | openspec-verify-change (read-only steps), kbd-goal-check, verification-loop, superpowers:verification-before-completion |
 | `fhir-infra-release-engineer` | CI/CD and release changes | karpathy-guidelines | ci-cd-and-automation, github-ops, deployment-patterns, docker-patterns, shipping-and-launch, gitops-bootstrap, kustomize-overlay |
-| `fhir-knowledge-curator` | Karpathy lessons for `/kbd-reflect` | karpathy-guidelines | karpathy-progress-memory, kbd-reflect, kbd-memory-recall, llm-wiki, continuous-learning-v2, knowledge-ops |
+| `fhir-tech-lead` (curation) | Karpathy lessons for `/kbd-reflect` | karpathy-guidelines | karpathy-progress-memory, kbd-reflect, kbd-memory-recall, llm-wiki, continuous-learning-v2, knowledge-ops |
 
 ## Hand-offs
 
 ```
-fhir-ideation-strategist ──goals──▶ fhir-tech-lead ──/kbd-new-phase──▶ fhir-architect
+fhir-architect ──goals──▶ fhir-tech-lead ──/kbd-new-phase──▶ fhir-architect
 fhir-architect ──assess / plan / OpenSpec changes──▶ fhir-tech-lead (/kbd-execute)
 fhir-tech-lead ──/kbd-apply per change──▶ fhir-go-developer | fhir-storage-search-engineer
                                           ⇅ fhir-test-engineer (tests first, CI parity)
@@ -60,11 +110,19 @@ fhir-tech-lead ──/kbd-apply per change──▶ fhir-go-developer | fhir-sto
                                                                                 │ PASS
                                                    fhir-tech-lead: kbd-apply verify → archive
 fhir-infra-release-engineer ◀── CI, Helm, Docker, release work; CI-only failures
-fhir-knowledge-curator ◀── phase end: ledger → Karpathy lessons → /kbd-reflect
+fhir-tech-lead ◀── phase end: ledger → Karpathy lessons → /kbd-reflect
+
+Domain roles (manifest; PHI lanes per phi-lane-policy):
+ehr-integration-manager ──intake──▶ hipaa-privacy-officer ──recommendation──▶ privacy official (operator) signs off
+ehr-integration-manager ──technical discovery──▶ fhir-integration-specialist ──change request──▶ fhir-architect
+fhir-integration-specialist ──schedule──▶ data-sync-coordinator ──ingest defects──▶ fhir-tech-lead
+data-sync-coordinator ──possible PHI exposure──▶ hipaa-privacy-officer (immediately)
+billing-prior-auth-specialist ──data gaps──▶ fhir-integration-specialist
 ```
 
 - **Gate rules.** Any CRITICAL finding from a reviewer means BLOCK. For Go changes, archive requires either a local `make lint` pass or recorded evidence of a green CI lint job; unverified lint means BLOCK. Commits and pushes happen only when the operator asks.
-- **Read-only personas** (`fhir-tech-lead`, the reviewers and the validator) never modify tracked files. Their Bash use is limited to verification. Commands that write into the repo (`make build`, `npm run build`) are not allowed for them.
+- **Read-only personas** (the reviewers and the validator) never modify tracked files. Their Bash use is limited to verification. Commands that write into the repo (`make build` without `BINARY=` pointing outside it, `npm run build`) are not allowed for them.
+- **`fhir-tech-lead`** edits only KBD phase records and curation paths (its manifest `owns`), never code, specs or configuration; its other Bash use is limited to KBD, OpenSpec and verification commands.
 
 ## Hooks
 
@@ -98,7 +156,7 @@ Claude Code events ──agent-ledger──▶ .prometheus/agent-ledger.jsonl   
 Stop / SessionEnd / PreCompact ──karpathy-flush──▶ scan ──▶ raw/<ts>-agent-activity.md (committed)
                                                    └──▶ outbox/ ──pk-drain (detached)──▶ pk ingest → project KB
 KBD task/change/phase:after ──karpathy-boundary──▶ record-progress.py ──▶ session-log.md + receipts (committed)
-fhir-knowledge-curator ──phase end──▶ Karpathy lessons in reflection.md
+fhir-tech-lead ──phase end──▶ Karpathy lessons in reflection.md
 ```
 
 **What is recorded:**
@@ -133,7 +191,7 @@ Regex scanning cannot detect names, dates of birth or clinical free text. That i
 
 ## Prerequisites
 
-The agents preload only skills that live in this repository: the vendored `karpathy-guidelines` and the OpenSpec skills installed by `openspec init`. So every agent loads on a fresh clone.
+The agents preload only skills that live in this repository: the vendored `karpathy-guidelines`, the OpenSpec skills installed by `openspec init`, and the domain skills in `.agents/skills/` (provenance in `.agents/skills/SOURCES.json`, mirrored to every harness by `node scripts/agent-team/mirror-skills.mjs`). So every agent loads on a fresh clone.
 
 The skills and helper agents below are **machine-local**. They are installed per developer, not committed. Each agent names them under *Invoke when needed*. When one is missing, the agent says `missing skill: <name>` once and continues with manual steps.
 
@@ -160,7 +218,7 @@ prerequisites:
   - name: continuous-learning-v2
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
-    used_by: [fhir-knowledge-curator]
+    used_by: [fhir-tech-lead]
   - name: database-migrations
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
@@ -172,7 +230,7 @@ prerequisites:
   - name: deep-research
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-ideation-strategist]
+    used_by: [fhir-architect]
   - name: deployment-patterns
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
@@ -192,7 +250,7 @@ prerequisites:
   - name: firecrawl-search
     kind: skill
     source: shared agent skills (~/.TOOLS/skills/agents, linked into ~/.claude/skills)
-    used_by: [fhir-ideation-strategist]
+    used_by: [fhir-architect]
   - name: github-ops
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
@@ -228,11 +286,11 @@ prerequisites:
   - name: idea-refine
     kind: skill
     source: shared agent skills (~/.TOOLS/skills/agents, linked into ~/.claude/skills)
-    used_by: [fhir-ideation-strategist]
+    used_by: [fhir-architect]
   - name: karpathy-progress-memory
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-knowledge-curator]
+    used_by: [fhir-tech-lead]
   - name: kbd-analyze
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
@@ -252,7 +310,7 @@ prerequisites:
   - name: kbd-goal
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-ideation-strategist]
+    used_by: [fhir-architect]
   - name: kbd-goal-check
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
@@ -260,11 +318,11 @@ prerequisites:
   - name: kbd-memory-recall
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-knowledge-curator]
+    used_by: [fhir-tech-lead]
   - name: kbd-new-phase
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-ideation-strategist]
+    used_by: [fhir-architect]
   - name: kbd-next-phase
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
@@ -280,7 +338,7 @@ prerequisites:
   - name: kbd-reflect
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-knowledge-curator, fhir-tech-lead]
+    used_by: [fhir-tech-lead]
   - name: kbd-status
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
@@ -288,7 +346,7 @@ prerequisites:
   - name: knowledge-ops
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
-    used_by: [fhir-knowledge-curator]
+    used_by: [fhir-tech-lead]
   - name: kustomize-overlay
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
@@ -296,7 +354,7 @@ prerequisites:
   - name: llm-wiki
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-knowledge-curator]
+    used_by: [fhir-tech-lead]
   - name: postgres-patterns
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
@@ -320,7 +378,7 @@ prerequisites:
   - name: superpowers:brainstorming
     kind: skill
     source: superpowers plugin (Claude Code plugin marketplace)
-    used_by: [fhir-ideation-strategist]
+    used_by: [fhir-architect]
   - name: superpowers:verification-before-completion
     kind: skill
     source: superpowers plugin (Claude Code plugin marketplace)
@@ -340,11 +398,39 @@ prerequisites:
   - name: validate-idea
     kind: skill
     source: prometheus-skill-pack (Prometheus plugin)
-    used_by: [fhir-ideation-strategist]
+    used_by: [fhir-architect]
   - name: verification-loop
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
     used_by: [fhir-conformance-validator, fhir-test-engineer]
+  - name: agent-team-creator
+    kind: skill
+    source: prometheus-skill-pack (Prometheus plugin; public Prometheus-AGS/prometheus-skill-system, MIT); validates and exports .agent-team/team.json (build-manifest --check and CI also run it)
+    used_by: [fhir-architect, fhir-infra-release-engineer]
+  - name: healthcare-phi-compliance
+    kind: skill
+    source: everything-claude-code (MIT, affaan-m/everything-claude-code), machine-local
+    used_by: [hipaa-privacy-officer, fhir-security-compliance-reviewer]
+  - name: hipaa-compliance
+    kind: skill
+    source: everything-claude-code (MIT, affaan-m/everything-claude-code), machine-local
+    used_by: [hipaa-privacy-officer, fhir-security-compliance-reviewer]
+  - name: prior-auth
+    kind: plugin-skill
+    source: healthcare@healthcare Claude Code plugin (anthropics/healthcare, not vendored; marketplace registered in .claude/settings.json, plugin per-user opt-in, synthetic lane only — ATH-D-007)
+    used_by: [billing-prior-auth-specialist]
+  - name: procedure-coding
+    kind: plugin-skill
+    source: healthcare@healthcare Claude Code plugin (anthropics/healthcare)
+    used_by: [billing-prior-auth-specialist]
+  - name: icd10-cm
+    kind: plugin-skill
+    source: healthcare@healthcare Claude Code plugin (anthropics/healthcare)
+    used_by: [billing-prior-auth-specialist]
+  - name: fhir-developer
+    kind: plugin-skill
+    source: healthcare@healthcare Claude Code plugin (anthropics/healthcare)
+    used_by: [fhir-integration-specialist]
 ```
 
 Runtime tools:

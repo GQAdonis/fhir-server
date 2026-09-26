@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".agent-team/roles/fhir-tech-lead.md",
+      "line": 25,
+      "claim": "The tech lead prompt authorizes writing `.prometheus/.flush-cursor` even though that path is not declared in the role's `owns` list.",
+      "evidence": "Acceptance requires each role to get explicit disjoint `owns` paths; the header `owns` only lists `.prometheus/raw/**`, `.prometheus/outbox/**`, `.prometheus/ledger/**`, and `.prometheus/agent-ledger.jsonl`, while the body says Edit/Write are allowed for \"`.prometheus/raw/`, `.prometheus/outbox/`, `.prometheus/ledger/`, `.prometheus/agent-ledger.jsonl` and the local `.prometheus/.flush-cursor`\".",
+      "suggested_fix": "Either add `.prometheus/.flush-cursor` to the role's `owns` list if it is a legitimate owned write path, or remove it from the prompt's allowed write paths; extend the ownership/prompt consistency check to cover this non-`Writable paths, and only these:` wording."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

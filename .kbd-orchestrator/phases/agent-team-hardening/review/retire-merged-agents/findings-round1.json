@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".kbd-orchestrator/project.json",
+      "line": 67,
+      "claim": "The retired `fhir-knowledge-curator` name remains outside the docs redirect note, violating the required grep result.",
+      "evidence": "Acceptance criterion 1.2 requires `grep -rn 'fhir-ideation-strategist\\|fhir-knowledge-curator'` outside the allowed archive/prometheus paths to return only the redirect note, but `.kbd-orchestrator/project.json:67` contains `no role assigned since fhir-knowledge-curator merged into fhir-tech-lead`.",
+      "suggested_fix": "Remove the retired agent name from `.kbd-orchestrator/project.json` or reword it without the retired identifier."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "docs/agent-team.md",
+      "line": 21,
+      "claim": "The docs contain multiple retired-agent references beyond the single redirect note required by the acceptance criteria.",
+      "evidence": "Acceptance criterion 1.2 says the grep should return only the redirect note, but `docs/agent-team.md` includes additional mentions at lines 21-22 (`fhir-ideation-strategist` and `fhir-knowledge-curator` merge bullets) and lines 68 and 77 (`formerly ...`) outside the `## Retired agents` redirect note.",
+      "suggested_fix": "Keep the retired names only in the `## Retired agents` redirect note and reword the roster/matrix entries to refer to `fhir-architect` and `fhir-tech-lead` duties without naming retired agents."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

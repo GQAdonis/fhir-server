@@ -143,12 +143,16 @@ test("default mode returns queued-async and a detached drainer empties the outbo
     const result = flush(root, NOW, { ...process.env, PK_BIN: fakePk(root, 0) });
     assert.equal(result.status, "queued-async");
     const outbox = path.join(root, ".prometheus", "outbox");
-    for (let i = 0; i < 50 && readdirSync(outbox).length > 0; i++) await new Promise((r) => setTimeout(r, 100));
+    const ledgerFile = path.join(root, ".prometheus", "agent-ledger.jsonl");
+    // The detached drainer empties the outbox and then appends its ledger line;
+    // wait for both (up to 20 s under load) before asserting.
+    const drained = () => readdirSync(outbox).length === 0 && /"event":"kb_ingested"/.test(readFileSync(ledgerFile, "utf8"));
+    for (let i = 0; i < 200 && !drained(); i++) await new Promise((r) => setTimeout(r, 100));
     assert.equal(readdirSync(outbox).length, 0);
-    const ledger = readFileSync(path.join(root, ".prometheus", "agent-ledger.jsonl"), "utf8");
-    assert.match(ledger, /"event":"kb_ingested","outcome":"delivered:1,remaining:0"/);
+    assert.match(readFileSync(ledgerFile, "utf8"), /"event":"kb_ingested","outcome":"delivered:1,remaining:0"/);
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    // The drainer may still be closing files; retry instead of failing with ENOTEMPTY.
+    rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
 });
 

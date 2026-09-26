@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 checked acceptance criteria for provenance, unlicensed Anthropic plugin handling, third-party notices, project-authored skills, harness mirroring, generated-skill exclusion, source-skill classification, research record, and docs prerequisites against the diff/file_tree/evidence; no unmet criterion found in the packet.",
+    "Correctness \u2014 checked mirror-skills.mjs classification, byte comparison, stale removal marker handling, --check behavior, and CI workflow invocation paths; no concrete defect found from the packet.",
+    "Regressions \u2014 checked new settings/workflow/docs additions for removal or replacement of existing behavior shown in the diff; no regression evidence in the packet.",
+    "Security \u2014 checked unlicensed source vendoring, PHI lane wording, plugin enablement, hosted connector restrictions, hardcoded secrets constraints, and vendored-risk notes; no packet-supported security defect found.",
+    "Constraint breaches \u2014 checked blocking constraints applicability; no Go/schema/store/handler changes and no committed credential pattern in scoped files introduced by the shown diff.",
+    "Silent failure \u2014 checked for swallowed mirror drift, unclassified skills, missing listed SKILL.md handling, and generated-skill exclusion behavior; no silent failure found in the packet."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

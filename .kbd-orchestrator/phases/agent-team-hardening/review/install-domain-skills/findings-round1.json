@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 acceptance criteria for provenance, plugin-only Anthropic skills, third-party notices, project-authored skills, payer citation rule, harness mirrors, and research record are addressed by the diff/evidence packet.",
+    "Correctness \u2014 mirror script logic checks listed project and third-party skills, validates source SKILL.md presence, compares file lists and bytes, and exits nonzero on drift in --check mode.",
+    "Regressions \u2014 no existing files are modified in a way the packet shows as removing prior behavior; added settings/docs/scripts/skills are consistent with the stated target.",
+    "Security \u2014 unlicensed Anthropic skills are plugin-enabled rather than vendored, PHI lane policy defaults to synthetic data, and the packet records clean scans/no introduced credentialed DSNs.",
+    "Constraint breaches \u2014 no Go, schema, store, handler, helm, or generated-file paths are touched; packet evidence marks Go build/test/lint constraints N/A and no-hardcoded-secrets baseline-only.",
+    "Silent failure \u2014 mirror check reports missing sources and drift with nonzero exits; payer skill requires unverified source gaps to be stated rather than silently relying on memory."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

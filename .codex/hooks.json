@@ -1,0 +1,42 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook guard",
+            "commandWindows": "for /f \"delims=\" %i in ('git rev-parse --show-toplevel') do @node \"%i/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook guard",
+            "timeout": 10,
+            "statusMessage": "Checking protected paths"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook ledger",
+            "commandWindows": "for /f \"delims=\" %i in ('git rev-parse --show-toplevel') do @node \"%i/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook ledger",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook ledger",
+            "commandWindows": "for /f \"delims=\" %i in ('git rev-parse --show-toplevel') do @node \"%i/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook ledger",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

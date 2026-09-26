@@ -1,0 +1,50 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/agents",
+      "claim": "The Claude harness does not contain exactly the 14 manifest roles because extra Claude agent files remain installed.",
+      "evidence": "Acceptance criterion \u201cRole coverage\u201d requires each of the five locations contain exactly the 14 role definitions; the packet file_tree states \u201c.claude/agents: 16 entries\u201d and \u201c.claude/agents also holds fhir-ideation-strategist.md and fhir-knowledge-curator.md\u201d.",
+      "suggested_fix": "Remove or retire the two non-roster Claude agent files in this change, or make the installer/check fail until `.claude/agents/` contains exactly the manifest roster."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/harness-lint.mts",
+      "claim": "The cross-harness lint does not enforce exact roster membership for Claude agents, so the current extra Claude files are not caught by CI.",
+      "evidence": "The HARNESSES roster/extra-file loop covers only codex/opencode/kimi/minimax via `for (const [name, spec] of Object.entries(HARNESSES))`, while Claude is handled later only by checking each roster id exists and has generated sections: `for (const id of roster) { ... .claude/agents/${id}.md ... }`; acceptance criterion requires `.claude/agents/` contain exactly the 14 role definitions and lint fail on drift across all harnesses.",
+      "suggested_fix": "Add Claude to the exact roster check, or explicitly enumerate `.claude/agents/*.md` and fail for any file whose id is not in the manifest."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/install-exports.mjs",
+      "claim": "The install drift check is not byte-for-byte because it normalizes CRLF before comparing installed files to fresh exports.",
+      "evidence": "Acceptance criterion \u201cGenerated files are not hand-edited\u201d says drift must fail on any byte difference; `normalize = (buf) => buf.toString(\"utf8\").replace(/\\r\\n/g, \"\\n\")` is used in `const same = existsSync(to) && normalize(readFileSync(to)) === normalize(want)` and marker comparisons.",
+      "suggested_fix": "Compare raw Buffer contents for generated files and markers in `--check`; rely on `.gitattributes` for line-ending consistency instead of normalizing differences away."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/gen-agents-md.mjs",
+      "claim": "The AGENTS.md drift check is not byte-for-byte because it normalizes CRLF before comparison.",
+      "evidence": "Acceptance criterion \u201cGenerated files are not hand-edited\u201d says drift must fail on any byte difference, but `--check` uses `readFileSync(out, \"utf8\").replace(/\\r\\n/g, \"\\n\") !== want`, so a CRLF hand edit or checkout change is accepted.",
+      "suggested_fix": "Compare `readFileSync(out)` against `Buffer.from(want, \"utf8\")` without newline normalization."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/gen-agents-md.mjs",
+      "claim": "AGENTS.md generation changes the document title in addition to the harness-specific lead line.",
+      "evidence": "Acceptance criterion \u201cNon-Claude harnesses get project instructions\u201d requires AGENTS.md be generated from CLAUDE.md \u201cchanging only the harness-specific lead line\u201d; `agentsMd()` returns ``# AGENTS.md\\n${src.slice(CLAUDE_TITLE.length + 1).replace(CLAUDE_LEAD, AGENTS_LEAD)}``, replacing the `# CLAUDE.md` title as well.",
+      "suggested_fix": "Preserve the original title if the criterion is literal, or update the acceptance criteria to explicitly allow changing the title."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

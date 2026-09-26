@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": "docs/agent-team.md",
+      "line": 117,
+      "claim": "The team documentation contradicts the generated manifest by calling `fhir-tech-lead` read-only even though the manifest grants it write ownership and Edit/Write tools.",
+      "evidence": "The docs say `Read-only personas (`fhir-tech-lead`, the reviewers and the validator) never modify tracked files`, while the Portable team roster gives `fhir-tech-lead` owned write paths such as `.kbd-orchestrator/phases/*/goals.md` and `.prometheus/agent-ledger.jsonl`; `.agent-team/roles/fhir-tech-lead.md` header also declares `tools: [Agent, Read, Grep, Glob, Bash, SendMessage, Edit, Write]` and `owns: [...]` for those paths.",
+      "suggested_fix": "Remove `fhir-tech-lead` from the read-only persona statement or qualify the statement as applying only to the pre-export installed Claude agent, then document the manifest-era write scope consistently."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

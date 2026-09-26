@@ -165,5 +165,13 @@
         ]
       }
     ]
+  },
+  "extraKnownMarketplaces": {
+    "healthcare": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/healthcare"
+      }
+    }
   }
 }

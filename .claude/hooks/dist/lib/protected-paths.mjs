@@ -27,6 +27,34 @@ export const PROTECTED_PATHS = [
         reason: "KBD runtime projection. Use `prometheus kbd` commands.",
     },
     {
+        glob: ".claude/agents/**",
+        reason: "Generated from the team manifest. Edit `.agent-team/roles/<id>.md` or `.agent-team/team.config.json`, then run `node scripts/agent-team/build-manifest.mjs && node scripts/agent-team/install-exports.mjs`.",
+    },
+    {
+        glob: ".codex/agents/**",
+        reason: "Generated from the team manifest. Edit `.agent-team/roles/<id>.md` or `.agent-team/team.config.json`, then run `node scripts/agent-team/build-manifest.mjs && node scripts/agent-team/install-exports.mjs`.",
+    },
+    {
+        glob: ".opencode/agents/**",
+        reason: "Generated from the team manifest. Edit `.agent-team/roles/<id>.md` or `.agent-team/team.config.json`, then run `node scripts/agent-team/build-manifest.mjs && node scripts/agent-team/install-exports.mjs`.",
+    },
+    {
+        glob: ".kimi-code/agents/**",
+        reason: "Generated from the team manifest. Edit `.agent-team/roles/<id>.md` or `.agent-team/team.config.json`, then run `node scripts/agent-team/build-manifest.mjs && node scripts/agent-team/install-exports.mjs`.",
+    },
+    {
+        glob: ".minimax/agents/**",
+        reason: "Generated from the team manifest. Edit `.agent-team/roles/<id>.md` or `.agent-team/team.config.json`, then run `node scripts/agent-team/build-manifest.mjs && node scripts/agent-team/install-exports.mjs`.",
+    },
+    {
+        glob: ".agent-team/team.json",
+        reason: "Generated from the team manifest. Edit `.agent-team/roles/<id>.md` or `.agent-team/team.config.json`, then run `node scripts/agent-team/build-manifest.mjs && node scripts/agent-team/install-exports.mjs`.",
+    },
+    {
+        glob: "AGENTS.md",
+        reason: "Generated from CLAUDE.md. Edit CLAUDE.md, then run `node scripts/agent-team/gen-agents-md.mjs`.",
+    },
+    {
         glob: ".kbd-orchestrator/position-reminder.txt",
         reason: "Rewritten by the KBD runtime on every transition. Use `prometheus kbd` commands.",
     },

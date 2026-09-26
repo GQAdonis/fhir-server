@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "2",
+  "generatedBy": "kbd-runtime",
+  "projectionContractVersion": 2,
+  "sourceRevision": 507,
+  "derivedRevision": 507,
+  "frontier": {
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 507
+  },
+  "conflictCount": 0,
+  "phase": "agent-team-hardening",
+  "phaseId": "agent-team-hardening",
+  "parentPhase": null,
+  "last_updated": "2026-09-25T21:56:07.071073Z",
+  "last_updated_by": "kbd-runtime",
+  "changes_total": 7,
+  "changes_completed": 5,
+  "implementation_total": 7,
+  "implementation_completed": 5,
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 5,
+      "total": 7,
+      "status": "IN_PROGRESS"
+    },
+    "evidence": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "completionScopes": {
+    "completion": "phase",
+    "runCompletion": "run"
+  },
+  "runCompletion": {
+    "scope": "run",
+    "runId": "agent-dev-team-20260924T112402Z",
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 13,
+      "total": 15,
+      "status": "IN_PROGRESS"
+    },
+    "evidence": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "changes": [
+    {
+      "id": "install-domain-skills",
+      "title": "Install and vendor healthcare skills, author project skills, record Firecrawl research",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 12,
+      "tasks_done": 6,
+      "last_task_completed": "install-domain-skills 6",
+      "next_task_pending": "Write `.kbd-orchestrator/phases/agent-team-hardening/evidence/skill-research.md`: Firecrawl queries, result URLs, proven",
+      "blockers": []
+    },
+    {
+      "id": "define-portable-team-manifest",
+      "title": "Portable agent-team manifest (14 roles) as single source of truth",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 14,
+      "tasks_done": 7,
+      "last_task_completed": "define-portable-team-manifest 7",
+      "next_task_pending": "Run `agent-team-models` discovery per harness (Claude, Codex, OpenCode, Kimi, MiniMax) and record concrete model ids per",
+      "blockers": []
+    },
+    {
+      "id": "export-team-to-harnesses",
+      "title": "Generate and install agents for Claude, Codex, OpenCode, Kimi, MiniMax Code",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 14,
+      "tasks_done": 7,
+      "last_task_completed": "export-team-to-harnesses 7",
+      "next_task_pending": "Export the manifest to staging for claude, codex, opencode, kimi, minimax (`cli.mjs export`, new dirs under `.agent-team",
+      "blockers": []
+    },
+    {
+      "id": "retire-merged-agents",
+      "title": "Retire fhir-ideation-strategist and fhir-knowledge-curator after merge",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 6,
+      "tasks_done": 3,
+      "last_task_completed": "retire-merged-agents 3",
+      "next_task_pending": "Remove any remaining `fhir-ideation-strategist` / `fhir-knowledge-curator` definitions from all five harness locations a",
+      "blockers": []
+    },
+    {
+      "id": "wire-hooks-per-harness",
+      "title": "Wire guard and ledger hooks into each harness's native hook mechanism",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 12,
+      "tasks_done": 6,
+      "last_task_completed": "wire-hooks-per-harness 6",
+      "next_task_pending": "Verify each harness's hook mechanism against its installed version (Codex hooks events and payload; OpenCode plugin API ",
+      "blockers": []
+    },
+    {
+      "id": "configure-phi-lanes",
+      "title": "Tribe-endpoint PHI lane templates and phi-lane-guard (synthetic default)",
+      "status": "PENDING",
+      "implementation_status": "PENDING",
+      "tasks_total": 7,
+      "tasks_done": 0,
+      "last_task_completed": null,
+      "next_task_pending": "Implement `src/phi-lane-guard.mts` + `src/lib/phi-lane.mts` (URL extraction from WebFetch/MCP/Bash, FHIR-path match, san",
+      "blockers": []
+    },
+    {
+      "id": "document-and-verify-cross-harness-team",
+      "title": "Docs, CI, goal check and per-harness acceptance",
+      "status": "PENDING",
+      "implementation_status": "PENDING",
+      "tasks_total": 5,
+      "tasks_done": 0,
+      "last_task_completed": null,
+      "next_task_pending": "Rewrite `docs/agent-team.md` (14-role roster, harness × tier model table, PHI-lane rules, hook capability matrix, per-ha",
+      "blockers": []
+    }
+  ],
+  "children": {},
+  "migrationStatus": null
+}

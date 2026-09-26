@@ -1,0 +1,15 @@
+# refine-validate — wire-hooks-per-harness (2026-09-25T21:56:18Z)
+- PASS  openspec-strict
+- PASS  hooks-tests
+- PASS  hooks-tests-repeat
+- PASS  check-dist
+- PASS  lint-agents
+- PASS  codex-hooks-json
+- PASS  opencode-plugin-syntax
+- PASS  plugin-manifests-parse
+- PASS  capability-evidence
+- PASS  doc-matrix
+- PASS  install-in-sync
+- PASS  prometheus-scan
+- PASS  no-probe-file-left
+- N/A   Go gates (no Go files)

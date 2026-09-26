@@ -2,7 +2,8 @@ name: Agent tooling
 
 # Verifies the Claude Code agent team and its Node hooks on all three
 # developer platforms: hook tests, committed dist/ freshness, agent lint,
-# the .prometheus/ PHI/secret scan, and an exec-form hook run (no shell).
+# harness skill mirrors, the .prometheus/ PHI/secret scan, and an exec-form
+# hook run (no shell).
 on:
   push:
     branches: [main]
@@ -12,6 +13,15 @@ on:
       - ".kbd-orchestrator/hooks-config.json"
       - "docs/agent-team.md"
       - ".gitattributes"
+      - ".agents/**"
+      - ".agent-team/**"
+      - ".codex/**"
+      - ".opencode/**"
+      - ".kimi-code/**"
+      - ".minimax/**"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "scripts/agent-team/**"
       - ".github/workflows/agent-tooling.yml"
   pull_request:
     branches: [main]
@@ -21,6 +31,15 @@ on:
       - ".kbd-orchestrator/hooks-config.json"
       - "docs/agent-team.md"
       - ".gitattributes"
+      - ".agents/**"
+      - ".agent-team/**"
+      - ".codex/**"
+      - ".opencode/**"
+      - ".kimi-code/**"
+      - ".minimax/**"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "scripts/agent-team/**"
       - ".github/workflows/agent-tooling.yml"
 
 permissions:
@@ -34,12 +53,17 @@ jobs:
   hooks:
     name: Hooks (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    env:
+      AGENT_TEAM_CREATOR: ${{ github.workspace }}/.ci/agent-team-creator-src/dist/plugins/claude/prometheus-skill-pack/skills/agent-team-creator
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
+      # No later step needs git auth, and the job runs third-party code (agent-team-creator).
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -58,11 +82,33 @@ jobs:
       - name: Hook tests (node:test against dist/)
         run: npm --prefix .claude/hooks test
 
-      - name: Lint agent definitions
-        run: npm --prefix .claude/hooks run lint:agents
-
+      # Runs before any third-party code enters the job, so its result cannot be tampered with.
       - name: PHI/secret scan of committable .prometheus/
         run: npm --prefix .claude/hooks run scan:prometheus
+
+      # agent-team-creator (MIT, public) at the commit recorded in
+      # .agent-team/team.config.json native.*.version; its compiled CLI has no
+      # dependencies. Checked out outside the repo tree's tracked paths.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: Prometheus-AGS/prometheus-skill-system
+          ref: 5f2d7a712f289b6bb2df3f45138bb3d68ed836a2
+          path: .ci/agent-team-creator-src
+          sparse-checkout: dist/plugins/claude/prometheus-skill-pack/skills/agent-team-creator
+          persist-credentials: false
+
+      # Lints every harness's generated agents and runs the drift checks
+      # (build-manifest incl. creator validate, install-exports, gen-agents-md, mirror-skills).
+      - name: Lint agent definitions and check drift across harnesses
+        run: npm --prefix .claude/hooks run lint:agents
+
+      # .agents/skills/ is the source; the four harness copies must match it.
+      # The team scripts' own tests (manifest build, harness install, AGENTS.md).
+      - name: Team script tests
+        run: node --test scripts/agent-team/build-manifest.test.mjs scripts/agent-team/install-exports.test.mjs scripts/agent-team/gen-agents-md.test.mjs
+
+      - name: Harness skill mirrors match .agents/skills/
+        run: node scripts/agent-team/mirror-skills.mjs --check
 
       # Exec form, as Claude Code runs the hooks: node spawns the compiled
       # module directly with a hook payload on stdin; no shell is involved.

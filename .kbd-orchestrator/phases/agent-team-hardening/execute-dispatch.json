@@ -1,0 +1,26 @@
+{
+  "phase": "agent-team-hardening",
+  "backend": "openspec",
+  "dispatchedAt": "2026-09-25T13:44:59Z",
+  "assignedChanges": [
+    "install-domain-skills",
+    "define-portable-team-manifest",
+    "export-team-to-harnesses",
+    "wire-hooks-per-harness",
+    "retire-merged-agents",
+    "configure-phi-lanes",
+    "document-and-verify-cross-harness-team"
+  ],
+  "tasksRegistered": 38,
+  "pending": [
+    "wire-hooks-per-harness",
+    "configure-phi-lanes",
+    "document-and-verify-cross-harness-team"
+  ],
+  "archived": [
+    "install-domain-skills",
+    "define-portable-team-manifest",
+    "export-team-to-harnesses",
+    "retire-merged-agents"
+  ]
+}

@@ -34,6 +34,13 @@ const PROTECTED = [
   ".kbd-orchestrator/current-waypoint.json",
   ".kbd-orchestrator/current-waypoint.md",
   ".kbd-orchestrator/position-reminder.txt",
+  ".claude/agents/fhir-architect.md",
+  ".codex/agents/fhir-architect.toml",
+  ".opencode/agents/fhir-architect.md",
+  ".kimi-code/agents/fhir-architect.md",
+  ".minimax/agents/fhir-architect/agent.md",
+  ".agent-team/team.json",
+  "AGENTS.md",
 ];
 
 for (const p of PROTECTED) {
@@ -71,5 +78,5 @@ test("tool calls without a file path are allowed", () => {
   assert.equal(targetPath({ command: "ls" }), undefined);
   assert.equal(targetPath({ notebook_path: "/repo/x.ipynb" }), "/repo/x.ipynb");
   assert.equal(protectionFor("go.mod"), undefined);
-  assert.equal(PROTECTED_PATHS.length, 7);
+  assert.equal(PROTECTED_PATHS.length, 14);
 });

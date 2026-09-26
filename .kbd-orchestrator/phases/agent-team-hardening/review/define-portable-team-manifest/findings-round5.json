@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".agent-team/roles/fhir-conformance-validator.md",
+      "line": 35,
+      "claim": "The validator prompt replaces the blocking `make build && make vet` gate with `go build ./... && go vet ./...`, so agents following this manifest will not execute the required project constraint.",
+      "evidence": "Constraint `build-passes` requires command `make build && make vet`, but the added validator command table says: `go build ./... && go vet ./...` and describes it as equivalent to the `build-passes` constraint.",
+      "suggested_fix": "Make the validator require `make build && make vet` exactly, or run it in a temporary/clean worktree and ignore/remove the generated `./fhir-server` afterward while still preserving the constraint command."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

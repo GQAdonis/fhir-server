@@ -1,0 +1,19 @@
+{
+  "generatedBy": "scripts/agent-team/install-exports.mjs",
+  "roles": [
+    "fhir-tech-lead",
+    "fhir-architect",
+    "fhir-go-developer",
+    "fhir-storage-search-engineer",
+    "fhir-test-engineer",
+    "fhir-code-reviewer",
+    "fhir-security-compliance-reviewer",
+    "fhir-conformance-validator",
+    "fhir-infra-release-engineer",
+    "hipaa-privacy-officer",
+    "fhir-integration-specialist",
+    "ehr-integration-manager",
+    "data-sync-coordinator",
+    "billing-prior-auth-specialist"
+  ]
+}

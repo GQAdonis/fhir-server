@@ -1,0 +1,18 @@
+# refine-validate — export-team-to-harnesses (2026-09-25T16:06:09Z)
+- PASS  openspec-strict
+- PASS  team-script-tests
+- PASS  install-in-sync
+- PASS  agents-md-current
+- PASS  manifest-check
+- PASS  each-harness-14
+- PASS  codex-registration-valid
+- PASS  lint-agents-with-drift
+- PASS  hooks-tests
+- PASS  check-dist
+- PASS  minimax-runtime-ignored
+- PASS  exports-staging-ignored
+- PASS  mirror-in-sync
+- PASS  workflow-yaml-parses
+- PASS  prometheus-scan
+- PASS  generated-agents-scan
+- N/A   Go build/test/lint/gofmt/license-header (no Go files touched)

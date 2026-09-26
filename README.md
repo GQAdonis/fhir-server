@@ -83,6 +83,135 @@ We'd love for you to be part of the project! Whether you're fixing a bug, improv
 - **[Report an Issue](https://github.com/wso2/fhir-server/issues)** — help us improve the server.
 - **[Security Policy](./SECURITY.md)** — how to report vulnerabilities responsibly.
 
+## AI Agent Team Setup (TribeHealth)
+
+This fork runs an AI agent development team on top of the server. Its KBD phase `agent-team-hardening` extends the team for use as an intermediate EHR that pulls patient data from other EHR systems over FHIR. The roster, models and hand-offs are in **[docs/agent-team.md](./docs/agent-team.md)**; the phase plan is in `.kbd-orchestrator/phases/agent-team-hardening/plan.md`.
+
+### Prerequisites
+
+- **Node.js 24+** on PATH. All project hooks run as `node <script>`.
+- **Go 1.25+** with `gofmt`, and **Docker** for integration tests.
+- **Python 3** (`python3`, `python` or `py -3`) and the Prometheus `pk` CLI, for Karpathy logging and KBD boundary records. Both degrade gracefully when absent.
+- **Git Bash** on Windows, for the KBD orchestrator's stage hooks.
+- Harness CLIs, one or more: Claude Code, Codex CLI (`codex`), OpenCode (`opencode`), Kimi Code (`kimi`), MiniMax Code (`mcode`).
+
+### Project hook toolchain
+
+```bash
+npm --prefix .claude/hooks ci
+npm --prefix .claude/hooks test
+npm --prefix .claude/hooks run check:dist
+npm --prefix .claude/hooks run lint:agents
+npm --prefix .claude/hooks run scan:prometheus
+```
+
+### Additional skills to install
+
+Review each source before installing; skills run with full agent permissions. Commits were pinned on 2026-09-25.
+
+1. **Anthropic healthcare plugin** ([anthropics/healthcare](https://github.com/anthropics/healthcare), commit `c7ed150d376b`).
+   - **Skills:** `fhir`, `fhir-developer`, `prior-auth`, `procedure-coding`, `icd10-cm`, `clinical-note-extract`, `doc-extract`, `contracts`.
+   - **Hosted MCP connectors:** CMS Coverage (LCD/NCD), ICD-10, NPI Registry, Clinical Trials, PubMed.
+   - **Install as a plugin only. Do not copy its files into this repo:** the repository has no license file.
+
+   ```text
+   # inside Claude Code
+   /plugin marketplace add anthropics/healthcare
+   /plugin install healthcare@healthcare
+   ```
+
+   The project's `.claude/settings.json` registers this marketplace but does **not** enable the plugin (ATH-D-007). The plugin starts two local Node MCP servers and five hosted connectors automatically, and it tracks the repository's default branch (only tag `v1.0.0` exists), so review it before you install it.
+
+   The hosted connectors (`hcls.mcp.claude.com`) are **not** approved for real patient data. Use them with synthetic or public data only; see *Patient-data policy* below.
+
+2. **Healthcare agents and skills** ([ajhcs/healthcare-agents](https://github.com/ajhcs/healthcare-agents), Apache-2.0, commit `81b239763c06`).
+   - **Used for:** the billing, prior-authorization, coding, clinical-documentation, interoperability and compliance roles.
+   - **Install from a reviewed, pinned checkout** rather than `npx`/`curl | bash`:
+
+   ```bash
+   git clone https://github.com/ajhcs/healthcare-agents.git ~/src/healthcare-agents
+   git -C ~/src/healthcare-agents checkout 81b239763c06
+   # then, per harness (from that checkout, after reviewing the installer):
+   npx --yes healthcare-agents install --agent-skills   # open .agents/skills convention (Codex, Zed, …)
+   npx --yes healthcare-agents install --claude-skills  # Claude Code
+   npx --yes healthcare-agents install --opencode       # OpenCode
+   npx --yes healthcare-agents install --codex          # Codex CLI
+   ```
+
+   The phase's change 1 vendors only the selected skills into `.agents/skills/`, with attribution in `THIRD_PARTY_NOTICES.md`.
+
+3. **FHIR developer skill** ([PhenoML/ClaudeFHIRSkill](https://github.com/PhenoML/ClaudeFHIRSkill), Apache-2.0, commit `f472b762acd0`). FHIR R4/R4B/R5 development guidance. Its README now installs from `TopologyHealth/ClaudeFHIRSkill`:
+
+   ```text
+   # inside Claude Code
+   /plugin marketplace add TopologyHealth/ClaudeFHIRSkill
+   /plugin install fhir-developer-skills@ClaudeFHIRSkill
+   ```
+
+4. **HIPAA and PHI skills** (machine-local, from the ECC skills collection): `hipaa-compliance`, `healthcare-phi-compliance`, `security-review`, and the `healthcare-reviewer` agent. These are expected in `~/.claude/skills/` and `~/.claude/agents/`.
+
+5. **MiniMax CLI** (`mmx`: MiniMax API, media and search tools; separate from the MiniMax Code harness):
+
+   ```bash
+   npm install -g mmx-cli && mmx --version
+   mmx auth login --api-key <your-key>            # region is auto-detected
+   # if API calls return 401: mmx config set --key region --value global   (or cn)
+   npx skills add MiniMax-AI/cli -y -g            # official mmx-cli skill
+   mmx quota                                       # confirm Token Plan balance
+   ```
+
+6. **OpenSpec skills for every harness** (already committed; re-run to refresh):
+
+   ```bash
+   openspec init --tools codex,claude,opencode,kimi,zed,minimax-code --no-animation --no-copilot-cloud
+   ```
+
+7. **Other machine-local skills and agents** used by the team: the KBD orchestrator and Prometheus skill pack, the ECC skill collection, and the `superpowers` plugin. They are listed with their sources in the `prerequisites` block of [docs/agent-team.md](./docs/agent-team.md). Agents name any missing skill and continue without it.
+
+MiniMax Code reads agents only from its data directory, and that directory also holds its **login, provider config, session state and logs**. Running `MINIMAX_DATA_DIR="$PWD/.minimax" mcode` (decision ATH-D-003) puts all of that inside the repo's working tree, where other agents can read it. It is gitignored, and `lint:agents` fails if anything but the generated team files would be committed. Until the operator decides on ATH-D-003, prefer copying `.minimax/agents/` into your user data dir (`~/.minimax/agents/`) and running `mcode` normally. See *Per-harness limitations* in [docs/agent-team.md](./docs/agent-team.md).
+
+### Patient-data policy (decision ATH-D-001)
+
+- **Real PHI only through Tribe Health Solutions' models.** Tribe Health Solutions is the only model provider covered by a HIPAA Business Associate Agreement, and it runs HIPAA-compliant local models. Real PHI may be processed only by sessions routed to those models.
+- **Everything else is synthetic or de-identified only.** That covers Claude Code (Anthropic), Codex (OpenAI), Kimi Code (Moonshot) and MiniMax Code (MiniMax cloud), plus the hosted healthcare MCP connectors. Use EHR sandboxes (Epic, Oracle Health, SMART Health IT, HAPI) for integration work.
+- **The Tribe endpoint is configuration you supply.** Its URL, model names and key come from environment variables such as `TRIBE_MODEL_BASE_URL`; they are never committed.
+
+### Phase plan: `agent-team-hardening`
+
+#### Build order
+
+| Round | Change | What it delivers |
+|---|---|---|
+| 1 | `install-domain-skills` | Anthropic's healthcare marketplace registered for Claude, with the plugin per-user opt-in (ATH-D-007; not copied into the repo); the ajhcs and PhenoML skills copied in with attribution; four project skills (EHR onboarding, sync runbook, payer documentation rules, patient-data lane policy); the Firecrawl research written up per role in `evidence/skill-research.md` |
+| 2 | `define-portable-team-manifest` | `.agent-team/team.json` as the single source: 14 roles with separate write paths, a patient-data lane rule in every prompt, and a card listing each role's skills, tools and model per harness |
+| 3 | `export-team-to-harnesses` | Agent files generated and installed for Claude, Codex, OpenCode, Kimi and MiniMax Code; a check that fails if a generated file is hand-edited; `AGENTS.md` generated from `CLAUDE.md` |
+| 4 | `wire-hooks-per-harness` and `retire-merged-agents` (in parallel) | The protected-file guard and ledger hooks wired into each harness's own hook system, with a table of which harnesses support what; the ideation-strategist and knowledge-curator agents removed after their merge |
+| 5 | `configure-phi-lanes` | Provider templates for Tribe's endpoint that use environment variables only, plus a guard that blocks FHIR pulls from non-sandbox servers unless the session is on a Tribe lane |
+| 6 | `document-and-verify-cross-harness-team` | Docs, CI, the goal check, and a smoke test per harness per new role using synthetic data |
+
+#### Scope choices to be aware of
+
+- **No real patient data this phase.** Tribe's endpoint hasn't been provided yet, so this phase builds the patient-data lanes but doesn't switch any on.
+- **The new business roles produce plans, runbooks and governance documents, not Go code.** The integration, sync and billing server features come in a later phase.
+- **"Same team everywhere" means the same definitions, not the same behaviour.** Kimi ignores per-agent models, and MiniMax's `mcode exec` can't select an agent; the docs will say so.
+- **The recommended hardening items from the last reflection are left for a later phase:**
+  - flush thresholds;
+  - labelling internal agents;
+  - documenting the pre-approved tool lists;
+  - pinning `release.yml`.
+
+#### Decisions that can be overruled
+
+- One team file as the single source of truth, with every harness's files generated from it (ATH-D-005).
+- Anthropic's healthcare skills installed as a plugin only (ATH-D-006).
+
+#### Review
+
+The cross-model reviewer (gpt-5.5) blocked the plan twice, both times on real gaps:
+
+- **Round 1:** the patient-data rules came after the export, the per-harness cards weren't specified, and the Firecrawl research wasn't a deliverable. All three are fixed.
+- **Round 2:** verification could run before the merged agents were removed, the new guard wasn't wired into the other harnesses, and the `AGENTS.md` check wasn't testable. These are fixed too, but that was the last allowed review round, so these fixes haven't been re-reviewed. The plan asks `fhir-conformance-validator` to re-check them during execution.
+
 ## License
 
 WSO2 FHIR Server is licensed under Apache 2.0. See the **[LICENSE](./LICENSE)** file for full details.

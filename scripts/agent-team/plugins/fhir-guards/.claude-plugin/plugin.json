@@ -1,0 +1,5 @@
+{
+  "name": "fhir-guards",
+  "version": "1.0.0",
+  "description": "WSO2 FHIR Server guardrails for MiniMax Code (Claude-compatible plugin format): protected-path guard and metadata-only ledger via the repo's compiled hooks."
+}
