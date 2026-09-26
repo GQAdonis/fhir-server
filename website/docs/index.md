@@ -1,11 +1,14 @@
 ---
-title: WSO2 FHIR Server
+title: Tribe Health FHIR Server
 sidebar_label: Introduction
 description: A production-oriented FHIR R4 REST server built in Go and backed by PostgreSQL.
 slug: /
 ---
 
-# WSO2 FHIR Server
+# Tribe Health FHIR Server
+
+Tribe Health's intermediate EHR for AI: a fork of the [WSO2 FHIR Server](https://github.com/wso2/fhir-server)
+that gathers partner EHR data into one FHIR R4 store for AI applications.
 
 A blazing-fast, lightweight FHIR server written in Go. It is an open-source FHIR R4 REST server
 backed by PostgreSQL, built for a compact operational footprint: a single binary, one database, and
@@ -50,7 +53,7 @@ no per-resource schema migrations.
 ## Choose your path
 
   - **Application developer** — Start with the [quickstart](./get-started/quickstart.md), then use the [API reference](./api/interactions.md) and [search guide](./api/search.md).
-  - **Platform operator** — Review [configuration](./administration/configuration.md), [deployment](./administration/deployment.md) and [performance tuning](https://github.com/wso2/fhir-server/blob/main/docs/performance-tuning.md).
+  - **Platform operator** — Review [configuration](./administration/configuration.md), [deployment](./administration/deployment.md) and [performance tuning](https://github.com/GQAdonis/fhir-server/blob/main/docs/performance-tuning.md).
   - **FHIR implementer** — Learn how [Implementation Guides](./conformance/implementation-guides.md), [validation](./conformance/validation.md), and [terminology](./conformance/terminology.md) work.
   - **Contributor** — Read the [contribution](./contributing/contributing.md) and [testing](./contributing/testing.md) guides.
 

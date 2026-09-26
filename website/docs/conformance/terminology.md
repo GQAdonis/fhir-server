@@ -5,7 +5,7 @@ description: Connect the FHIR server to an external terminology service.
 
 # Terminology integration
 
-WSO2 FHIR Server supports terminology-backed searches — ValueSet membership and CodeSystem hierarchy filters — by connecting to an external FHIR terminology service. Point the server at a terminology endpoint and the `:in`, `:not-in`, `:below`, and `:above` token search modifiers become available.
+Tribe Health FHIR Server supports terminology-backed searches — ValueSet membership and CodeSystem hierarchy filters — by connecting to an external FHIR terminology service. Point the server at a terminology endpoint and the `:in`, `:not-in`, `:below`, and `:above` token search modifiers become available.
 
 ## Configure the service
 

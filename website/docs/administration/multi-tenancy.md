@@ -5,7 +5,7 @@ description: Choose between physically isolated and logically isolated tenant de
 
 # Choose an isolation boundary
 
-WSO2 FHIR Server supports two deployment patterns. Choose the isolation boundary before provisioning data or exposing client URLs.
+Tribe Health FHIR Server supports two deployment patterns. Choose the isolation boundary before provisioning data or exposing client URLs.
 
 ## Dedicated server and database
 

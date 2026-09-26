@@ -103,7 +103,7 @@ search with its actual parameter values, which is what keeps skewed parameters (
 versus a rare one) from being served by a single cached generic plan. Setting it to `auto` or
 `force_generic_plan` re-exposes exactly the misestimate pathology the search architecture is
 designed to avoid — change it only for controlled experiments. See
-[Performance tuning](https://github.com/wso2/fhir-server/blob/main/docs/performance-tuning.md).
+[Performance tuning](https://github.com/GQAdonis/fhir-server/blob/main/docs/performance-tuning.md).
 :::
 
 ## Search and write path
@@ -162,4 +162,4 @@ Terminology is environment-variable only; it has no YAML key:
 Keep secrets in environment variables or a secret manager. Use YAML for non-secret, reviewable deployment defaults.
 :::
 
-See [Performance tuning](https://github.com/wso2/fhir-server/blob/main/docs/performance-tuning.md) before changing search-plan or write-path controls.
+See [Performance tuning](https://github.com/GQAdonis/fhir-server/blob/main/docs/performance-tuning.md) before changing search-plan or write-path controls.

@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-26T13:40:00Z",
+  "title": "Design System: Tribe Health FHIR Server Docs",
+  "extensions": {
+    "colorMeta": {
+      "navy": { "role": "primary", "displayName": "Ink Navy", "canonical": "#003b5c", "tonalRamp": ["#001a29", "#002a42", "#003b5c", "#1f5a7a", "#4d7f9a", "#7fa5ba", "#b4cbd9", "#e3edf4"] },
+      "marker": { "role": "tertiary", "displayName": "Highlighter", "canonical": "#ffe45c", "tonalRamp": ["#5c4e00", "#8a7600", "#b89e00", "#e6c600", "#ffe45c", "#ffec8a", "#fff3ad", "#fffadb"] },
+      "desk": { "role": "neutral", "displayName": "Desk", "canonical": "#eef1f4" },
+      "sheet": { "role": "neutral", "displayName": "Sheet", "canonical": "#ffffff" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#0d1d2b" },
+      "met": { "role": "semantic", "displayName": "Met", "canonical": "#1f7a4d" },
+      "gap": { "role": "semantic", "displayName": "Gap", "canonical": "#9a5b00" },
+      "void": { "role": "semantic", "displayName": "Void", "canonical": "#b3261e" },
+      "night-desk": { "role": "neutral", "displayName": "Night Desk", "canonical": "#011b2c" },
+      "night-sheet": { "role": "neutral", "displayName": "Night Sheet", "canonical": "#062a40" }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Page titles, Nexa 800." },
+      "title": { "displayName": "Title", "purpose": "h2 section headings under a hairline rule." },
+      "body": { "displayName": "Body", "purpose": "Prose in Source Serif 4, capped at 68ch." },
+      "label": { "displayName": "Label", "purpose": "Uppercase document chrome: table headers, admonition headings, TOC label." },
+      "code": { "displayName": "Code", "purpose": "Code fields and inline code only." }
+    },
+    "shadows": [
+      { "name": "sheet", "value": "0 1px 2px rgb(13 29 43 / 0.06), 0 18px 40px -18px rgb(13 29 43 / 0.28)", "purpose": "The one paper elevation, on the doc page only." }
+    ],
+    "motion": [
+      { "name": "marker-sweep", "value": "620ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Highlighter sweep across the target heading; off under reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "sheet-full-bleed", "value": "996px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Code Field",
+      "kind": "custom",
+      "refersTo": "code-field",
+      "description": "Solid navy band for every code block.",
+      "html": "<pre class=\"ds-code\"><span class=\"ds-kw\">curl</span> -sS <span class=\"ds-str\">\"http://localhost:9090/fhir/r4/Patient?family=Smith\"</span></pre>",
+      "css": ".ds-code { background: #002a42; color: #f3f7fa; font-family: ui-monospace, Menlo, monospace; font-size: 14px; padding: 16px 20px; margin: 0; border-radius: 0; } .ds-kw { color: #7fd0dc; } .ds-str { color: #9fd8b8; }"
+    },
+    {
+      "name": "Target Heading",
+      "kind": "custom",
+      "refersTo": "title",
+      "description": "Heading the reader jumped to, under the highlighter.",
+      "html": "<h2 class=\"ds-target\">Modifier support</h2>",
+      "css": ".ds-target { font-family: Nexa, system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; color: #0d1d2b; background: #ffe45c; display: inline; }"
+    },
+    {
+      "name": "Warning Admonition",
+      "kind": "card",
+      "refersTo": "admonition",
+      "description": "Source-slip callout with a state-coloured top edge.",
+      "html": "<div class=\"ds-adm\"><div class=\"ds-adm-h\">Warning</div><p>Quantity searches match on the coded unit as stored.</p></div>",
+      "css": ".ds-adm { background: #eef1f4; border-top: 3px solid #9a5b00; padding: 16px; font-family: 'Source Serif 4', Georgia, serif; color: #0d1d2b; } .ds-adm-h { font-family: Nexa, system-ui, sans-serif; font-weight: 700; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a5b00; margin-bottom: 6px; } .ds-adm p { margin: 0; }"
+    },
+    {
+      "name": "Page Action Button",
+      "kind": "button",
+      "refersTo": "page-action-button",
+      "description": "Copy page split button above each doc.",
+      "html": "<button class=\"ds-pa\">Copy page</button>",
+      "css": ".ds-pa { font-family: Nexa, system-ui, sans-serif; font-weight: 700; font-size: 13px; color: #3e4f5e; background: #ffffff; border: 1px solid #cfd7df; border-radius: 4px; padding: 5.6px 9.6px; cursor: pointer; transition: background-color 150ms ease, color 150ms ease; } .ds-pa:hover { background: #eef1f4; color: #0d1d2b; } .ds-pa:focus-visible { outline: 2px solid #003b5c; outline-offset: 1px; }"
+    },
+    {
+      "name": "Sidebar Link",
+      "kind": "nav",
+      "refersTo": "sidebar-link-active",
+      "description": "Current page as a sheet pulled from the stack.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-a is-active\" href=\"#\">Search</a><a class=\"ds-nav-a\" href=\"#\">Operations</a></nav>",
+      "css": ".ds-nav { background: #eef1f4; padding: 8px; font-family: Nexa, system-ui, sans-serif; font-size: 15px; } .ds-nav-a { display: block; padding: 6px 12px; color: #3e4f5e; text-decoration: none; } .ds-nav-a:hover { background: rgb(0 59 92 / 0.06); } .ds-nav-a.is-active { background: #ffffff; color: #003b5c; font-weight: 700; box-shadow: 0 1px 2px rgb(13 29 43 / 0.08); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Evidence File",
+    "overview": "The docs are the reference material behind Tribe Health's cited letter. Each doc page is a square-edged white sheet laid on a cool desk; Ink Navy owns whole regions; Highlighter yellow appears only where evidence is in focus. Dark mode is the night desk: the same world under navy.",
+    "keyCharacteristics": ["Desk and sheet", "Navy as fields", "Yellow means evidence", "Nexa chrome, serif prose, mono for code only", "Square edges; 4px only on small controls"],
+    "rules": [
+      { "name": "The Yellow Means Evidence Rule", "body": "Highlighter marks only what the reader is looking at: a target heading, a search hit, a selection.", "section": "colors" },
+      { "name": "The Fields Not Accents Rule", "body": "Navy appears as whole regions or as the colour of a link or active item, never as tinted boxes, pills or icon tiles.", "section": "colors" },
+      { "name": "The Night Desk Rule", "body": "Dark mode rebuilds the same world under navy; it is not a grey theme.", "section": "colors" },
+      { "name": "The Chrome Speaks Nexa Rule", "body": "Chrome is Nexa, prose is serif, and never the reverse.", "section": "typography" }
+    ],
+    "dos": ["Do use the --th-* tokens in src/css/custom.css for every colour.", "Do keep all prose on the sheet and all chrome on the desk.", "Do give every custom interactive element a 2px --th-focus outline at 2px offset.", "Do check new colours in both the day desk and the night desk."],
+    "donts": ["Don't use Highlighter yellow for anything but evidence in focus.", "Don't add rounded cards, tinted callout pills, gradients, glass or coloured side stripes.", "Don't put uppercase labels above headings; labels are document chrome only.", "Don't set prose in Nexa or chrome in the serif.", "Don't show real patient data in examples, screenshots or diagrams; synthetic only."]
+  }
+}

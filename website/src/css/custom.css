@@ -1,19 +1,641 @@
-:root {
-  --ifm-color-primary: #c94f0c;
-  --ifm-color-primary-dark: #b5470b;
-  --ifm-color-primary-darker: #ab430a;
-  --ifm-color-primary-darkest: #8d3708;
-  --ifm-color-primary-light: #dd570d;
-  --ifm-color-primary-lighter: #e75b0e;
-  --ifm-color-primary-lightest: #f36c21;
+/*
+ * Tribe Health identity for the FHIR Server docs.
+ * Source of truth: ../simple-ai-care/DESIGN.md ("Cited Letter"), translated to a
+ * reading surface: each doc page is a white sheet on the desk, Ink Navy owns code
+ * and the footer, and Highlighter yellow marks only evidence in focus.
+ */
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('../fonts/nexa/nexa-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
+@font-face {
+  font-family: 'Nexa';
+  src: url('../fonts/nexa/nexa-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nexa';
+  src: url('../fonts/nexa/nexa-800.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Tokens ─────────────────────────────────────────────────────────── */
+
+:root {
+  --th-desk: #eef1f4;
+  --th-sheet: #ffffff;
+  --th-ink: #0d1d2b;
+  --th-ink-soft: #3e4f5e;
+  --th-rule: #cfd7df;
+  --th-navy: #003b5c;
+  --th-navy-deep: #002a42;
+  --th-on-navy: #f3f7fa;
+  --th-on-navy-soft: #b4cbd9;
+  --th-marker: #ffe45c;
+  --th-marker-soft: #fff3ad;
+  --th-met: #1f7a4d;
+  --th-gap: #9a5b00;
+  --th-void: #b3261e;
+  --th-link: var(--th-navy);
+  --th-code-field: var(--th-navy-deep);
+  --th-footer: var(--th-navy-deep);
+  --th-hover-wash: rgb(0 59 92 / 0.06);
+  --th-focus: var(--th-navy);
+  --th-sheet-shadow: 0 1px 2px rgb(13 29 43 / 0.06), 0 18px 40px -18px rgb(13 29 43 / 0.28);
+
+  --th-font-display: 'Nexa', system-ui, sans-serif;
+  --th-font-text: 'Source Serif 4', Georgia, serif;
+  --th-font-code: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --th-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --ifm-color-primary: #003b5c;
+  --ifm-color-primary-dark: #003553;
+  --ifm-color-primary-darker: #00324e;
+  --ifm-color-primary-darkest: #002940;
+  --ifm-color-primary-light: #004165;
+  --ifm-color-primary-lighter: #00446a;
+  --ifm-color-primary-lightest: #004d78;
+
+  --ifm-background-color: var(--th-desk);
+  --ifm-background-surface-color: var(--th-sheet);
+  --ifm-font-color-base: var(--th-ink);
+  --ifm-font-color-secondary: var(--th-ink-soft);
+  --ifm-heading-color: var(--th-ink);
+  --ifm-link-color: var(--th-link);
+  --ifm-toc-border-color: var(--th-rule);
+  --ifm-hr-background-color: var(--th-rule);
+  --ifm-table-border-color: var(--th-rule);
+  --ifm-table-head-background: transparent;
+  --ifm-table-stripe-background: transparent;
+
+  --ifm-font-family-base: var(--th-font-text);
+  --ifm-heading-font-family: var(--th-font-display);
+  --ifm-font-family-monospace: var(--th-font-code);
+  --ifm-line-height-base: 1.6;
+  --ifm-heading-font-weight: 800;
+  --ifm-code-font-size: 88%;
+
+  --ifm-global-radius: 0;
+  --ifm-button-border-radius: 0;
+  --ifm-code-border-radius: 0;
+  --ifm-pre-border-radius: 0;
+  --ifm-alert-border-radius: 0;
+  --ifm-card-border-radius: 0;
+  --ifm-pagination-nav-border-radius: 0;
+
+  --ifm-navbar-background-color: var(--th-desk);
+  --ifm-navbar-shadow: none;
+  --ifm-navbar-height: 4rem;
+  --ifm-navbar-link-color: var(--th-ink);
+  --ifm-navbar-link-hover-color: var(--th-navy);
+
+  --ifm-menu-color: var(--th-ink-soft);
+  --ifm-menu-color-active: var(--th-navy);
+  --ifm-menu-color-background-active: var(--th-sheet);
+  --ifm-menu-color-background-hover: var(--th-hover-wash);
+
+  --ifm-footer-background-color: var(--th-footer);
+  --ifm-footer-link-color: var(--th-on-navy-soft);
+  --ifm-footer-link-hover-color: var(--th-on-navy);
+  --ifm-footer-title-color: var(--th-on-navy);
+  --ifm-footer-color: var(--th-on-navy-soft);
+
+  --docusaurus-highlighted-code-line-bg: rgb(255 255 255 / 0.08);
+}
+
+/* Night desk: the same world under navy. The sheet is a lifted navy, code sits
+   deeper than the sheet, and text on navy is tinted from the navy, never grey. */
 [data-theme='dark'] {
-  --ifm-color-primary: #f36c21;
-  --ifm-color-primary-dark: #ec5f0f;
-  --ifm-color-primary-darker: #df5a0e;
-  --ifm-color-primary-darkest: #b84a0c;
-  --ifm-color-primary-light: #f57c3a;
-  --ifm-color-primary-lighter: #f68447;
-  --ifm-color-primary-lightest: #f89d6c;
+  --th-desk: #011b2c;
+  --th-sheet: #062a40;
+  --th-ink: #eaf1f6;
+  --th-ink-soft: #b4cbd9;
+  --th-rule: #1e4059;
+  --th-met: #6fd0a0;
+  --th-gap: #e8b25c;
+  --th-void: #ff9a92;
+  --th-link: #8ccbe9;
+  --th-code-field: #001421;
+  --th-footer: #000f1a;
+  --th-hover-wash: rgb(140 203 233 / 0.08);
+  --th-focus: #8ccbe9;
+  --th-sheet-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 18px 40px -18px rgb(0 0 0 / 0.6);
+
+  --ifm-color-primary: #8ccbe9;
+  --ifm-color-primary-dark: #6fbde2;
+  --ifm-color-primary-darker: #60b6df;
+  --ifm-color-primary-darkest: #3aa2d3;
+  --ifm-color-primary-light: #a9d9f0;
+  --ifm-color-primary-lighter: #b8dff3;
+  --ifm-color-primary-lightest: #e0f1fa;
+
+  --ifm-menu-color-active: var(--th-link);
+}
+
+/* ── Browser surfaces ───────────────────────────────────────────────── */
+
+html {
+  scrollbar-color: var(--th-rule) var(--th-desk);
+  accent-color: var(--th-navy);
+}
+
+::selection {
+  background: var(--th-marker);
+  color: #0d1d2b;
+}
+
+:focus-visible {
+  outline: 2px solid var(--th-focus);
+  outline-offset: 2px;
+}
+
+/* Search hits are evidence the reader asked for. */
+mark {
+  background: var(--th-marker);
+  color: #0d1d2b;
+  padding: 0 0.1em;
+}
+
+/* ── Chrome in Nexa ─────────────────────────────────────────────────── */
+
+.navbar,
+.menu,
+.theme-doc-toc-mobile,
+.table-of-contents,
+.breadcrumbs,
+.pagination-nav,
+.theme-doc-footer,
+.theme-admonition-heading,
+.footer,
+.button,
+.navbar__search-input,
+.dropdown__menu,
+table thead {
+  font-family: var(--th-font-display);
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────── */
+
+.navbar {
+  border-bottom: 1px solid var(--th-rule);
+}
+
+.navbar__brand {
+  margin-right: 0;
+}
+
+.navbar__logo {
+  height: 2rem;
+  margin-right: 0.625rem;
+}
+
+.navbar__title {
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  color: var(--th-ink);
+}
+
+.navbar-product {
+  display: inline-block;
+  margin-left: 0.875rem;
+  padding-left: 0.875rem;
+  border-left: 1px solid var(--th-rule);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  color: var(--th-ink-soft);
+  white-space: nowrap;
+}
+
+.navbar__link {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.navbar__search-input {
+  border-radius: 4px;
+  background-color: var(--th-sheet);
+  border: 1px solid var(--th-rule);
+  color: var(--th-ink);
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────── */
+
+.menu {
+  font-size: 0.9375rem;
+}
+
+.menu__link,
+.menu__caret {
+  border-radius: 0;
+}
+
+.menu__link {
+  font-weight: 400;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+/* The current page is a sheet pulled forward from the stack. */
+.menu__link--active:not(.menu__link--sublist) {
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgb(13 29 43 / 0.08);
+}
+
+.menu__list-item-collapsible,
+.menu__link--sublist {
+  border-radius: 0;
+}
+
+.menu__list-item-collapsible--active {
+  background: var(--th-sheet);
+}
+
+.menu__link--sublist,
+.menu__list-item-collapsible .menu__link {
+  font-weight: 700;
+  color: var(--th-ink);
+}
+
+/* ── The sheet ──────────────────────────────────────────────────────── */
+
+div[class*='docItemContainer'] > article {
+  background: var(--th-sheet);
+  box-shadow: var(--th-sheet-shadow);
+  padding: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
+}
+
+.markdown {
+  font-size: 1.0625rem;
+}
+
+.markdown > p,
+.markdown > ul,
+.markdown > ol,
+.markdown > blockquote,
+.markdown > dl {
+  max-width: 68ch;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 1.5rem);
+}
+
+.markdown h1:first-child,
+.markdown header h1 {
+  font-size: clamp(2rem, 1.5rem + 2vw, 2.875rem);
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+}
+
+.markdown h2 {
+  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+  line-height: 1.15;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--th-rule);
+}
+
+.markdown h3 {
+  font-size: 1.3125rem;
+  line-height: 1.25;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown h4 {
+  font-size: 1.0625rem;
+  margin-top: 1.75rem;
+}
+
+/* Jumping to a section highlights its heading: the reviewer's marker pass,
+   the one authored motion on the site. */
+.markdown :is(h2, h3, h4):target {
+  background-image: linear-gradient(var(--th-marker), var(--th-marker));
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #0d1d2b;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  animation: th-marker-sweep 620ms var(--th-ease-out) both;
+}
+
+.markdown :is(h2, h3, h4):target .hash-link {
+  color: #0d1d2b;
+}
+
+@keyframes th-marker-sweep {
+  from {
+    background-size: 0% 100%;
+  }
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markdown :is(h2, h3, h4):target {
+    animation: none;
+  }
+}
+
+.markdown a:not(.hash-link) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--th-link) 40%, transparent);
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 150ms ease, text-decoration-thickness 150ms ease;
+}
+
+.markdown a:not(.hash-link):hover {
+  text-decoration-color: var(--th-link);
+  text-decoration-thickness: 2px;
+}
+
+.markdown strong {
+  font-weight: 600;
+}
+
+.markdown blockquote {
+  border-left: 1px solid var(--th-navy);
+  color: var(--th-ink-soft);
+  font-style: italic;
+}
+
+.markdown hr {
+  height: 1px;
+}
+
+/* ── Code: Ink Navy fields ──────────────────────────────────────────── */
+
+.markdown code {
+  font-variant-ligatures: none;
+}
+
+.markdown :not(pre) > code {
+  background: var(--th-desk);
+  border: 0;
+  color: var(--th-ink);
+  padding: 0.1em 0.35em;
+}
+
+.theme-code-block {
+  box-shadow: none !important;
+  --prism-background-color: var(--th-code-field);
+}
+
+.theme-code-block,
+.theme-code-block pre {
+  background-color: var(--th-code-field) !important;
+}
+
+div[class*='codeBlockTitle'] {
+  background: var(--th-code-field);
+  color: var(--th-on-navy-soft);
+  border-bottom: 1px solid rgb(180 203 217 / 0.2) !important;
+  font-family: var(--th-font-code);
+  font-size: 0.8125rem;
+}
+
+.theme-code-block button {
+  color: var(--th-on-navy);
+  border-color: rgb(180 203 217 / 0.35);
+  background: rgb(0 42 66 / 0.85);
+  border-radius: 0;
+}
+
+.theme-code-block button:hover {
+  border-color: var(--th-on-navy-soft);
+}
+
+/* ── Tables: hairline-ruled ledgers ─────────────────────────────────── */
+
+/* Infima keeps tables as scrollable blocks; on wide screens they span the sheet. */
+.markdown table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.markdown table thead tr {
+  border-bottom: 2px solid var(--th-ink);
+}
+
+.markdown table th {
+  background: transparent;
+  border: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--th-ink-soft);
+  padding: 0.5rem 0.75rem 0.5rem 0;
+}
+
+.markdown table tr {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--th-rule);
+}
+
+.markdown table tr:nth-child(2n) {
+  background: transparent;
+}
+
+.markdown table td {
+  border: 0;
+  padding: 0.625rem 0.75rem 0.625rem 0;
+  vertical-align: top;
+}
+
+@media (min-width: 997px) {
+  .markdown table {
+    display: table;
+    width: 100%;
+  }
+}
+
+/* ── Admonitions: source slips with a state-coloured top edge ──────── */
+
+.theme-admonition {
+  --th-state: var(--th-navy);
+  background: var(--th-desk);
+  border: 0;
+  border-top: 3px solid var(--th-state);
+  box-shadow: none;
+  color: var(--th-ink);
+  --ifm-alert-border-left-width: 0;
+}
+
+[data-theme='dark'] .theme-admonition {
+  --th-state: var(--th-link);
+}
+
+.theme-admonition.alert--success {
+  --th-state: var(--th-met);
+}
+
+.theme-admonition.alert--warning {
+  --th-state: var(--th-gap);
+}
+
+.theme-admonition.alert--danger {
+  --th-state: var(--th-void);
+}
+
+.theme-admonition-heading {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--th-state);
+}
+
+.theme-admonition-heading svg {
+  fill: var(--th-state);
+}
+
+.theme-admonition a {
+  color: var(--th-link);
+  text-decoration-color: var(--th-link);
+}
+
+.theme-admonition code {
+  background: var(--th-sheet);
+}
+
+.markdown details {
+  --ifm-alert-background-color: var(--th-desk);
+  --ifm-alert-border-color: var(--th-rule);
+  --ifm-alert-foreground-color: var(--th-ink);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ── Wayfinding ─────────────────────────────────────────────────────── */
+
+.table-of-contents {
+  font-size: 0.8125rem;
+}
+
+.theme-doc-toc-desktop .table-of-contents::before {
+  content: 'On this page';
+  display: block;
+  margin-bottom: 0.625rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--th-ink-soft);
+}
+
+.table-of-contents__link {
+  color: var(--th-ink-soft);
+}
+
+.table-of-contents__link:hover,
+.table-of-contents__link--active {
+  color: var(--th-link);
+}
+
+.table-of-contents__link--active {
+  font-weight: 700;
+}
+
+.breadcrumbs__link {
+  border-radius: 0;
+  font-size: 0.8125rem;
+}
+
+.breadcrumbs__item--active .breadcrumbs__link {
+  background: transparent;
+  color: var(--th-ink);
+  font-weight: 700;
+}
+
+.pagination-nav__link {
+  border: 1px solid var(--th-rule);
+  background: var(--th-sheet);
+  transition: border-color 150ms ease;
+}
+
+.pagination-nav__link:hover {
+  border-color: var(--th-link);
+}
+
+.pagination-nav__sublabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--th-ink-soft);
+}
+
+.pagination-nav__label {
+  font-weight: 800;
+  color: var(--th-ink);
+}
+
+.theme-edit-this-page {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+/* ── Footer: the navy band ──────────────────────────────────────────── */
+
+.footer {
+  padding-block: 3rem;
+}
+
+.footer__title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--th-on-navy-soft);
+}
+
+.footer__link-item {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.footer__copyright {
+  font-family: var(--th-font-text);
+  font-size: 0.875rem;
+  max-width: 60ch;
+  margin-inline: auto;
+}
+
+.footer :focus-visible {
+  outline-color: var(--th-on-navy);
+}
+
+/* ── Small screens ──────────────────────────────────────────────────── */
+
+@media (max-width: 996px) {
+  div[class*='docItemContainer'] > article {
+    margin-inline: calc(-1 * var(--ifm-spacing-horizontal));
+    box-shadow: none;
+    border-block: 1px solid var(--th-rule);
+  }
+
+  .navbar-product {
+    display: none;
+  }
 }
