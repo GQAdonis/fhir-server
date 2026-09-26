@@ -91,6 +91,13 @@ IG load failures are non-fatal but keep readiness at 503.
 
 Concurrency: optimistic concurrency via `If-Match`/ETag (412 on conflict). PATCH takes a row lock inside its transaction.
 
+## UI design (Impeccable)
+
+UI work uses the `impeccable` skill.
+- `PRODUCT.md` (repo root) is the shared product record for every UI surface: users, purpose, PHI constraints, brand status.
+- Root `DESIGN.md` is the server architecture doc, **not** a visual system. Each UI surface is listed in `pnpm-workspace.yaml` (there only for Impeccable's workspace resolution; npm ignores it) and has its own `DESIGN.md`, currently just `website/DESIGN.md`. The Tribe Health brand is defined in the tribehealth.ai site repo, `../simple-ai-care/DESIGN.md`; `PRODUCT.md` points there.
+- Run Impeccable from the surface directory (`cd website`) or with `--target website/...`, never against the repo root. A new surface needs a `pnpm-workspace.yaml` entry and its own `DESIGN.md` before any design work, otherwise it inherits the architecture doc.
+
 ## Spec workflow
 
 OpenSpec is initialized (`openspec/`, schema `spec-driven`). Propose changes with `/opsx:propose "<idea>"`. KBD phase state lives in `.kbd-orchestrator/`. Pick work from `current-waypoint.json` `nextChange`, and drive changes task by task with `/kbd-apply`. Never hand-edit `progress.json`, `current-waypoint.*` or `position-reminder.txt`; a hook refuses those edits.

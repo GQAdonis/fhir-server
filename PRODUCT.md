@@ -35,7 +35,7 @@ The data layer under the Prior Authorization Workbench: a single-binary, single-
 
 - Server: FHIR R4 REST API (JSON, XML, Turtle), `/t/{tenant}` tenant routing, Helm and Docker deployment, health probes, Prometheus metrics, OpenTelemetry tracing.
 - Partner data enters through FHIR R4 REST and Bulk Data `$export` with SMART backend-services authorization.
-- Team process docs: `docs/integrations/` (onboarding), `docs/sync/` (sync runbooks), `docs/compliance/` (HIPAA), `docs/billing/` (payer documentation and prior auth); these arrive with the agent-team-hardening work (PR #2).
+- Team process docs: `docs/integrations/` (onboarding), `docs/sync/` (sync runbooks), `docs/compliance/` (HIPAA), `docs/billing/` (payer documentation and prior auth).
 
 ## Capabilities and Constraints
 
@@ -50,7 +50,7 @@ UI surfaces:
 
 Constraints:
 
-- **PHI:** UI mocks, fixtures, screenshots and demo data use synthetic patients only. Real PHI may only be processed on a Tribe PHI lane (ATH-D-001; the `phi-lane-policy` skill arrives with PR #2). Never put real patient details, credentials or real partner endpoint hosts into a UI surface, comp or committed artifact.
+- **PHI:** UI mocks, fixtures, screenshots and demo data use synthetic patients only. Real PHI may only be processed on a Tribe PHI lane (ATH-D-001, `phi-lane-policy` skill). Never put real patient details, credentials or real partner endpoint hosts into a UI surface, comp or committed artifact.
 - Tenant isolation is a product guarantee; a UI must never show one tenant's data in another tenant's context.
 - Search is fail-closed: an unsupported query returns an error, not a wider result set. UIs surface that error honestly.
 - Terminology is delegated to an external server; there is no local code-system browsing.
