@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { editedPaths, guardInputs, ledgerInput } from "../dist/lib/harness-payload.mjs";
 
@@ -111,7 +111,7 @@ test("bad usage and malformed input never block (exit 0 with a warning)", () => 
 
 test("the OpenCode project plugin blocks a protected edit and records sessions (loaded as OpenCode does)", async () => {
   const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-  const { FhirGuards } = await import(path.join(repo, ".opencode", "plugins", "fhir-guards.js"));
+  const { FhirGuards } = await import(pathToFileURL(path.join(repo, ".opencode", "plugins", "fhir-guards.js")).href);
   const root = sandbox();
   try {
     // The plugin resolves the adapter from the project directory: the real repo has it, the sandbox does not.
@@ -149,7 +149,7 @@ test("the Kimi/MiniMax launcher runs only for allowlisted repositories", async (
     assert.deepEqual(JSON.parse(readFileSync(env.FHIR_GUARDS_CONFIG, "utf8")).roots, [repo]);
     const after = launch();
     // Importing the launcher (not running it) must not do anything, even with --allow in argv.
-    const imported = spawnSync(process.execPath, ["--input-type=module", "-e", `await import(${JSON.stringify(launcher)})`, "--", "--allow", "/tmp", "--yes"], { encoding: "utf8", env });
+    const imported = spawnSync(process.execPath, ["--input-type=module", "-e", `await import(${JSON.stringify(pathToFileURL(launcher).href)})`, "--", "--allow", "/tmp", "--yes"], { encoding: "utf8", env });
     assert.equal(imported.status, 0);
     assert.deepEqual(JSON.parse(readFileSync(env.FHIR_GUARDS_CONFIG, "utf8")).roots, [repo], "import did not modify the allowlist");
     assert.match(JSON.parse(after.stdout).hookSpecificOutput.permissionDecisionReason, /AGENTS\.md is protected/);
