@@ -5,7 +5,7 @@ description: The server's components, how a request flows through them, and wher
 
 # Architecture overview
 
-WSO2 FHIR Server is a single binary that speaks FHIR R4 over REST and stores everything in PostgreSQL. There is nothing else to deploy: one service, one database.
+Tribe Health FHIR Server is a single binary that speaks FHIR R4 over REST and stores everything in PostgreSQL. There is nothing else to deploy: one service, one database.
 
 This page covers the components a request passes through, how they share one storage model, and which concerns are deliberately handled outside the server.
 
@@ -67,4 +67,4 @@ The server deliberately delegates two concerns:
 - **Terminology reasoning** — ValueSet expansion and code hierarchy questions go to a FHIR terminology server you configure.
 - **Identity and policy** — authentication, authorization, and TLS termination belong to the gateway or ingress in front of the server. See [Deployment](../administration/deployment.md).
 
-For design rationale and accepted tradeoffs, read [`DESIGN.md`](https://github.com/wso2/fhir-server/blob/main/DESIGN.md).
+For design rationale and accepted tradeoffs, read [`DESIGN.md`](https://github.com/GQAdonis/fhir-server/blob/main/DESIGN.md).

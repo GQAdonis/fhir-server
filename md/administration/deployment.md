@@ -83,4 +83,4 @@ written without the new parameter. See
 
 ## After bulk loading
 
-Run `VACUUM (ANALYZE)` on `resources` and on every search-parameter table after a bulk import, executing each statement outside a transaction. This refreshes visibility maps and planner statistics before serving search traffic. See [Performance tuning](https://github.com/wso2/fhir-server/blob/main/docs/performance-tuning.md) for the full procedure.
+Run `VACUUM (ANALYZE)` on `resources` and on every search-parameter table after a bulk import, executing each statement outside a transaction. This refreshes visibility maps and planner statistics before serving search traffic. See [Performance tuning](https://github.com/GQAdonis/fhir-server/blob/main/docs/performance-tuning.md) for the full procedure.

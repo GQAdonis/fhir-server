@@ -31,4 +31,4 @@ Search never scans raw JSON: queries resolve against the typed `sp_*` indexes fi
 
 ## Schema management
 
-The canonical schema is [`internal/db/schema.sql`](https://github.com/wso2/fhir-server/blob/main/internal/db/schema.sql). It is idempotent; production deployments should apply schema changes out of band with a controlled database role rather than granting the runtime role DDL privileges.
+The canonical schema is [`internal/db/schema.sql`](https://github.com/GQAdonis/fhir-server/blob/main/internal/db/schema.sql). It is idempotent; production deployments should apply schema changes out of band with a controlled database role rather than granting the runtime role DDL privileges.
