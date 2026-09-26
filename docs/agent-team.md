@@ -29,7 +29,7 @@ PHI lanes follow the `phi-lane-policy` skill (ATH-D-001):
 
 | Role | Tier | PHI lane | Owns (primary write paths) |
 |---|---|---|---|
-| `fhir-tech-lead` | hard | none | `.kbd-orchestrator/phases/*/goals.md`, `.kbd-orchestrator/phases/*/execution.md`, `.kbd-orchestrator/phases/*/execute-dispatch.json`, `.kbd-orchestrator/phases/*/reflection.md`, `.prometheus/raw/**`, `.prometheus/outbox/**`, `.prometheus/ledger/**`, `.prometheus/agent-ledger.jsonl` |
+| `fhir-tech-lead` | hard | none | `.kbd-orchestrator/phases/*/goals.md`, `.kbd-orchestrator/phases/*/execution.md`, `.kbd-orchestrator/phases/*/execute-dispatch.json`, `.kbd-orchestrator/phases/*/reflection.md`, `.prometheus/raw/**`, `.prometheus/outbox/**`, `.prometheus/ledger/**`, `.prometheus/.flush-cursor` |
 | `fhir-architect` | hard | none | `openspec/**`, `DESIGN.md`, `docs/*.md`, `docs/images/**`, `.kbd-orchestrator/phases/*/assessment.md`, `.kbd-orchestrator/phases/*/analysis.md`, `.kbd-orchestrator/phases/*/plan.md`, `.kbd-orchestrator/phases/*/evidence/**`, `.agent-team/team.json`, `.agent-team/roles/**` |
 | `fhir-go-developer` | medium | none | `internal/handler/**`, `internal/validate/**`, `internal/fhirpath/**`, `internal/fhirxml/**`, `internal/fhirttl/**`, `internal/patch/**`, `internal/config/**`, `internal/ig/**`, `internal/terminology/**`, `internal/compartment/**`, `internal/obs/**`, `internal/version/**`, `cmd/server/**`, `website/docs/**` |
 | `fhir-storage-search-engineer` | hard | none | `internal/store/*.go`, `internal/index/**`, `internal/db/**`, `internal/searchparam/**`, `internal/seed/**`, `internal/tenant/**` |
@@ -37,12 +37,26 @@ PHI lanes follow the `phi-lane-policy` skill (ATH-D-001):
 | `fhir-code-reviewer` | medium | none | `.agent-team/findings/fhir-code-reviewer/**` |
 | `fhir-security-compliance-reviewer` | hard | none | `.agent-team/findings/fhir-security-compliance-reviewer/**` |
 | `fhir-conformance-validator` | medium | none | `.agent-team/findings/fhir-conformance-validator/**` |
-| `fhir-infra-release-engineer` | medium | none | `.github/workflows/**`, `.github/CODEOWNERS`, `.github/*TEMPLATE*`, `.gitignore`, `helm/**`, `Dockerfile`, `docker-compose.yml`, `Makefile`, `version.txt`, `.claude/hooks/**`, `.claude/agents/**`, `.claude/settings.json`, `.claude/skills/**`, `.agents/skills/**`, `.codex/**`, `.opencode/**`, `.kimi-code/**`, `.minimax/**`, `scripts/agent-team/**`, `AGENTS.md` |
+| `fhir-infra-release-engineer` | medium | none | `.github/workflows/**`, `.github/CODEOWNERS`, `.github/*TEMPLATE*`, `.gitignore`, `helm/**`, `Dockerfile`, `.dockerignore`, `docker-compose.yml`, `Makefile`, `version.txt`, `.claude/hooks/**`, `.claude/agents/**`, `.claude/settings.json`, `.claude/skills/**`, `.agents/skills/**`, `.codex/**`, `.opencode/**`, `.kimi-code/**`, `.minimax/**`, `scripts/agent-team/**`, `AGENTS.md` |
 | `hipaa-privacy-officer` | hard | policy-only | `docs/compliance/**` |
 | `fhir-integration-specialist` | hard | tribe-only | `docs/interop/**` |
 | `ehr-integration-manager` | medium | none | `docs/integrations/**` |
 | `data-sync-coordinator` | medium | tribe-only | `docs/sync/**` |
 | `billing-prior-auth-specialist` | hard | tribe-only | `docs/billing/**` |
+
+## Models per harness and tier
+
+Each role's tier (above) selects its model in each harness. The map lives in `.agent-team/team.config.json` `models`. It is written into every generated agent file, and into each role's Harness card. Discovery evidence: `.kbd-orchestrator/phases/agent-team-hardening/evidence/model-map.md`.
+
+| Tier | Claude Code | Codex | OpenCode | Kimi Code | MiniMax Code |
+|---|---|---|---|---|---|
+| hard | `opus` | `gpt-6-astra`, reasoning effort `high` | `kimi-for-coding/k3` | `kimi-code/k3` (chosen at invocation) | `minimax/MiniMax-M3` |
+| medium | `sonnet` | `gpt-6-astra`, reasoning effort `medium` | `kimi-for-coding/k3` | `kimi-code/k3` (chosen at invocation) | `minimax/MiniMax-M3` |
+| low | `haiku` | `gpt-6-astra`, reasoning effort `low` | `kimi-for-coding/k3` | `kimi-code/k3` (chosen at invocation) | `minimax/MiniMax-M3` |
+
+- No role is on the `low` tier today; the row is kept for future roles.
+- Codex and OpenCode have no verified smaller model, so Codex expresses tier through reasoning effort and OpenCode uses one model for every tier.
+- **None of these models is BAA-covered.** They are for synthetic data only. A `tribe-only` role on a Tribe lane uses the `TRIBE_MODEL_*` configuration instead of this table (see [PHI lanes](#phi-lanes)).
 
 ## Per-harness limitations
 
@@ -52,11 +66,11 @@ Each harness has its own agent format and gaps. The generated Harness card on ev
 |---|---|---|
 | Claude Code | `.claude/agents/<id>.md` (JSON frontmatter) | Project agents load at session start: start a new session after regenerating. |
 | Codex | `.codex/agents/<id>.toml`, registered in `.codex/config.toml` | Codex does not auto-discover agent files; `install-exports` generates the `[agents.<id>]` registrations. Codex reads project config only after you **trust this project** in Codex. `install-exports` manages only the delimited `# >>> agent-team roles … >>>` block in `.codex/config.toml`: other project settings outside the markers are preserved, and editing inside the block fails the drift check. Gate roles run with `sandbox_mode = "read-only"`, and `lint:agents` rejects any other key in generated agents. |
-| OpenCode | `.opencode/agents/<id>.md` (subagents) | Read-only roles get `permission.edit = deny`, and shell commands ask for approval except a read-only verification allowlist. OpenCode has no read-only sandbox, so an approved shell command could still write. Other roles use the session defaults. |
+| OpenCode | `.opencode/agents/<id>.md` (subagents) | Read-only roles get `permission.edit = deny`, and shell commands ask for approval except a read-only verification allowlist. OpenCode has no read-only sandbox, so an approved shell command could still write. Other roles use the session defaults. Team roles are subagents, and `opencode run --agent` accepts only primary agents, so the headless smoke test could not run them (files verified, behaviour not: `evidence/cross-harness-smoke.md`); invoke them from a primary agent session. |
 | Kimi Code | `.kimi-code/agents/<id>.md` | **Kimi ignores the per-agent model.** Choose it at invocation (`kimi -m kimi-code/k3 --agent <id>`). There is no per-agent permission field, so read-only roles are read-only by instruction. |
-| MiniMax Code | `.minimax/agents/<id>/agent.md` (ATH-D-003) | **`mcode exec` has no agent selector** and there is no agent-listing command; pick the agent in an interactive session. MiniMax reads agents from `MINIMAX_DATA_DIR`, which relocates **all** of its user data, including login and provider config. Keeping the data dir inside the repo puts MiniMax login, session state and logs in the working tree. There other agents can read them, `docker build` could copy them, and backups include them, even though they are gitignored and `lint:agents` fails if anything but generated team files under `.minimax/` would be committed. **Prefer a data dir outside the repo** (for example copy `.minimax/agents/` to `~/.minimax/agents/`) until the operator decides (ATH-D-003 is under review). There is no per-agent permission field. |
+| MiniMax Code | `.minimax/agents/<id>/agent.md` (ATH-D-003) | **`mcode exec` has no agent selector** and there is no agent-listing command; pick the agent in an interactive session. MiniMax reads agents from `MINIMAX_DATA_DIR`, which relocates **all** of its user data, including login and provider config. The project keeps `MINIMAX_DATA_DIR=.minimax` (ATH-D-003, operator decision 2026-09-26), so MiniMax needs its own `mcode login`, and its login, session state and logs land in the working tree. `.minimax/auth` and everything else except the generated team files are gitignored, `lint:agents` fails if anything else under `.minimax/` would be committed, and `.dockerignore` excludes `.minimax/`. Other agents can still read those files, and backups include them. There is no per-agent permission field. |
 
-Patient-data lanes apply in every harness: none of the models above is BAA-covered (see `phi-lane-policy`).
+Patient-data lanes apply in every harness (see [PHI lanes](#phi-lanes)).
 
 ## Hook coverage per harness
 
@@ -66,12 +80,14 @@ The same compiled hooks (`.claude/hooks/dist/`) run in every harness that suppor
 |---|---|---|---|---|---|
 | Protected-path guard (`guard-generated`) | supported | supported | supported | partial | partial |
 | PHI-lane guard (`phi-lane-guard`) | supported | supported | supported | partial | partial |
+| Tech-lead write scope (`agent-scope-guard`) | partial (Task-tool subagent only) | unsupported | unsupported | unsupported | unsupported |
 | Agent ledger (`agent-ledger`, metadata only) | supported | supported | supported | partial | partial |
 | License header, gofmt checks | supported | unsupported | unsupported | unsupported | unsupported |
 | Karpathy flush / session context | supported | unsupported | unsupported | unsupported | unsupported |
 | How it is wired | `.claude/settings.json` | `.codex/hooks.json` | `.opencode/plugins/fhir-guards.js` (auto-loaded) | `scripts/agent-team/plugins/fhir-guards` (user install: `/plugins install`, then `run.mjs --allow <repo>`) | same plugin, Claude-compatible format (user install: `mcode plugin install`, then `run.mjs --allow <repo>`) |
 | Activation | always | **trust the project and each hook hash once** in Codex | always | after install; hooks are **fail-open** | after install and `mcode login`; not verified end to end |
 
+- `agent-scope-guard` needs a subagent-lifecycle event to know which persona is active. Only Claude Code fires one, and only for Task-tool subagents, so it is registered only in `.claude/settings.json` and `.claude/settings.tribe.json`, not in `harness-hook.mjs`. Elsewhere, and for `claude --agent fhir-tech-lead` as the main session, the tech lead's write scope is enforced by its prompt alone (see [Hooks](#hooks)).
 - **Reduced protection where a hook is partial or unsupported:** generated files and KBD projections can be hand-edited without a guard. `lint:agents` (drift) and CI still catch drift in generated agent files, but not in other protected files. Run `npm --prefix .claude/hooks run lint:agents` before committing.
 - The protected-path guard covers file-writing tools only (Edit/Write/patch); it does not inspect shell commands in any harness. The PHI-lane guard is narrower still: it only inspects WebFetch calls, MCP-shaped tool inputs (a `base_url`/`server` field), and shell commands that both mention `curl`/`wget`/`httpie`/`fhir` and reach a FHIR-shaped path — an obfuscated shell command can evade it (documented residual risk; policy and review are the backstop, see `phi-lane-policy`).
 - **The guard fails open in every harness:** an adapter error, a timeout (10 s), a missing or unbuilt adapter, or unparseable output allows the write. CI (`check:dist`, `lint:agents`) is the backstop for compiled hooks and generated agent files. KBD projections and golden `testdata` have no CI backstop. The Codex commands locate the repo with `git`: without git, outside a repository, or when git refuses a repo with "dubious ownership", the Codex guard is silently off. On Windows it relies on Codex running `commandWindows` through `cmd.exe` (not verified).
@@ -81,12 +97,17 @@ The same compiled hooks (`.claude/hooks/dist/`) run in every harness that suppor
 
 ## PHI lanes
 
-Rules: `phi-lane-policy`. Enforcement (change `configure-phi-lanes`):
+The rules are in the `phi-lane-policy` skill (`.agents/skills/phi-lane-policy/`), and the operator's decisions are in the decision record in `docs/compliance/README.md`. This section does not restate them. In short:
+- Cloud-model harnesses get synthetic data only. Data derived from real patients, even de-identified, stays on the Tribe local-model lane (ATH-D-001; operator decision 2026-09-26).
+- Counts rule: only pass/fail results, fixed error codes and run-level counts leave a Tribe lane.
+- Claude Code may become a Tribe lane first, then Codex and OpenCode. **Kimi Code and MiniMax Code are not approved Tribe lanes.**
 
 > **Not yet sufficient for real PHI.** These controls support synthetic-only operation. No real-PHI session may start until the pre-real-PHI gate in `docs/compliance/README.md` holds (review warnings W1-W5, deferred to a follow-up change). Kimi Code and MiniMax Code are not approved Tribe lanes.
 
+Enforcement (change `configure-phi-lanes`):
+
 - **Model-config templates** (env vars only, per ATH-D-001; never a literal endpoint or key): `.codex/config.phi.template.toml`, `.kimi-code/config.phi.template.toml`, `.opencode/opencode.phi.template.json`. None is loaded automatically; copy the relevant one to an untracked location and render `TRIBE_MODEL_*` from your own environment before use.
-- **Tribe-lane profile** (task 4.1, off-lane channels *denied*, not just discouraged): `.claude/settings.tribe.json` (load explicitly with `claude --settings .claude/settings.tribe.json`) denies `WebFetch`/`WebSearch`/`mcp__*`, adds no plugin marketplaces and omits the Karpathy `Stop`/`SessionEnd`/`PreCompact` sinks from its own hooks (but Claude Code merges `--settings` with project and user settings, so project hooks and user-enabled plugins still run until W2 is fixed), minimizes transcript retention (`cleanupPeriodDays`) and sets `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`. The Codex and OpenCode templates above carry the equivalent denies (Codex: `sandbox_workspace_write.network_access = false`, which blocks the agent's own shell network use without affecting Codex's own call to the configured model provider; OpenCode: `permission.webfetch = "deny"`). Kimi and MiniMax have no per-agent or global permission-deny field (`docs/agent-team.md` § Per-harness limitations), so this control does not exist for them; the `phi-lane-guard` hook and policy are the only backstops there. Some of the Claude/Codex/OpenCode fields above are best-effort against each product's public settings reference and are not verified end to end in this repo's CI: verify against your installed version before relying on them for a real PHI session.
+- **Tribe-lane profile** (task 4.1, off-lane channels *denied*, not just discouraged): `.claude/settings.tribe.json` (load explicitly with `claude --settings .claude/settings.tribe.json`) denies `WebFetch`/`WebSearch`/`mcp__*`, adds no plugin marketplaces and omits the Karpathy `Stop`/`SessionEnd`/`PreCompact` sinks from its own hooks (but Claude Code merges `--settings` with project and user settings, so project hooks and user-enabled plugins still run until W2 is fixed), minimizes transcript retention (`cleanupPeriodDays`) and sets `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`. The Codex and OpenCode templates above carry the equivalent denies (Codex: `sandbox_workspace_write.network_access = false`, which blocks the agent's own shell network use without affecting Codex's own call to the configured model provider; OpenCode: `permission.webfetch = "deny"`). Kimi and MiniMax have no per-agent or global permission-deny field (see [Per-harness limitations](#per-harness-limitations)), so this control does not exist for them; the `phi-lane-guard` hook and policy are the only backstops there. Some of the Claude/Codex/OpenCode fields above are best-effort against each product's public settings reference and are not verified end to end in this repo's CI: verify against your installed version before relying on them for a real PHI session.
 - **`phi-lane-guard` hook:** denies a FHIR pull to a non-sandbox endpoint unless the session has proven the lane (`PHI_LANE=tribe` and `AGENT_MODEL_BASE_URL`, exported by whoever launches the harness and not settable by a tool call in the running session; it is operator-declared, not read from the endpoint the harness actually calls, which W1 fixes — equal to `TRIBE_MODEL_BASE_URL`). Sandbox allowlist: `.claude/hooks/phi-sandboxes.json`.
 
 ## Persona → KBD stage and skill matrix
@@ -106,6 +127,11 @@ Preloaded skills are always repo-resident (see [Prerequisites](#prerequisites)).
 | `fhir-conformance-validator` | Archive gate (`kbd-apply verify`, `/opsx:verify`), `/kbd-goal-check` | karpathy-guidelines | openspec-verify-change (read-only steps), kbd-goal-check, verification-loop, superpowers:verification-before-completion |
 | `fhir-infra-release-engineer` | CI/CD and release changes | karpathy-guidelines | ci-cd-and-automation, github-ops, deployment-patterns, docker-patterns, shipping-and-launch, gitops-bootstrap, kustomize-overlay |
 | `fhir-tech-lead` (curation) | Karpathy lessons for `/kbd-reflect` | karpathy-guidelines | karpathy-progress-memory, kbd-reflect, kbd-memory-recall, llm-wiki, continuous-learning-v2, knowledge-ops |
+| `hipaa-privacy-officer` | No KBD stage; PHI-flow, BAA and lane recommendations for the privacy official | karpathy-guidelines, phi-lane-policy, healthcare-agents | hipaa-compliance, healthcare-phi-compliance |
+| `fhir-integration-specialist` | No KBD stage; interop designs and change requests to `fhir-architect` | karpathy-guidelines, phi-lane-policy, fhir-software, ehr-integration-onboarding, healthcare-agents | fhir-developer (plugin), firecrawl-search |
+| `ehr-integration-manager` | No KBD stage; partner intake, go-live checklists, SLAs | karpathy-guidelines, phi-lane-policy, ehr-integration-onboarding, healthcare-agents | firecrawl-search |
+| `data-sync-coordinator` | No KBD stage; sync schedules, reconciliation, sync incidents | karpathy-guidelines, phi-lane-policy, fhir-data-sync-runbook, fhir-software | (none) |
+| `billing-prior-auth-specialist` | No KBD stage; payer documentation workups, prior-auth and appeal drafts | karpathy-guidelines, phi-lane-policy, payer-documentation-rules, healthcare-agents | prior-auth, procedure-coding, icd10-cm (plugin), firecrawl-search |
 
 ## Hand-offs
 
@@ -263,7 +289,7 @@ prerequisites:
   - name: firecrawl-search
     kind: skill
     source: shared agent skills (~/.TOOLS/skills/agents, linked into ~/.claude/skills)
-    used_by: [fhir-architect]
+    used_by: [fhir-architect, fhir-integration-specialist, ehr-integration-manager, billing-prior-auth-specialist]
   - name: github-ops
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
@@ -284,17 +310,9 @@ prerequisites:
     kind: skill
     source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
     used_by: [fhir-go-developer, fhir-storage-search-engineer, fhir-test-engineer]
-  - name: healthcare-phi-compliance
-    kind: skill
-    source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
-    used_by: [fhir-security-compliance-reviewer]
   - name: healthcare-reviewer
     kind: agent
     source: user agents (~/.claude/agents)
-    used_by: [fhir-security-compliance-reviewer]
-  - name: hipaa-compliance
-    kind: skill
-    source: Claude skills collection (~/.TOOLS/skills/claude, linked into ~/.claude/skills)
     used_by: [fhir-security-compliance-reviewer]
   - name: idea-refine
     kind: skill

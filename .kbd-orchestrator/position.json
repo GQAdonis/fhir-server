@@ -2,25 +2,23 @@
   "schemaVersion": "1",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 552,
-  "derivedRevision": 552,
+  "sourceRevision": 574,
+  "derivedRevision": 574,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 552
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 574
   },
   "conflictCount": 0,
-  "updatedAt": "2026-09-26T21:57:22.223806Z",
+  "updatedAt": "2026-09-26T23:08:01.035475Z",
   "cursor": [
     "agent-team-hardening",
-    "execute",
-    "document-and-verify-cross-harness-team",
-    "1.1"
+    "execute"
   ],
   "root": {
     "type": "phase",
     "id": "98eeab9c-ff3e-4471-a109-52e79b939f28",
     "status": "ready",
     "progress": {
-      "done": 14,
+      "done": 15,
       "total": 15
     },
     "children": [
@@ -115,7 +113,7 @@
         "canonicalId": "agent-team-hardening",
         "status": "IN_PROGRESS",
         "progress": {
-          "done": 6,
+          "done": 7,
           "total": 7
         },
         "children": [
@@ -176,9 +174,9 @@
           {
             "type": "change",
             "id": "document-and-verify-cross-harness-team",
-            "status": "PENDING",
+            "status": "COMPLETE",
             "progress": {
-              "done": 0,
+              "done": 5,
               "total": 5
             }
           }

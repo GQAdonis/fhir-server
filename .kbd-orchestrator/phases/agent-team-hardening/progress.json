@@ -2,27 +2,27 @@
   "schemaVersion": "2",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 552,
-  "derivedRevision": 552,
+  "sourceRevision": 574,
+  "derivedRevision": 574,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 552
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 574
   },
   "conflictCount": 0,
   "phase": "agent-team-hardening",
   "phaseId": "agent-team-hardening",
   "parentPhase": null,
-  "last_updated": "2026-09-26T21:57:22.223806Z",
+  "last_updated": "2026-09-26T23:08:01.035475Z",
   "last_updated_by": "kbd-runtime",
   "changes_total": 7,
-  "changes_completed": 6,
+  "changes_completed": 7,
   "implementation_total": 7,
-  "implementation_completed": 6,
+  "implementation_completed": 7,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 6,
+      "completed": 7,
       "total": 7,
-      "status": "IN_PROGRESS"
+      "status": "COMPLETE"
     },
     "evidence": {
       "status": "NOT_TRACKED",
@@ -49,9 +49,9 @@
     "runId": "agent-dev-team-20260924T112402Z",
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 14,
+      "completed": 15,
       "total": 15,
-      "status": "IN_PROGRESS"
+      "status": "COMPLETE"
     },
     "evidence": {
       "status": "PENDING",
@@ -139,12 +139,12 @@
     {
       "id": "document-and-verify-cross-harness-team",
       "title": "Docs, CI, goal check and per-harness acceptance",
-      "status": "PENDING",
-      "implementation_status": "PENDING",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
       "tasks_total": 5,
-      "tasks_done": 0,
-      "last_task_completed": null,
-      "next_task_pending": "Rewrite `docs/agent-team.md` (14-role roster, harness × tier model table, PHI-lane rules, hook capability matrix, per-ha",
+      "tasks_done": 5,
+      "last_task_completed": "Run the phase goal check via `fhir-conformance-validator` (including re-checking the three unvetted plan round-2 fixes);",
+      "next_task_pending": null,
       "blockers": []
     }
   ],

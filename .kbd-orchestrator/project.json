@@ -16,7 +16,11 @@
   "lint_command": "make lint",
   "preferred_planning_agent": "claude-code",
   "preferred_execution_agents": [
-    "claude-code"
+    "claude-code",
+    "codex",
+    "opencode",
+    "kimi-code",
+    "minimax-code"
   ],
   "model_policy": {
     "registry": {
@@ -90,10 +94,12 @@
       ]
     },
     "codex": {
-      "entry": "OpenAI Codex CLI / app",
+      "entry": "OpenAI Codex CLI / app (agents: .codex/agents/*.toml, registered in .codex/config.toml; trust the project first)",
+      "team_target": "codex",
       "strengths": [
         "parallel isolated tasks via git worktrees"
-      ]
+      ],
+      "roster_doc": "docs/agent-team.md"
     },
     "cline": {
       "entry": "Cline VSCode extension",
@@ -103,18 +109,37 @@
       ]
     },
     "opencode": {
-      "entry": "OpenCode CLI",
+      "entry": "OpenCode CLI (agents: .opencode/agents/*.md)",
+      "team_target": "opencode",
       "strengths": [
         "quick targeted edits",
         "file patches"
-      ]
+      ],
+      "roster_doc": "docs/agent-team.md"
     },
     "claude-code": {
-      "entry": "claude --agent fhir-tech-lead (personas: .claude/agents/fhir-*.md)",
+      "entry": "claude --agent fhir-tech-lead (agents: .claude/agents/*.md)",
+      "team_target": "claude",
       "strengths": [
         "KBD orchestration via fhir-tech-lead",
         "persona-routed implementation, review and validation",
         "cross-platform Karpathy logging hooks"
+      ],
+      "roster_doc": "docs/agent-team.md"
+    },
+    "kimi-code": {
+      "entry": "kimi -m kimi-code/k3 --agent <id> (agents: .kimi-code/agents/*.md; per-agent model ignored)",
+      "team_target": "kimi",
+      "strengths": [
+        "headless role runs with a session-chosen model"
+      ],
+      "roster_doc": "docs/agent-team.md"
+    },
+    "minimax-code": {
+      "entry": "MINIMAX_DATA_DIR=.minimax mcode, agent picked interactively (agents: .minimax/agents/<id>/agent.md; mcode exec has no agent selector)",
+      "team_target": "minimax",
+      "strengths": [
+        "interactive role sessions"
       ],
       "roster_doc": "docs/agent-team.md"
     }
@@ -134,5 +159,6 @@
   },
   "integration_test_command": "make test-integration",
   "conformance_test_command": "make test-conformance",
-  "updatedAt": "2026-09-24T23:37:25Z"
+  "updatedAt": "2026-09-26T22:07:15Z",
+  "__agents_note": "The five team harnesses (claude-code, codex, opencode, kimi-code, minimax-code) run the same 14 roles generated from .agent-team/team.json (team_target = its native target id). Cloud-model harnesses are synthetic-data only; Tribe PHI lanes are Claude first, then Codex and OpenCode; Kimi and MiniMax are not approved (docs/compliance/README.md)."
 }

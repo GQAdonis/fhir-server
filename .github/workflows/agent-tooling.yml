@@ -97,8 +97,12 @@ jobs:
           sparse-checkout: dist/plugins/claude/prometheus-skill-pack/skills/agent-team-creator
           persist-credentials: false
 
-      # Lints every harness's generated agents and runs the drift checks
-      # (build-manifest incl. creator validate, install-exports, gen-agents-md, mirror-skills).
+      # Lints every harness's generated agents (structure, roster, PHI-lane
+      # block, Harness card) and runs every team-script drift check in
+      # --check mode: manifest validation plus ownership/card checks
+      # (build-manifest.mjs, including agent-team-creator validate),
+      # install-exports.mjs, AGENTS.md currency (gen-agents-md.mjs) and skill
+      # mirrors (mirror-skills.mjs). See .claude/hooks/src/lib/harness-lint.mts.
       - name: Lint agent definitions and check drift across harnesses
         run: npm --prefix .claude/hooks run lint:agents
 
