@@ -1,14 +1,14 @@
 ---
 title: Contributing
-description: Prepare focused, tested contributions to WSO2 FHIR Server.
+description: Prepare focused, tested contributions to Tribe Health FHIR Server.
 ---
 
-# Contribute to WSO2 FHIR Server
+# Contribute to Tribe Health FHIR Server
 
 ## Prepare the repository
 
 ```bash
-git clone https://github.com/wso2/fhir-server.git
+git clone https://github.com/GQAdonis/fhir-server.git
 cd fhir-server
 make build
 make test
@@ -43,6 +43,6 @@ make test
 make test-integration
 ```
 
-Document any check that could not be run and why. Do not report security vulnerabilities through a public issue; follow [`SECURITY.md`](https://github.com/wso2/fhir-server/blob/main/SECURITY.md).
+Document any check that could not be run and why. Do not report security vulnerabilities through a public issue; follow [`SECURITY.md`](https://github.com/GQAdonis/fhir-server/blob/main/SECURITY.md).
 
-The complete contribution policy is in [`CONTRIBUTING.md`](https://github.com/wso2/fhir-server/blob/main/CONTRIBUTING.md).
+The complete contribution policy is in [`CONTRIBUTING.md`](https://github.com/GQAdonis/fhir-server/blob/main/CONTRIBUTING.md).

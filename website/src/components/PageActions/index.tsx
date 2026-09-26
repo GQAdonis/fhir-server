@@ -24,7 +24,7 @@ export default function PageActions(): React.ReactNode {
   const mdUrl = useBaseUrl(`md/${mdPath}`);
   const absoluteMdUrl = `${siteConfig.url.replace(/\/$/, '')}${mdUrl}`;
 
-  const prompt = `Read ${absoluteMdUrl} — it is the Markdown source of the WSO2 FHIR Server documentation page "${metadata.title}". Answer my questions about it.`;
+  const prompt = `Read ${absoluteMdUrl} — it is the Markdown source of the Tribe Health FHIR Server documentation page "${metadata.title}". Answer my questions about it.`;
   const encoded = encodeURIComponent(prompt);
 
   // Close on a click anywhere outside the menu, or on Escape. Deliberately not

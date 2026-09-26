@@ -59,4 +59,4 @@ go test -race -count=1 ./internal/store/...
 - Test transaction rollback when changing Bundle processing.
 - Use realistic partial precision, modifiers, and choice-type fields for FHIR search cases.
 
-See [`TESTING.md`](https://github.com/wso2/fhir-server/blob/main/TESTING.md) for the repository's detailed testing model.
+See [`TESTING.md`](https://github.com/GQAdonis/fhir-server/blob/main/TESTING.md) for the repository's detailed testing model.

@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Build and run WSO2 FHIR Server as a binary or container.
+description: Build and run Tribe Health FHIR Server as a binary or container.
 ---
 
 # Install and run the server
@@ -8,7 +8,7 @@ description: Build and run WSO2 FHIR Server as a binary or container.
 All commands run from a clone of the repository:
 
 ```bash
-git clone https://github.com/wso2/fhir-server.git
+git clone https://github.com/GQAdonis/fhir-server.git
 cd fhir-server
 ```
 
@@ -52,7 +52,7 @@ Keep DDL privileges out of the steady-state runtime role. Provision the schema s
 
 ## Run with a configuration file
 
-[`config.example.yaml`](https://github.com/wso2/fhir-server/blob/main/config.example.yaml) ships in the repository root and documents every available key:
+[`config.example.yaml`](https://github.com/GQAdonis/fhir-server/blob/main/config.example.yaml) ships in the repository root and documents every available key:
 
 ```bash
 cp config.example.yaml config.yaml

@@ -11,6 +11,8 @@
   align-items: center;
   gap: 0.4rem;
   font: inherit;
+  font-family: var(--th-font-display);
+  font-weight: 700;
   font-size: 0.8125rem;
   line-height: 1.2;
   color: var(--ifm-font-color-secondary, var(--ifm-color-emphasis-700));
@@ -46,7 +48,7 @@
 }
 
 .icon {
-  font-size: 0.9rem;
+  font-size: 1em;
 }
 
 .menuWrapper {
@@ -72,6 +74,7 @@
 .menu a {
   display: block;
   padding: 0.5rem 0.7rem;
+  font-family: var(--th-font-display);
   font-size: 0.8125rem;
   color: var(--ifm-font-color-base);
   border-radius: 4px;

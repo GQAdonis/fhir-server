@@ -1,0 +1,7 @@
+# Not used by the build: website/ installs with npm (package-lock.json) and npm ignores
+# this file. It exists so the Impeccable design skill resolves each UI surface as a
+# workspace that inherits the root PRODUCT.md and reads its own DESIGN.md, instead of
+# mistaking the root DESIGN.md (server architecture) for a visual design system.
+# Add each new UI surface here, and give it its own DESIGN.md.
+packages:
+  - website
