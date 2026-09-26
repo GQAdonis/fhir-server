@@ -101,7 +101,7 @@ export function planTarget(root, target, ids, exportDir) {
   const writes = [];
   for (const id of ids) {
     const from = path.join(exportDir, spec.exported(id));
-    if (!existsSync(from)) throw new Error(`${target}: export has no file for ${id} (${spec.exported(id)})`);
+    if (!existsSync(from) && !isDanglingLink(from)) throw new Error(`${target}: export has no file for ${id} (${spec.exported(id)})`);
     if (!lstatSync(from).isFile()) throw new Error(`${target}: refusing non-regular export file for ${id} (symlink or special file)`);
     const to = path.join(root, spec.installed(id));
     assertInsideRoot(root, to);

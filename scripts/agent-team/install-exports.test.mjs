@@ -97,6 +97,19 @@ test("refuses a symlinked export file", (t) => {
   assert.throws(() => planTarget(root, "claude", ["a"], exp("claude")), /refusing non-regular export file/);
 });
 
+test("refuses a dangling symlinked export file", (t) => {
+  const { root, exp } = fixture(["a"]);
+  const f = path.join(exp("claude"), TARGETS.claude.exported("a"));
+  rmSync(f);
+  try {
+    symlinkSync(path.join(root, "does-not-exist.md"), f);
+  } catch {
+    t.skip("symlinks not permitted on this platform");
+    return;
+  }
+  assert.throws(() => planTarget(root, "claude", ["a"], exp("claude")), /refusing non-regular export file/);
+});
+
 test("the Claude marker is byte-compared like the others (a CRLF copy is drift)", () => {
   const { root, exp } = fixture(["a"]);
   install(root, exp, ["a"]);
