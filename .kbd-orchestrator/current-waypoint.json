@@ -2,10 +2,10 @@
   "schemaVersion": "5",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 507,
-  "derivedRevision": 507,
+  "sourceRevision": 552,
+  "derivedRevision": 552,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 507
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 552
   },
   "conflictCount": 0,
   "projectId": "98eeab9c-ff3e-4471-a109-52e79b939f28",
@@ -21,19 +21,19 @@
   "phase": "agent-team-hardening",
   "parentPhase": null,
   "childPointer": null,
-  "change": "configure-phi-lanes",
+  "change": "document-and-verify-cross-harness-team",
   "currentTask": "1.1",
   "status": "ready",
   "lifecycle": "ready",
   "stageId": "execute",
   "stageStatus": "IN_PROGRESS",
   "completionMetric": "implementation",
-  "implementationCompleted": 13,
+  "implementationCompleted": 14,
   "implementationTotal": 15,
   "planRevision": 4,
-  "revision": 507,
+  "revision": 552,
   "exactNextCommand": "/kbd-execute agent-team-hardening",
-  "nextChange": "configure-phi-lanes",
+  "nextChange": "document-and-verify-cross-harness-team",
   "nextTask": "1.1",
-  "updatedAt": "2026-09-25T21:56:07.071073Z"
+  "updatedAt": "2026-09-26T21:57:22.223806Z"
 }

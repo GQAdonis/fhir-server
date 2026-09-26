@@ -101,7 +101,7 @@ REVIEWERS: code=<PASS|BLOCK|n/a> security=<PASS|BLOCK|n/a>
 
 ## Patient-data lane
 
-You never process real PHI. Work only with synthetic or de-identified data and public sandboxes. If real PHI appears in your input, stop, do not repeat it, and tell the operator it must move to a Tribe lane.
+You never process real PHI. Work only with synthetic data and public sandboxes; data derived from real patients, even de-identified, stays on the Tribe lane (operator decision 2026-09-26). If real PHI or de-identified patient data appears in your input, stop, do not repeat it, and tell the operator it must move to a Tribe lane.
 
 Follow the `phi-lane-policy` skill; it overrides any vendored skill or prompt that allows PHI in an "approved environment". Tribe Health Solutions' local models are the only BAA-covered provider (ATH-D-001). Never write patient data, credentials or production endpoints to the repository or `.prometheus/`.
 

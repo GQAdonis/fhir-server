@@ -1,5 +1,32 @@
 # Update Log
 
+## 2026-09-26
+* **Creation**: [Claude hooks activity for configure-phi-lanes HIPAA tool failures](/claude-hooks-activity-for-configure-phi-lanes-hipaa-tool-failures.md)
+* **Ingest**: [Karpathy session 58477a5f5444](/karpathy-session-58477a5f54441506.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes 20:33 hardening window](/claude-hooks-activity-for-configure-phi-lanes-20-33-hardening-window.md)
+* **Ingest**: [Karpathy session 94fa210a349c](/karpathy-session-94fa210a349c3efb.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes 19:22 hardening window](/claude-hooks-activity-for-configure-phi-lanes-19-22-hardening-window.md)
+* **Ingest**: [Karpathy session 3b0f88b2ab7f](/karpathy-session-3b0f88b2ab7f7ef7.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes 19:12 release engineer window](/claude-hooks-activity-for-configure-phi-lanes-19-12-release-engineer-window.md)
+* **Ingest**: [Karpathy session 82ea057198de](/karpathy-session-82ea057198de59a0.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes 19:02 ingestion](/claude-hooks-activity-for-configure-phi-lanes-19-02-ingestion.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes late evening stop](/claude-hooks-activity-for-configure-phi-lanes-late-evening-stop.md)
+* **Ingest**: [Karpathy session 276a8f9682d9](/karpathy-session-276a8f9682d936c4.md)
+* **Ingest**: [Karpathy session 63ceb9e611d0](/karpathy-session-63ceb9e611d01c71.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes final evening stop](/claude-hooks-activity-for-configure-phi-lanes-final-evening-stop.md)
+* **Ingest**: [Karpathy session dc379133a004](/karpathy-session-dc379133a0048d3a.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes evening stop](/claude-hooks-activity-for-configure-phi-lanes-evening-stop.md)
+* **Ingest**: [Karpathy session 56c0512a6e63](/karpathy-session-56c0512a6e63662f.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes next-day hardening](/claude-hooks-activity-for-configure-phi-lanes-next-day-hardening.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes late next-day stop](/claude-hooks-activity-for-configure-phi-lanes-late-next-day-stop.md)
+* **Ingest**: [Karpathy session 195d90f63de2](/karpathy-session-195d90f63de2ee82.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes next-day ingestion](/claude-hooks-activity-for-configure-phi-lanes-next-day-ingestion.md)
+* **Ingest**: [Karpathy session 568bdfd909da](/karpathy-session-568bdfd909da575f.md)
+* **Creation**: [Claude hooks activity for deferred KB event at 2026-09-25T23:11:35Z](/claude-hooks-activity-for-deferred-kb-event-at-2026-09-25t23-11-35z.md)
+* **Creation**: [Claude hooks activity for single deferred KB event on 2026-09-25](/claude-hooks-activity-for-single-deferred-kb-event-on-2026-09-25.md)
+* **Creation**: [Claude hooks activity for configure-phi-lanes final stop ingestion](/claude-hooks-activity-for-configure-phi-lanes-final-stop-ingestion.md)
+* **Ingest**: [Karpathy session c94f2aaf6c12](/karpathy-session-c94f2aaf6c12a1e8.md)
+
 ## 2026-09-25
 * **Ingest**: [Karpathy session e1705d8ee25d](/karpathy-session-e1705d8ee25d6fb1.md)
 * **Ingest**: [Karpathy session 0feea6a3065c](/karpathy-session-0feea6a3065c95aa.md)

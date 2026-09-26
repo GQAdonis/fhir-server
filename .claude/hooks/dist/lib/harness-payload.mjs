@@ -104,6 +104,24 @@ const LEDGER_EVENTS = {
     SubagentStart: "SubagentStart",
     SubagentStop: "SubagentStop",
 };
+/**
+ * Claude-shaped PreToolUse input for the PHI-lane guard, passed straight
+ * through: `phi-lane.mts` detection is tool-name/tool-input shaped, not
+ * harness-specific, so no per-harness mapping is needed beyond locating the
+ * fields. Undefined when the payload names no tool.
+ */
+export function phiLaneInput(harness, p) {
+    const tool = p.tool_name ?? p.tool;
+    if (typeof tool !== "string" || tool === "")
+        return undefined;
+    return compact({
+        hook_event_name: "PreToolUse",
+        session_id: p.session_id ?? p.sessionID,
+        cwd: projectRootOf(p),
+        tool_name: tool,
+        tool_input: p.tool_input ?? p.args,
+    });
+}
 /** Claude-shaped ledger input, or undefined for events the ledger does not record. */
 export function ledgerInput(harness, p) {
     const event = p.hook_event_name !== undefined ? LEDGER_EVENTS[p.hook_event_name] : undefined;

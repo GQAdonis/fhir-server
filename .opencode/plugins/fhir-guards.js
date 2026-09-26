@@ -1,7 +1,8 @@
 // WSO2 FHIR Server project plugin for OpenCode: runs the repo's compiled hooks
 // (.claude/hooks/dist) through the harness-hook adapter, so OpenCode sessions
-// get the same protected-path guard and metadata-only ledger as Claude Code.
-// Generated files and KBD projections are refused; see docs/agent-team.md.
+// get the same protected-path guard, PHI-lane guard and metadata-only ledger
+// as Claude Code. Generated files, KBD projections and non-sandbox FHIR pulls
+// outside a proven Tribe lane are refused; see docs/agent-team.md.
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
@@ -32,15 +33,17 @@ export const FhirGuards = async ({ directory, worktree }) => {
   const root = worktree && path.dirname(worktree) !== worktree ? worktree : directory;
   return {
   "tool.execute.before": async (input, output) => {
-    const out = await adapter(root, "guard", { tool: input.tool, sessionID: input.sessionID, args: output.args });
-    if (out === "") return;
-    let result;
-    try {
-      result = JSON.parse(out);
-    } catch {
-      return;
+    for (const hook of ["guard", "phi-lane"]) {
+      const out = await adapter(root, hook, { tool: input.tool, sessionID: input.sessionID, args: output.args });
+      if (out === "") continue;
+      let result;
+      try {
+        result = JSON.parse(out);
+      } catch {
+        continue;
+      }
+      if (result.decision === "deny") throw new Error(result.reason);
     }
-    if (result.decision === "deny") throw new Error(result.reason);
   },
   event: async ({ event }) => {
     if (event.type === "session.created" || event.type === "session.deleted" || event.type === "session.error") {

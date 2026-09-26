@@ -2,25 +2,25 @@
   "schemaVersion": "2",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 507,
-  "derivedRevision": 507,
+  "sourceRevision": 552,
+  "derivedRevision": 552,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 507
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 552
   },
   "conflictCount": 0,
   "phase": "agent-team-hardening",
   "phaseId": "agent-team-hardening",
   "parentPhase": null,
-  "last_updated": "2026-09-25T21:56:07.071073Z",
+  "last_updated": "2026-09-26T21:57:22.223806Z",
   "last_updated_by": "kbd-runtime",
   "changes_total": 7,
-  "changes_completed": 5,
+  "changes_completed": 6,
   "implementation_total": 7,
-  "implementation_completed": 5,
+  "implementation_completed": 6,
   "completion": {
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 5,
+      "completed": 6,
       "total": 7,
       "status": "IN_PROGRESS"
     },
@@ -49,7 +49,7 @@
     "runId": "agent-dev-team-20260924T112402Z",
     "primaryCounter": "implementation",
     "implementation": {
-      "completed": 13,
+      "completed": 14,
       "total": 15,
       "status": "IN_PROGRESS"
     },
@@ -128,12 +128,12 @@
     {
       "id": "configure-phi-lanes",
       "title": "Tribe-endpoint PHI lane templates and phi-lane-guard (synthetic default)",
-      "status": "PENDING",
-      "implementation_status": "PENDING",
-      "tasks_total": 7,
-      "tasks_done": 0,
-      "last_task_completed": null,
-      "next_task_pending": "Implement `src/phi-lane-guard.mts` + `src/lib/phi-lane.mts` (URL extraction from WebFetch/MCP/Bash, FHIR-path match, san",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 10,
+      "tasks_done": 10,
+      "last_task_completed": "Narrow cloud-harness data policy to synthetic-only",
+      "next_task_pending": null,
       "blockers": []
     },
     {

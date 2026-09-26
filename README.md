@@ -122,7 +122,7 @@ Review each source before installing; skills run with full agent permissions. Co
 
    The project's `.claude/settings.json` registers this marketplace but does **not** enable the plugin (ATH-D-007). The plugin starts two local Node MCP servers and five hosted connectors automatically, and it tracks the repository's default branch (only tag `v1.0.0` exists), so review it before you install it.
 
-   The hosted connectors (`hcls.mcp.claude.com`) are **not** approved for real patient data. Use them with synthetic or public data only; see *Patient-data policy* below.
+   The hosted connectors (`hcls.mcp.claude.com`) are **not** approved for real patient data. Use them with synthetic data or public sandboxes only; see *Patient-data policy* below.
 
 2. **Healthcare agents and skills** ([ajhcs/healthcare-agents](https://github.com/ajhcs/healthcare-agents), Apache-2.0, commit `81b239763c06`).
    - **Used for:** the billing, prior-authorization, coding, clinical-documentation, interoperability and compliance roles.
@@ -173,7 +173,7 @@ MiniMax Code reads agents only from its data directory, and that directory also 
 ### Patient-data policy (decision ATH-D-001)
 
 - **Real PHI only through Tribe Health Solutions' models.** Tribe Health Solutions is the only model provider covered by a HIPAA Business Associate Agreement, and it runs HIPAA-compliant local models. Real PHI may be processed only by sessions routed to those models.
-- **Everything else is synthetic or de-identified only.** That covers Claude Code (Anthropic), Codex (OpenAI), Kimi Code (Moonshot) and MiniMax Code (MiniMax cloud), plus the hosted healthcare MCP connectors. Use EHR sandboxes (Epic, Oracle Health, SMART Health IT, HAPI) for integration work.
+- **Everything else is synthetic only.** Data derived from real patients, even de-identified, stays on the Tribe models (operator decision 2026-09-26). That covers Claude Code (Anthropic), Codex (OpenAI), Kimi Code (Moonshot) and MiniMax Code (MiniMax cloud), plus the hosted healthcare MCP connectors. Use EHR sandboxes (Epic, Oracle Health, SMART Health IT, HAPI) for integration work.
 - **The Tribe endpoint is configuration you supply.** Its URL, model names and key come from environment variables such as `TRIBE_MODEL_BASE_URL`; they are never committed.
 
 ### Phase plan: `agent-team-hardening`

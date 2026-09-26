@@ -12,6 +12,18 @@
             "statusMessage": "Checking protected paths"
           }
         ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook phi-lane",
+            "commandWindows": "for /f \"delims=\" %i in ('git rev-parse --show-toplevel') do @node \"%i/.claude/hooks/dist/harness-hook.mjs\" --harness codex --hook phi-lane",
+            "timeout": 10,
+            "statusMessage": "Checking PHI lane"
+          }
+        ]
       }
     ],
     "SessionStart": [

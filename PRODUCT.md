@@ -50,7 +50,7 @@ UI surfaces:
 
 Constraints:
 
-- **PHI:** UI mocks, fixtures, screenshots and demo data use synthetic patients only. Real PHI may only be processed on a Tribe PHI lane (ATH-D-001, `phi-lane-policy` skill). Never put real patient details, credentials or real partner endpoint hosts into a UI surface, comp or committed artifact.
+- **PHI:** UI mocks, fixtures, screenshots and demo data use synthetic patients only. Real PHI, and any data derived from it including de-identified data, may only be processed on a Tribe PHI lane (ATH-D-001, `phi-lane-policy` skill). Never put real patient details, credentials or real partner endpoint hosts into a UI surface, comp or committed artifact.
 - Tenant isolation is a product guarantee; a UI must never show one tenant's data in another tenant's context.
 - Search is fail-closed: an unsupported query returns an error, not a wider result set. UIs surface that error honestly.
 - Terminology is delegated to an external server; there is no local code-system browsing.

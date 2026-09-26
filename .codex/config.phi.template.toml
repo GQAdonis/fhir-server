@@ -1,0 +1,45 @@
+# Template for a Tribe-lane Codex session (change `configure-phi-lanes`).
+#
+# This file is NOT loaded automatically and is not part of the generated
+# `# >>> agent-team roles >>>` block in .codex/config.toml. Copy it to an
+# untracked location (for example ~/.codex/config.toml, or a gitignored
+# .codex/config.local.toml merged in by your own tooling) before use. Never
+# commit a copy with a real endpoint, model name or key: every value below is
+# a TRIBE_MODEL_* environment variable placeholder, per ATH-D-001 and the
+# `phi-lane-policy` skill. Verify the exact keys against your installed Codex
+# version before relying on this file (model_providers/sandbox schemas change
+# between releases).
+
+[model_providers.tribe]
+name = "Tribe Health Solutions (local, BAA-covered — ATH-D-001)"
+# Codex config.toml does not interpolate "$VAR" inside string values. Render
+# this template with your own tooling (envsubst, a secrets manager, a copy
+# script) so the literal value comes from your shell's TRIBE_MODEL_BASE_URL,
+# or hand-edit only your untracked copy — never this committed template.
+base_url = "$TRIBE_MODEL_BASE_URL"
+env_key = "TRIBE_MODEL_API_KEY"
+wire_api = "chat"
+
+model_provider = "tribe"
+model = "$TRIBE_MODEL_NAME"
+
+# Deny off-lane channels (task 4.1, carried from the define-portable-team-
+# manifest security review). network_access=false blocks the *shell sandbox*
+# (curl/wget/anything the agent runs) from reaching the network at all; it
+# does not affect Codex's own call to model_providers.tribe above, which is a
+# host-process HTTP call, not a sandboxed shell command. Verify this
+# distinction against your installed Codex version before relying on it.
+[sandbox_workspace_write]
+network_access = false
+
+# phi-lane-guard (.claude/hooks/src/phi-lane-guard.mts) proves the lane from
+# the process environment, not from this file. Before launching Codex with
+# this provider active, export in your shell (never in a committed file):
+#   export PHI_LANE=tribe
+#   export TRIBE_MODEL_BASE_URL=<your real Tribe endpoint>
+#   export TRIBE_MODEL_API_KEY=<your real Tribe key>
+#   export TRIBE_MODEL_NAME=<the model Tribe serves>
+#   export AGENT_MODEL_BASE_URL="$TRIBE_MODEL_BASE_URL"
+# Declaring PHI_LANE=tribe without a matching AGENT_MODEL_BASE_URL is still
+# the synthetic lane (phi-lane-policy): the guard denies non-sandbox FHIR
+# pulls either way. Never export these variables for a cloud/non-Tribe model.

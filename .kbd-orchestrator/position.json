@@ -2,17 +2,17 @@
   "schemaVersion": "1",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 507,
-  "derivedRevision": 507,
+  "sourceRevision": 552,
+  "derivedRevision": 552,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 507
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 552
   },
   "conflictCount": 0,
-  "updatedAt": "2026-09-25T21:56:07.071073Z",
+  "updatedAt": "2026-09-26T21:57:22.223806Z",
   "cursor": [
     "agent-team-hardening",
     "execute",
-    "configure-phi-lanes",
+    "document-and-verify-cross-harness-team",
     "1.1"
   ],
   "root": {
@@ -20,7 +20,7 @@
     "id": "98eeab9c-ff3e-4471-a109-52e79b939f28",
     "status": "ready",
     "progress": {
-      "done": 13,
+      "done": 14,
       "total": 15
     },
     "children": [
@@ -115,7 +115,7 @@
         "canonicalId": "agent-team-hardening",
         "status": "IN_PROGRESS",
         "progress": {
-          "done": 5,
+          "done": 6,
           "total": 7
         },
         "children": [
@@ -167,10 +167,10 @@
           {
             "type": "change",
             "id": "configure-phi-lanes",
-            "status": "PENDING",
+            "status": "COMPLETE",
             "progress": {
-              "done": 0,
-              "total": 7
+              "done": 10,
+              "total": 10
             }
           },
           {

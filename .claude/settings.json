@@ -11,6 +11,14 @@
               "${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/agent-ledger.mjs"
             ],
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/agent-scope-guard.mjs"
+            ],
+            "timeout": 5
           }
         ]
       }
@@ -23,6 +31,14 @@
             "command": "node",
             "args": [
               "${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/agent-ledger.mjs"
+            ],
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/agent-scope-guard.mjs"
             ],
             "timeout": 5
           }
@@ -136,6 +152,27 @@
             "command": "node",
             "args": [
               "${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/guard-generated.mjs"
+            ],
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/agent-scope-guard.mjs"
+            ],
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch|Bash|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/dist/phi-lane-guard.mjs"
             ],
             "timeout": 10
           }

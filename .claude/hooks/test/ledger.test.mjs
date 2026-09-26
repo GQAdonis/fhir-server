@@ -13,6 +13,8 @@ import {
   parseLedger,
   readKbdPosition,
   makeEntry,
+  isLedgerFile,
+  ledgerKeyFindings,
 } from "../dist/lib/ledger.mjs";
 
 const NOW = new Date("2026-09-24T12:00:00.000Z");
@@ -101,6 +103,22 @@ test("appendEntry writes exactly one line per call and parseLedger skips corrupt
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("isLedgerFile recognizes agent-ledger.jsonl and ledger/<yyyy-mm>.jsonl only", () => {
+  assert.equal(isLedgerFile("agent-ledger.jsonl"), true);
+  assert.equal(isLedgerFile("ledger/2026-08.jsonl"), true);
+  assert.equal(isLedgerFile("ledger/2026-8.jsonl"), false);
+  assert.equal(isLedgerFile("raw/2026-08-note.md"), false);
+  assert.equal(isLedgerFile("outbox/agent-ledger.jsonl.bak"), false);
+});
+
+test("ledgerKeyFindings flags a key outside LEDGER_FIELDS and ignores malformed lines", () => {
+  const clean = JSON.stringify({ ts: "t", event: "SubagentStart", agent_type: "fhir-architect" });
+  const dirty = JSON.stringify({ ts: "t", event: "SubagentStart", prompt_text: "leaked" });
+  const findings = ledgerKeyFindings(`${clean}\n${dirty}\n{torn\n`);
+  assert.deepEqual(findings, [{ line: 2, key: "prompt_text" }]);
+  for (const key of Object.keys(JSON.parse(clean))) assert.ok(LEDGER_FIELDS.includes(key));
 });
 
 test("readKbdPosition prefers nextChange and tolerates a missing waypoint", () => {

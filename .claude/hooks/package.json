@@ -11,7 +11,8 @@
     "test": "node --test test/**/*.test.mjs",
     "check:dist": "node scripts/check-dist.mjs",
     "scan:prometheus": "node dist/scan-prometheus.mjs",
-    "lint:agents": "node dist/lint-agents.mjs"
+    "lint:agents": "node dist/lint-agents.mjs",
+    "rotate-ledger": "node dist/rotate-ledger.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

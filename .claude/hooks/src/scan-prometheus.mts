@@ -11,6 +11,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { isLedgerFile, ledgerKeyFindings } from "./lib/ledger.mjs";
 import { parseAllowlist, scanText, validateAllowlist } from "./lib/scan.mjs";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -90,9 +91,16 @@ for (const file of files.sort()) {
     continue;
   }
   scanned += 1;
+  const relLabel = path.relative(root, file).split(path.sep).join("/");
   for (const m of scanText(buf.toString("utf8"), allowlist)) {
     hits += 1;
-    console.error(`scan-prometheus: ${path.relative(root, file).split(path.sep).join("/")}:${m.line}:${m.column}: ${m.rule}`);
+    console.error(`scan-prometheus: ${relLabel}:${m.line}:${m.column}: ${m.rule}`);
+  }
+  if (isLedgerFile(relLabel)) {
+    for (const f of ledgerKeyFindings(buf.toString("utf8"))) {
+      hits += 1;
+      console.error(`scan-prometheus: ${relLabel}:${f.line}: ledger-key-not-allowlisted (${f.key})`);
+    }
   }
 }
 

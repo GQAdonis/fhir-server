@@ -2,6 +2,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
@@ -95,6 +97,31 @@ test("rel rejects paths outside the project", () => {
   assert.equal(rel("/repo", "../secrets.txt"), null);
   assert.equal(rel("/repo", "a/../../b"), null);
   assert.equal(rel("/work/repo", "../repo/internal/x.go"), "internal/x.go", "climb out and back in");
+});
+
+test("rel recognizes a case-variant absolute target as inside the root (case-insensitive containment, like globMatch)", () => {
+  assert.equal(rel("/Repo", "/repo/Internal/BaseDef/X.GZ"), "Internal/BaseDef/X.GZ");
+  assert.equal(rel("/repo", "/REPO/internal/basedef/x.gz"), "internal/basedef/x.gz");
+  assert.equal(rel("/repo", "/repository/x.go"), null, "still rejects a same-cased near-miss prefix");
+});
+
+test("rel resolves a symlinked path to the same relPath as the real path it points to", () => {
+  const tmp = mkdtempSync(path.join(tmpdir(), "paths-symlink-"));
+  try {
+    const repo = path.join(tmp, "repo");
+    mkdirSync(path.join(repo, "internal", "basedef"), { recursive: true });
+    writeFileSync(path.join(repo, "internal", "basedef", "x.gz"), "data");
+    // A symlinked directory elsewhere reaches the same protected file by a
+    // route that does not lexically start with `repo` at all.
+    const alias = path.join(tmp, "alias");
+    symlinkSync(path.join(repo, "internal", "basedef"), alias, "dir");
+    assert.equal(rel(repo, path.join(alias, "x.gz")), "internal/basedef/x.gz");
+    // A file that does not exist yet (Write on a new path) inside the same
+    // symlinked directory is still resolved through the symlink.
+    assert.equal(rel(repo, path.join(alias, "new.gz")), "internal/basedef/new.gz");
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
 });
 
 test("projectDir prefers CLAUDE_PROJECT_DIR over cwd", () => {

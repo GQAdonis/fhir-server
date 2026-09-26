@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { editedPaths, guardInputs, ledgerInput } from "../dist/lib/harness-payload.mjs";
+import { editedPaths, guardInputs, ledgerInput, phiLaneInput } from "../dist/lib/harness-payload.mjs";
 
 const cli = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "dist", "harness-hook.mjs");
 
@@ -100,6 +100,43 @@ test("ledger: a harness session start appends one metadata-only line", () => {
   }
 });
 
+test("phiLaneInput passes the tool name and input through unchanged, or undefined when the payload names no tool", () => {
+  assert.deepEqual(phiLaneInput("codex", { tool_name: "shell", tool_input: { command: "ls" }, session_id: "s1", cwd: "/repo" }), {
+    hook_event_name: "PreToolUse",
+    session_id: "s1",
+    cwd: "/repo",
+    tool_name: "shell",
+    tool_input: { command: "ls" },
+  });
+  assert.equal(phiLaneInput("codex", {}), undefined);
+});
+
+const PHI_CASES = [
+  ["codex", { hook_event_name: "PreToolUse", cwd: process.cwd(), tool_name: "shell", tool_input: { command: "curl https://ehr.example.com/fhir/Patient/1" } }],
+  ["opencode", { tool: "webfetch", directory: process.cwd(), args: { url: "https://ehr.example.com/fhir/Patient/1" } }],
+  ["kimi", { hook_event_name: "PreToolUse", cwd: process.cwd(), tool_name: "Shell", tool_input: { command: "curl https://ehr.example.com/fhir/Patient/1" } }],
+  ["minimax", { hook_event_name: "PreToolUse", cwd: process.cwd(), tool_name: "shell", tool_input: { command: "curl https://ehr.example.com/fhir/Patient/1" } }],
+];
+
+for (const [harness, payload] of PHI_CASES) {
+  test(`${harness}: a non-sandbox FHIR pull is denied in the native contract without a lane; an ordinary command is allowed`, () => {
+    const denied = run(harness, "phi-lane", payload);
+    assert.equal(denied.status, 0, denied.stderr);
+    const out = JSON.parse(denied.stdout);
+    if (harness === "opencode") {
+      assert.equal(out.decision, "deny");
+      assert.match(out.reason, /ATH-D-001/);
+    } else {
+      assert.equal(out.hookSpecificOutput.permissionDecision, "deny");
+      assert.match(out.hookSpecificOutput.permissionDecisionReason, /ATH-D-001/);
+    }
+    const okPayload = harness === "opencode" ? { tool: "webfetch", directory: process.cwd(), args: { url: "https://example.com/api/v1/widgets" } } : { ...payload, tool_input: { command: "ls -la" } };
+    const allowed = run(harness, "phi-lane", okPayload);
+    assert.equal(allowed.status, 0);
+    assert.equal(allowed.stdout, "");
+  });
+}
+
 test("bad usage and malformed input never block (exit 0 with a warning)", () => {
   const bad = spawnSync(process.execPath, [cli, "--harness", "nope", "--hook", "guard"], { input: "{}", encoding: "utf8" });
   assert.equal(bad.status, 0);
@@ -119,6 +156,10 @@ test("the OpenCode project plugin blocks a protected edit and records sessions (
     await assert.rejects(
       hooks["tool.execute.before"]({ tool: "write", sessionID: "t" }, { args: { filePath: path.join(repo, "internal", "basedef", "x.gz") } }),
       /is protected/,
+    );
+    await assert.rejects(
+      hooks["tool.execute.before"]({ tool: "webfetch", sessionID: "t" }, { args: { url: "https://ehr.example.com/fhir/Patient/1" } }),
+      /ATH-D-001/,
     );
     await hooks["tool.execute.before"]({ tool: "write", sessionID: "t" }, { args: { filePath: path.join(repo, "internal", "handler", "x.go") } });
     await hooks["tool.execute.before"]({ tool: "read", sessionID: "t" }, { args: { filePath: path.join(repo, "AGENTS.md") } });

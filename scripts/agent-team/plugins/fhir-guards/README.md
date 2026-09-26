@@ -1,6 +1,6 @@
 # fhir-guards plugin (Kimi Code, MiniMax Code)
 
-Kimi Code and MiniMax Code load hooks only from **user-installed** plugins, not from the project. This package brings the repo's protected-path guard and metadata-only ledger to them. The rules stay in the repo, and `hooks/run.mjs` runs the project's own `.claude/hooks/dist/harness-hook.mjs`, so updating the repo updates the behaviour.
+Kimi Code and MiniMax Code load hooks only from **user-installed** plugins, not from the project. This package brings the repo's protected-path guard, PHI-lane guard and metadata-only ledger to them. The rules stay in the repo, and `hooks/run.mjs` runs the project's own `.claude/hooks/dist/harness-hook.mjs`, so updating the repo updates the behaviour.
 
 **Security:** the plugin fires in every project you open. To keep an arbitrary cloned repository from running code through it, `hooks/run.mjs` runs a project's adapter **only for repositories on your allowlist** (its git top level, compared by canonical real path; an allowlist file inside the repo itself is ignored). The allowlist file is `$FHIR_GUARDS_CONFIG`, or `%APPDATA%/fhir-guards/roots.json` on Windows, or `$XDG_CONFIG_HOME` (default `~/.config`)`/fhir-guards/roots.json`.
 

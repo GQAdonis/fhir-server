@@ -23,7 +23,7 @@ Fourteen roles (decision ATH-D-002):
 - five domain roles are added.
 
 PHI lanes follow the `phi-lane-policy` skill (ATH-D-001):
-- `none`: never processes real PHI;
+- `none`: never processes real PHI; synthetic data only, never de-identified patient data (operator decision 2026-09-26);
 - `policy-only`: reviews PHI policy and flows, not content;
 - `tribe-only`: real PHI only on a verified Tribe lane.
 
@@ -65,6 +65,7 @@ The same compiled hooks (`.claude/hooks/dist/`) run in every harness that suppor
 | Hook | Claude Code | Codex | OpenCode | Kimi Code | MiniMax Code |
 |---|---|---|---|---|---|
 | Protected-path guard (`guard-generated`) | supported | supported | supported | partial | partial |
+| PHI-lane guard (`phi-lane-guard`) | supported | supported | supported | partial | partial |
 | Agent ledger (`agent-ledger`, metadata only) | supported | supported | supported | partial | partial |
 | License header, gofmt checks | supported | unsupported | unsupported | unsupported | unsupported |
 | Karpathy flush / session context | supported | unsupported | unsupported | unsupported | unsupported |
@@ -72,11 +73,21 @@ The same compiled hooks (`.claude/hooks/dist/`) run in every harness that suppor
 | Activation | always | **trust the project and each hook hash once** in Codex | always | after install; hooks are **fail-open** | after install and `mcode login`; not verified end to end |
 
 - **Reduced protection where a hook is partial or unsupported:** generated files and KBD projections can be hand-edited without a guard. `lint:agents` (drift) and CI still catch drift in generated agent files, but not in other protected files. Run `npm --prefix .claude/hooks run lint:agents` before committing.
-- The guard covers file-writing tools only (Edit/Write/patch). Shell commands are not guarded in any harness.
+- The protected-path guard covers file-writing tools only (Edit/Write/patch); it does not inspect shell commands in any harness. The PHI-lane guard is narrower still: it only inspects WebFetch calls, MCP-shaped tool inputs (a `base_url`/`server` field), and shell commands that both mention `curl`/`wget`/`httpie`/`fhir` and reach a FHIR-shaped path — an obfuscated shell command can evade it (documented residual risk; policy and review are the backstop, see `phi-lane-policy`).
 - **The guard fails open in every harness:** an adapter error, a timeout (10 s), a missing or unbuilt adapter, or unparseable output allows the write. CI (`check:dist`, `lint:agents`) is the backstop for compiled hooks and generated agent files. KBD projections and golden `testdata` have no CI backstop. The Codex commands locate the repo with `git`: without git, outside a repository, or when git refuses a repo with "dubious ownership", the Codex guard is silently off. On Windows it relies on Codex running `commandWindows` through `cmd.exe` (not verified).
 - Sessions started in a subdirectory are guarded too. Every adapter resolves the git top level, and relative edit paths are resolved against the session directory first (so `../../AGENTS.md` from `internal/store` is denied).
 - The Kimi/MiniMax plugin runs a repo's hooks **only for repositories you allow**: `node scripts/agent-team/plugins/fhir-guards/hooks/run.mjs --allow <repo>`, run interactively (or with `--yes`). The allowlist lives in your user config dir; one stored inside a repo is ignored. It trusts a path, not content: whatever you check out or pull into an allowed repo runs at session start. Without it, the plugin does nothing, so another repo cannot run code through it.
 - The ledger records a harness session start as `SubagentStart` (with the harness as `agent_type`), plus prompt submits, and tool failures where the harness reports them: Claude, OpenCode (`session.error`), Kimi and MiniMax. **Codex has no tool-failure event, so Codex sessions record only session starts and prompts.** Per-turn stop events are not recorded.
+
+## PHI lanes
+
+Rules: `phi-lane-policy`. Enforcement (change `configure-phi-lanes`):
+
+> **Not yet sufficient for real PHI.** These controls support synthetic-only operation. No real-PHI session may start until the pre-real-PHI gate in `docs/compliance/README.md` holds (review warnings W1-W5, deferred to a follow-up change). Kimi Code and MiniMax Code are not approved Tribe lanes.
+
+- **Model-config templates** (env vars only, per ATH-D-001; never a literal endpoint or key): `.codex/config.phi.template.toml`, `.kimi-code/config.phi.template.toml`, `.opencode/opencode.phi.template.json`. None is loaded automatically; copy the relevant one to an untracked location and render `TRIBE_MODEL_*` from your own environment before use.
+- **Tribe-lane profile** (task 4.1, off-lane channels *denied*, not just discouraged): `.claude/settings.tribe.json` (load explicitly with `claude --settings .claude/settings.tribe.json`) denies `WebFetch`/`WebSearch`/`mcp__*`, adds no plugin marketplaces and omits the Karpathy `Stop`/`SessionEnd`/`PreCompact` sinks from its own hooks (but Claude Code merges `--settings` with project and user settings, so project hooks and user-enabled plugins still run until W2 is fixed), minimizes transcript retention (`cleanupPeriodDays`) and sets `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`. The Codex and OpenCode templates above carry the equivalent denies (Codex: `sandbox_workspace_write.network_access = false`, which blocks the agent's own shell network use without affecting Codex's own call to the configured model provider; OpenCode: `permission.webfetch = "deny"`). Kimi and MiniMax have no per-agent or global permission-deny field (`docs/agent-team.md` § Per-harness limitations), so this control does not exist for them; the `phi-lane-guard` hook and policy are the only backstops there. Some of the Claude/Codex/OpenCode fields above are best-effort against each product's public settings reference and are not verified end to end in this repo's CI: verify against your installed version before relying on them for a real PHI session.
+- **`phi-lane-guard` hook:** denies a FHIR pull to a non-sandbox endpoint unless the session has proven the lane (`PHI_LANE=tribe` and `AGENT_MODEL_BASE_URL`, exported by whoever launches the harness and not settable by a tool call in the running session; it is operator-declared, not read from the endpoint the harness actually calls, which W1 fixes — equal to `TRIBE_MODEL_BASE_URL`). Sandbox allowlist: `.claude/hooks/phi-sandboxes.json`.
 
 ## Persona → KBD stage and skill matrix
 
@@ -122,7 +133,7 @@ billing-prior-auth-specialist ──data gaps──▶ fhir-integration-speciali
 
 - **Gate rules.** Any CRITICAL finding from a reviewer means BLOCK. For Go changes, archive requires either a local `make lint` pass or recorded evidence of a green CI lint job; unverified lint means BLOCK. Commits and pushes happen only when the operator asks.
 - **Read-only personas** (the reviewers and the validator) never modify tracked files. Their Bash use is limited to verification. Commands that write into the repo (`make build` without `BINARY=` pointing outside it, `npm run build`) are not allowed for them.
-- **`fhir-tech-lead`** edits only KBD phase records and curation paths (its manifest `owns`), never code, specs or configuration; its other Bash use is limited to KBD, OpenSpec and verification commands.
+- **`fhir-tech-lead`** edits only KBD phase records and curation paths (its manifest `owns`), never code, specs or configuration; its other Bash use is limited to KBD, OpenSpec, ledger rotation and verification commands. In Claude Code, this is enforced by the `agent-scope-guard` hook (task 4.3) when the tech lead runs as a Task-tool subagent; run as the main session, or in any other harness, it is enforced by the prompt alone (documented limitation, not a gap this change silently accepts).
 
 ## Hooks
 
@@ -132,6 +143,8 @@ All hooks are TypeScript 7 sources (`.claude/hooks/src/*.mts`) compiled to commi
 |---|---|---|
 | `session-context` | SessionStart | Adds the KBD phase, the next change derived from task state, and the position-reminder head (≤ 2 KB) |
 | `guard-generated` | PreToolUse (Edit/Write/MultiEdit/NotebookEdit) | Denies edits to `internal/basedef/*.gz`, `internal/store/testdata/**`, `.claude/hooks/dist/**` and KBD runtime projections, naming the correct regeneration command |
+| `phi-lane-guard` | PreToolUse (WebFetch, Bash, MCP-shaped tool calls) | Denies a FHIR pull to a non-sandbox endpoint unless the session has a proven Tribe lane (`PHI_LANE=tribe` and a matching model endpoint); allowlist in `.claude/hooks/phi-sandboxes.json` (`phi-lane-policy`, change `configure-phi-lanes`) |
+| `agent-scope-guard` | SubagentStart/Stop; PreToolUse (Edit/Write/MultiEdit/NotebookEdit) | Enforces `fhir-tech-lead`'s documented write scope (`.agent-team/team.json` `owns`, built from `.agent-team/roles/fhir-tech-lead.md`), denying an edit outside it. **Claude Code only, and only for a Task-tool subagent**: it tracks the active persona from `SubagentStart`/`SubagentStop` in a per-session temp-dir state file, so `fhir-tech-lead` run as the *main* session (`claude --agent fhir-tech-lead`) is not scoped — there is no hook event that identifies a main session's own persona, in any harness. No other harness fires a subagent-lifecycle event today (see the coverage table below), so this hook is registered only in `.claude/settings.json`/`.claude/settings.tribe.json`, not in `harness-hook.mjs`. Concurrent subagents in one session are not disambiguated (the most recent `SubagentStart` wins until the next `SubagentStop`). |
 | `license-header` | PostToolUse (.go) | Feedback when the WSO2 Apache header is missing |
 | `gofmt-check` | PostToolUse (.go) | Feedback when the file is not gofmt-clean (silent without gofmt) |
 | `agent-ledger` | SubagentStart/Stop, PostToolUseFailure, TaskCompleted, UserPromptSubmit | Appends one metadata-only line to `.prometheus/agent-ledger.jsonl` |

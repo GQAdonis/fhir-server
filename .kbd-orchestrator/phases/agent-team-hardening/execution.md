@@ -41,3 +41,21 @@
 - **Operator question (security review of export):** `fhir-tech-lead` gained Edit/Write when curation merged in, and its write scope is enforced only by its prompt. Accept this, or add a PreToolUse path allowlist for the tech lead (it fits `wire-hooks-per-harness`)?
 - `wire-hooks-per-harness` follow-up (pre-existing, out of scope): `paths.mts` `rel()` compares case-sensitively and doesn't resolve symlinks, so a case-variant or symlinked absolute path to a protected file is allowed. Fix alongside `phi-lane-guard` in `configure-phi-lanes`.
 - Judge gateway (liter-llm, localhost:4000) returned HTTP 401 and then stopped responding. The operator must repair it (`/liter-llm-bridge configure`) before the `wire-hooks-per-harness` judge round and all later judge rounds.
+
+## Operator decisions (2026-09-26)
+
+- **Cloud data policy: synthetic only.** Operator, acting as designated privacy official (45 CFR 164.530(a)), narrowed cloud-model harnesses to synthetic data; de-identified data derived from real patients stays on the Tribe local-model lane. New task `configure-phi-lanes` 5.1.
+- **ATH-D-003 resolved: project dir.** `MINIMAX_DATA_DIR=.minimax` stays; `.minimax/auth` remains gitignored.
+- **Tech-lead write scope: enforced by hook.** New task `configure-phi-lanes` 4.3 (PreToolUse path allowlist).
+- **Path matching follow-up** from `wire-hooks-per-harness` registered as `configure-phi-lanes` 4.4.
+- **Judge fallback:** liter-llm gateway still down; the final adversarial diff review runs through the Codex CLI as the cross-model judge.
+- Branch rebased onto `main` after PR #3 (docs rebrand); agent tooling CI fixed (mirror file, Windows ESM imports) in `0b7b04f`.
+
+## configure-phi-lanes review outcome (2026-09-26)
+
+- `hipaa-privacy-officer` review (task 3.1) first returned BLOCK on C1: its own role card still allowed "require de-identification" for non-Tribe endpoints. Fixed, along with the de-identification rule wording (Q3) and the `policy-only` lane block (W6); all harnesses re-exported with the pinned creator.
+- Operator decisions (recorded in `docs/compliance/README.md`, 164.530(j)):
+  - the counts rule is adopted;
+  - synthetic-only covers published de-identified research datasets, and patient data in partner documents and tool output;
+  - Tribe lanes: Claude first, then Codex and OpenCode after verification; Kimi and MiniMax are not approved.
+- **Deferred follow-up (next phase, gating the first real-PHI session):** W1 lane proof must read the real endpoint; W2 full isolation of the Tribe profile (`--setting-sources`, no note sinks); W3 shell egress on the Claude Tribe profile; W4 complete harness templates, each deny verified; W5 guard FHIR-detection gaps. The review's suggestions S1–S6 go in the same change. The gate conditions are listed in `docs/compliance/README.md`.

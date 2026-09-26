@@ -1,8 +1,8 @@
 // Hook adapter for harnesses other than Claude Code.
-//   node .claude/hooks/dist/harness-hook.mjs --harness <codex|opencode|kimi|minimax> --hook <guard|ledger>
+//   node .claude/hooks/dist/harness-hook.mjs --harness <codex|opencode|kimi|minimax> --hook <guard|ledger|phi-lane>
 // Reads the harness's native hook payload on stdin, normalizes it to the
-// Claude Code shape, runs the project's compiled hook (guard-generated or
-// agent-ledger) and answers in the native contract:
+// Claude Code shape, runs the project's compiled hook (guard-generated,
+// agent-ledger or phi-lane-guard) and answers in the native contract:
 //   codex, kimi, minimax: Claude-compatible JSON (hookSpecificOutput.permissionDecision) on stdout
 //   opencode:             {"decision":"deny","reason":"…"} on stdout; the plugin throws on deny
 // Never blocks on its own failure (exit 0 with a warning), like every project hook.
@@ -11,7 +11,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseInput } from "./lib/hook-io.mjs";
-import { guardInputs, HARNESSES, ledgerInput, projectRootOf } from "./lib/harness-payload.mjs";
+import { guardInputs, HARNESSES, ledgerInput, phiLaneInput, projectRootOf } from "./lib/harness-payload.mjs";
 const dist = path.dirname(fileURLToPath(import.meta.url));
 function arg(name) {
     const i = process.argv.indexOf(`--${name}`);
@@ -71,8 +71,8 @@ function answerDeny(harness, reason) {
 try {
     const harness = arg("harness");
     const hook = arg("hook");
-    if (harness === undefined || !HARNESSES.includes(harness) || (hook !== "guard" && hook !== "ledger")) {
-        throw new Error("usage: harness-hook --harness <codex|opencode|kimi|minimax> --hook <guard|ledger>");
+    if (harness === undefined || !HARNESSES.includes(harness) || (hook !== "guard" && hook !== "ledger" && hook !== "phi-lane")) {
+        throw new Error("usage: harness-hook --harness <codex|opencode|kimi|minimax> --hook <guard|ledger|phi-lane>");
     }
     const payload = parseInput(await readStdin());
     if (payload === null)
@@ -85,6 +85,14 @@ try {
                 answerDeny(harness, reason);
                 break;
             }
+        }
+    }
+    else if (hook === "phi-lane") {
+        const input = phiLaneInput(harness, payload);
+        if (input !== undefined) {
+            const reason = denyReason(runProjectHook("phi-lane-guard.mjs", input, root).stdout);
+            if (reason !== undefined)
+                answerDeny(harness, reason);
         }
     }
     else {

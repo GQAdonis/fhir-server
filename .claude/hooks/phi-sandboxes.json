@@ -1,0 +1,11 @@
+{
+  "$comment": "Public FHIR sandbox allowlist for phi-lane-guard (change configure-phi-lanes). Reviewed by hipaa-privacy-officer. Each entry is a public, unauthenticated-by-default test server that never holds real patient data. Add a host only with a reason naming the sandbox program; never add a production or partner endpoint here.",
+  "sandboxes": [
+    { "host": "hapi.fhir.org", "reason": "HAPI FHIR public test server (R4 base at /baseR4), operated by Smile Digital Health for community testing; synthetic/test data only." },
+    { "host": "r4.smarthealthit.org", "reason": "SMART Health IT public R4 reference sandbox (SMART App Launch conformance testing); synthetic data only." },
+    { "host": "launch.smarthealthit.org", "reason": "SMART Health IT app launcher for the public sandbox above; no patient data of its own." },
+    { "host": "fhir.epic.com", "reason": "Epic on FHIR public sandbox (open.epic.com), used for third-party app development against Epic's non-production test tenant." },
+    { "host": "fhir-open.cerner.com", "reason": "Oracle Health (Cerner) public open sandbox for FHIR R4 conformance testing; synthetic patients only." },
+    { "host": "fhir-ehr-code.cerner.com", "reason": "Oracle Health (Cerner) code console sandbox for SMART app development; synthetic patients only." }
+  ]
+}

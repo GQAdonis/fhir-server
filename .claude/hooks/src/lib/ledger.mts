@@ -119,6 +119,94 @@ export function ledgerPath(projectRoot: string): string {
   return path.join(projectRoot, ".prometheus", "agent-ledger.jsonl");
 }
 
+export function ledgerDir(projectRoot: string): string {
+  return path.join(projectRoot, ".prometheus", "ledger");
+}
+
+/** The "yyyy-mm" UTC month key for a `ts` string, or undefined when it does not parse. */
+export function monthKey(ts: string): string | undefined {
+  const d = new Date(ts);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+export interface LedgerPartition {
+  /** Raw lines to append to `ledger/<month>.jsonl`, grouped by month, each group in original order. */
+  readonly rotated: ReadonlyMap<string, readonly string[]>;
+  /** Raw lines that stay in `agent-ledger.jsonl`, in original order. */
+  readonly kept: readonly string[];
+}
+
+/**
+ * Split raw ledger lines (rotate-ledger.mts) into ones to move out (month
+ * strictly before `beforeMonth`, "yyyy-mm") and ones to keep. Lines move
+ * verbatim: a line whose `ts` is missing or unparseable is kept rather than
+ * dropped or misfiled, since we cannot prove which month it belongs to.
+ */
+export function partitionLedgerLines(lines: readonly string[], beforeMonth: string): LedgerPartition {
+  const rotated = new Map<string, string[]>();
+  const kept: string[] = [];
+  for (const line of lines) {
+    if (line.trim() === "") continue;
+    let ts: string | undefined;
+    try {
+      const value = JSON.parse(line) as unknown;
+      if (value !== null && typeof value === "object" && typeof (value as { ts?: unknown }).ts === "string") {
+        ts = (value as { ts: string }).ts;
+      }
+    } catch {
+      ts = undefined;
+    }
+    const month = ts !== undefined ? monthKey(ts) : undefined;
+    if (month !== undefined && month < beforeMonth) {
+      const bucket = rotated.get(month) ?? [];
+      bucket.push(line);
+      rotated.set(month, bucket);
+    } else {
+      kept.push(line);
+    }
+  }
+  return { rotated, kept };
+}
+
+/** True for a ledger-shaped file, whose JSON lines must use only LEDGER_FIELDS: `agent-ledger.jsonl` or `ledger/<yyyy-mm>.jsonl`. */
+export function isLedgerFile(relPath: string): boolean {
+  const posix = relPath.split(path.sep).join("/");
+  return posix === "agent-ledger.jsonl" || /^ledger\/\d{4}-\d{2}\.jsonl$/.test(posix);
+}
+
+export interface LedgerKeyFinding {
+  readonly line: number;
+  readonly key: string;
+}
+
+/**
+ * Keys outside LEDGER_FIELDS found in a ledger-shaped file's JSON lines. This
+ * is a schema check, not the PHI/secret scan: it catches a future hook (or a
+ * hand edit) adding a field the ledger's allowlist design was built to
+ * exclude, even if that field's value happens not to match a scan rule.
+ * Malformed lines are not this check's concern (the PHI scan and
+ * `parseLedger` already handle those).
+ */
+export function ledgerKeyFindings(text: string): LedgerKeyFinding[] {
+  const findings: LedgerKeyFinding[] = [];
+  const lines = text.split(/\r?\n/);
+  lines.forEach((line, index) => {
+    if (line.trim() === "") return;
+    let value: unknown;
+    try {
+      value = JSON.parse(line);
+    } catch {
+      return;
+    }
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return;
+    for (const key of Object.keys(value as Record<string, unknown>)) {
+      if (!(LEDGER_FIELDS as readonly string[]).includes(key)) findings.push({ line: index + 1, key });
+    }
+  });
+  return findings;
+}
+
 /**
  * Append one line. Lines are kept well under 4 KB so a single O_APPEND write
  * stays line-atomic when hooks run concurrently.

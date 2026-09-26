@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -71,6 +73,27 @@ test("ordinary source files and outside paths are allowed", () => {
     const { status, body } = run("/repo", target);
     assert.equal(status, 0);
     assert.equal(body, null, target);
+  }
+});
+
+test("a case-variant root/target pair is still denied (case-insensitive filesystems)", () => {
+  const { body } = run("/Repo", "/repo/internal/basedef/x.gz");
+  assert.equal(body?.hookSpecificOutput?.permissionDecision, "deny");
+});
+
+test("a symlinked path to a protected file is denied, including a file that does not exist yet", () => {
+  const tmp = mkdtempSync(path.join(tmpdir(), "guard-symlink-"));
+  try {
+    const repo = path.join(tmp, "repo");
+    mkdirSync(path.join(repo, "internal", "basedef"), { recursive: true });
+    const alias = path.join(tmp, "alias");
+    symlinkSync(path.join(repo, "internal", "basedef"), alias, "dir");
+    const existing = run(repo, path.join(alias, "x.gz"));
+    assert.equal(existing.body?.hookSpecificOutput?.permissionDecision, "deny");
+    const notYetWritten = run(repo, path.join(alias, "new.gz"));
+    assert.equal(notYetWritten.body?.hookSpecificOutput?.permissionDecision, "deny");
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
   }
 });
 
