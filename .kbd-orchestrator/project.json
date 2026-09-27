@@ -1,7 +1,7 @@
 {
   "name": "WSO2 FHIR Server",
   "description": "Open-source FHIR R4 REST server written in Go and backed by PostgreSQL.",
-  "activePhase": "agent-dev-team",
+  "activePhase": "agent-team-hardening",
   "worktreeRoot": "${HOME}/.claude/worktrees",
   "maxChildDepth": 4,
   "ux_profile": "advanced",
@@ -16,7 +16,11 @@
   "lint_command": "make lint",
   "preferred_planning_agent": "claude-code",
   "preferred_execution_agents": [
-    "claude-code"
+    "claude-code",
+    "codex",
+    "opencode",
+    "kimi-code",
+    "minimax-code"
   ],
   "model_policy": {
     "registry": {
@@ -64,7 +68,7 @@
       "creator-persist": "small"
     },
     "active_environment": "local",
-    "__registry_note": "local lane = Claude Code agent team (docs/agent-team.md): small=Haiku 4.5 (fhir-knowledge-curator), medium=Sonnet 5 (developer/test/review/validate/infra), frontier=Opus 5.5 (tech-lead/ideation/architect/storage-search/security). t4/l4 are self-hosted GPU lanes and keep their open-weight models for small/medium."
+    "__registry_note": "local lane = Claude Code agent team (docs/agent-team.md): small=Haiku 4.5 (no role assigned since knowledge curation merged into fhir-tech-lead, ATH-D-002), medium=Sonnet 5 (go-developer/test/code-review/validate/infra/ehr-integration-manager/data-sync-coordinator), frontier=Opus 5.5 (tech-lead/architect/storage-search/security/hipaa-privacy-officer/fhir-integration-specialist/billing-prior-auth-specialist). Team source: .agent-team/team.json. t4/l4 are self-hosted GPU lanes and keep their open-weight models for small/medium."
   },
   "agents_config": {
     "antigravity": {
@@ -90,10 +94,12 @@
       ]
     },
     "codex": {
-      "entry": "OpenAI Codex CLI / app",
+      "entry": "OpenAI Codex CLI / app (agents: .codex/agents/*.toml, registered in .codex/config.toml; trust the project first)",
+      "team_target": "codex",
       "strengths": [
         "parallel isolated tasks via git worktrees"
-      ]
+      ],
+      "roster_doc": "docs/agent-team.md"
     },
     "cline": {
       "entry": "Cline VSCode extension",
@@ -103,18 +109,37 @@
       ]
     },
     "opencode": {
-      "entry": "OpenCode CLI",
+      "entry": "OpenCode CLI (agents: .opencode/agents/*.md)",
+      "team_target": "opencode",
       "strengths": [
         "quick targeted edits",
         "file patches"
-      ]
+      ],
+      "roster_doc": "docs/agent-team.md"
     },
     "claude-code": {
-      "entry": "claude --agent fhir-tech-lead (personas: .claude/agents/fhir-*.md)",
+      "entry": "claude --agent fhir-tech-lead (agents: .claude/agents/*.md)",
+      "team_target": "claude",
       "strengths": [
         "KBD orchestration via fhir-tech-lead",
         "persona-routed implementation, review and validation",
         "cross-platform Karpathy logging hooks"
+      ],
+      "roster_doc": "docs/agent-team.md"
+    },
+    "kimi-code": {
+      "entry": "kimi -m kimi-code/k3 --agent <id> (agents: .kimi-code/agents/*.md; per-agent model ignored)",
+      "team_target": "kimi",
+      "strengths": [
+        "headless role runs with a session-chosen model"
+      ],
+      "roster_doc": "docs/agent-team.md"
+    },
+    "minimax-code": {
+      "entry": "MINIMAX_DATA_DIR=.minimax mcode, agent picked interactively (agents: .minimax/agents/<id>/agent.md; mcode exec has no agent selector)",
+      "team_target": "minimax",
+      "strengths": [
+        "interactive role sessions"
       ],
       "roster_doc": "docs/agent-team.md"
     }
@@ -134,5 +159,6 @@
   },
   "integration_test_command": "make test-integration",
   "conformance_test_command": "make test-conformance",
-  "updatedAt": "2026-09-24T11:16:23Z"
+  "updatedAt": "2026-09-26T22:07:15Z",
+  "__agents_note": "The five team harnesses (claude-code, codex, opencode, kimi-code, minimax-code) run the same 14 roles generated from .agent-team/team.json (team_target = its native target id). Cloud-model harnesses are synthetic-data only; Tribe PHI lanes are Claude first, then Codex and OpenCode; Kimi and MiniMax are not approved (docs/compliance/README.md)."
 }

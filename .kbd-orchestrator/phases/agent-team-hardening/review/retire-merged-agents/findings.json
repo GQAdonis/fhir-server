@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 file_tree shows both retired agent definitions absent from all five harness directories and .agent-team/roles, and packet evidence states the exact-id sweep outside stated exclusions leaves only the docs redirect note.",
+    "Correctness \u2014 the diff only changes agent/team metadata and documentation; no executable logic, error handling, or resource management paths are modified.",
+    "Regressions \u2014 required active agents remain present in every harness per file_tree, including fhir-tech-lead and fhir-architect.",
+    "Security \u2014 no application code, authentication, authorization, deserialization, path handling, or secret-bearing configuration is changed.",
+    "Constraint breaches \u2014 no Go files, database schema, store/search code, handler code, helm files, or generated FHIR assets are touched by the shown diff.",
+    "Silent failure \u2014 no new fallback behavior, swallowed errors, or command error handling paths are introduced."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,16 @@
+# Keep agent tooling, harness runtime data and logs out of the image build context.
+.git
+.agent-team/
+.agents/
+.ci/
+.claude/
+.codex/
+.kbd-orchestrator/
+.kimi-code/
+.minimax/
+.opencode/
+.prometheus/
+.refiner/
+openspec/
+website/node_modules/
+AGENTS.md

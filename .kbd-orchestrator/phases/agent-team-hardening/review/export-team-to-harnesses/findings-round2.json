@@ -1,0 +1,37 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "AGENTS.md",
+      "claim": "The required generated AGENTS.md is not added to the repository, so non-Claude harnesses do not get project instructions and the drift check will fail on a missing file.",
+      "evidence": "Acceptance criteria require `AGENTS.md SHALL be generated from CLAUDE.md`; `scripts/agent-team/gen-agents-md.mjs` checks `AGENTS.md` at `const out = path.join(root, \"AGENTS.md\")`, but the diff contains no `diff --git a/AGENTS.md` hunk.",
+      "suggested_fix": "Run `node scripts/agent-team/gen-agents-md.mjs` and commit the generated `AGENTS.md`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/test/flush.test.mjs",
+      "line": 13,
+      "claim": "The hook tests and CI reference compiled `.claude/hooks/dist/*.mjs` files, but the diff adds only `src/` and tests, not the committed `dist/` output they import.",
+      "evidence": "`flush.test.mjs` imports `../dist/lib/flush.mjs`, other tests and workflow steps execute `.claude/hooks/dist/*.mjs`, and `.github/workflows/agent-tooling.yml` runs `npm --prefix .claude/hooks run check:dist`; the diff has no `.claude/hooks/dist/` hunks for the newly added hook sources.",
+      "suggested_fix": "Build the hook toolchain and commit the generated `.claude/hooks/dist/` files, or change tests/workflow to build before importing dist and stop requiring committed dist."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "docs/agent-team.md",
+      "claim": "The required documentation of Kimi and MiniMax harness limitations is not updated in the diff.",
+      "evidence": "Acceptance criterion `Per-harness limitations are explicit` says `docs/agent-team.md SHALL list the limitation`; the diff adds Harness-card text in generated agent files and evidence, but contains no `diff --git a/docs/agent-team.md` hunk documenting Kimi's ignored per-role model or MiniMax's `MINIMAX_DATA_DIR`/missing exec selector limitations.",
+      "suggested_fix": "Update `docs/agent-team.md` to list each harness limitation required by the criterion and commit the change."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

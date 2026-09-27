@@ -1,0 +1,29 @@
+# plan probe evidence — 2026-09-25T11:24:13Z
+## codex
+codex-cli 0.154.0
+12:openai_base_url = "http://127.0.0.1:11434/api/codex/v1"
+594:[hooks.state]
+596:[hooks.state."warp@codex-warp:hooks/hooks.json:permission_request:0:0"]
+      --dangerously-bypass-hook-trust
+          Run enabled hooks without requiring persisted hook trust for this invocation. DANGEROUS.
+## kimi
+0.42.0
+51:base_url = "https://api.kimi.com/coding/v1/search"
+59:base_url = "https://api.kimi.com/coding/v1/fetch"
+70:[providers."managed:kimi-code"]
+73:base_url = "https://api.kimi.com/coding/v1"
+  --agent <name>                Agent profile to start the new session with. Custom profiles are
+                                discovered from agent directories or loaded via --agent-file. Cannot
+## minimax code
+0.5.4
+0
+1
+Minimax Code — terminal coding agent
+  prompt                        task to execute in the interactive TUI
+  init [directory]              Analyze the codebase and generate AGENTS.md
+  exec [options] [prompt]       Run one prompt without starting the TUI
+## opencode
+1.18.25-fork
+  opencode acp                 start ACP (Agent Client Protocol) server
+  opencode agent               manage agents
+  opencode github              manage GitHub agent

@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "project": [
+    "ehr-integration-onboarding",
+    "fhir-data-sync-runbook",
+    "payer-documentation-rules",
+    "phi-lane-policy"
+  ],
+  "generated": [
+    "openspec-apply-change",
+    "openspec-archive-change",
+    "openspec-bulk-archive-change",
+    "openspec-continue-change",
+    "openspec-explore",
+    "openspec-ff-change",
+    "openspec-new-change",
+    "openspec-onboard",
+    "openspec-propose",
+    "openspec-sync-specs",
+    "openspec-update-change",
+    "openspec-verify-change"
+  ],
+  "thirdParty": {
+    "healthcare-agents": {
+      "url": "https://github.com/ajhcs/healthcare-agents",
+      "commit": "81b239763c06a71f6290d01f2535431c5ae4d89c",
+      "license": "Apache-2.0",
+      "modified": true,
+      "roles": [
+        "billing-prior-auth-specialist",
+        "hipaa-privacy-officer",
+        "ehr-integration-manager",
+        "fhir-integration-specialist"
+      ]
+    },
+    "fhir-software": {
+      "url": "https://github.com/PhenoML/ClaudeFHIRSkill",
+      "commit": "f472b762acd0511da892963ec940431f5d57c58a",
+      "license": "Apache-2.0",
+      "modified": false,
+      "roles": [
+        "fhir-integration-specialist",
+        "data-sync-coordinator",
+        "fhir-architect",
+        "fhir-go-developer",
+        "fhir-conformance-validator"
+      ]
+    }
+  },
+  "plugins": {
+    "healthcare@healthcare": {
+      "url": "https://github.com/anthropics/healthcare",
+      "commit": "c7ed150d376bdd13219eb0bfeb4203e12da85516",
+      "license": "none",
+      "harness": "claude",
+      "roles": [
+        "billing-prior-auth-specialist",
+        "fhir-integration-specialist"
+      ],
+      "enabled": "per-user opt-in (ATH-D-007)",
+      "pinned": false
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "docs/agent-team.md",
+      "line": 71,
+      "claim": "The team documentation still presents the removed `fhir-ideation-strategist` and `fhir-knowledge-curator` as active personas after the required merges.",
+      "evidence": "Acceptance criteria require \"Fold ideation into the architect and knowledge curation into the tech lead,\" but the added `Persona \u2192 KBD stage and skill matrix` still has rows for `fhir-ideation-strategist` and `fhir-knowledge-curator`, and the hand-off diagram still routes work to both removed roles.",
+      "suggested_fix": "Update the persona matrix and hand-off diagram to remove `fhir-ideation-strategist` and `fhir-knowledge-curator`, moving their responsibilities and skills to `fhir-architect` and `fhir-tech-lead` respectively."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

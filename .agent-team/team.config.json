@@ -1,0 +1,81 @@
+{
+  "id": "fhir-server-team",
+  "outcome": "Build and operate the WSO2 FHIR Server as an intermediate EHR for AI: FHIR R4 storage and search, partner EHR integration and sync, HIPAA-governed patient-data lanes, and billing/prior-authorization support",
+  "scope": "project",
+  "harness": "claude",
+  "roster": [
+    "fhir-tech-lead",
+    "fhir-architect",
+    "fhir-go-developer",
+    "fhir-storage-search-engineer",
+    "fhir-test-engineer",
+    "fhir-code-reviewer",
+    "fhir-security-compliance-reviewer",
+    "fhir-conformance-validator",
+    "fhir-infra-release-engineer",
+    "hipaa-privacy-officer",
+    "fhir-integration-specialist",
+    "ehr-integration-manager",
+    "data-sync-coordinator",
+    "billing-prior-auth-specialist"
+  ],
+  "models": {
+    "source": ".kbd-orchestrator/phases/agent-team-hardening/evidence/model-map.md",
+    "claude": {
+      "hard": "opus",
+      "medium": "sonnet",
+      "low": "haiku"
+    },
+    "codex": {
+      "hard": {
+        "model": "gpt-6-astra",
+        "model_reasoning_effort": "high"
+      },
+      "medium": {
+        "model": "gpt-6-astra",
+        "model_reasoning_effort": "medium"
+      },
+      "low": {
+        "model": "gpt-6-astra",
+        "model_reasoning_effort": "low"
+      }
+    },
+    "opencode": {
+      "hard": "kimi-for-coding/k3",
+      "medium": "kimi-for-coding/k3",
+      "low": "kimi-for-coding/k3"
+    },
+    "kimi": {
+      "hard": "kimi-code/k3",
+      "medium": "kimi-code/k3",
+      "low": "kimi-code/k3"
+    },
+    "minimax": {
+      "hard": "minimax/MiniMax-M3",
+      "medium": "minimax/MiniMax-M3",
+      "low": "minimax/MiniMax-M3"
+    }
+  },
+  "native": {
+    "claude": {
+      "version": "Claude Code CLI (installed); agent-team-creator 5f2d7a712f28 (prometheus-skill-pack worktree .worktrees/agent-team-creator)",
+      "source": "https://code.claude.com/docs/en/sub-agents"
+    },
+    "codex": {
+      "version": "codex 0.154.0; agent-team-creator 5f2d7a712f28 (prometheus-skill-pack worktree .worktrees/agent-team-creator)",
+      "source": "https://learn.chatgpt.com/docs/agent-configuration/subagents"
+    },
+    "opencode": {
+      "version": "opencode 1.18.25; agent-team-creator 5f2d7a712f28 (prometheus-skill-pack worktree .worktrees/agent-team-creator)",
+      "source": "https://opencode.ai/docs/agents/"
+    },
+    "kimi": {
+      "version": "kimi-code 0.42.0; agent-team-creator 5f2d7a712f28 (prometheus-skill-pack worktree .worktrees/agent-team-creator)",
+      "source": "https://github.com/MoonshotAI/kimi-code/blob/main/docs/en/customization/agents.md"
+    },
+    "minimax": {
+      "version": "mcode 0.5.4; agent-team-creator 5f2d7a712f28 (prometheus-skill-pack worktree .worktrees/agent-team-creator)",
+      "source": "https://github.com/MiniMax-AI/minimax-code/blob/main/packages/local-runtime-v2/src/service/agent/storage/canonical-agent-config.ts"
+    }
+  }
+}

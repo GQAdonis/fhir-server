@@ -1,0 +1,39 @@
+{
+  "mode": "artifact",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "plan.md",
+      "line": 0,
+      "claim": "The PHI-lane role policy is scheduled after harness export, which can leave generated agent files stale or make the drift check fail.",
+      "evidence": "The plan establishes ATH-D-005: \"One portable manifest (`.agent-team/team.json`) is the single source of truth. Every harness file... is generated from it, and a drift check fails if a generated file is hand-edited.\" Change 3 then exports and adds a drift check. But Change 5, which runs later, includes scope to change \"`phi-lane-policy` in each PHI-capable role\" after `.claude/agents`, `.codex/agents`, `.opencode/agents`, `.kimi-code/agents`, and `.minimax/agents` have already been generated.",
+      "suggested_fix": "Move all PHI-lane role prompt/card content into Change 2 before export, or make Change 5 update the manifest and re-run all exports plus the drift check."
+    },
+    {
+      "severity": "WARNING",
+      "file": "plan.md",
+      "line": 0,
+      "claim": "The plan does not include concrete work or acceptance criteria to record each agent card's tools and best model per harness, despite the goal requiring it.",
+      "evidence": "The goal says: \"record in every agent card its skills, tools, and the best model per harness.\" Change 2 only requires \"prompt body, skills, `owns`..., inputs/outputs, `dependsOn`, and `modelPolicy` tier\" and acceptance only checks \"every role's `skills[]` resolve to installed ids.\" Change 3 defines per-harness model mapping, but its acceptance checks agent listing/smokes and drift only, not that each generated card records tools and best model per harness.",
+      "suggested_fix": "Add explicit manifest fields and export requirements for `tools` and per-harness model selections, plus an acceptance check that every generated agent card contains skills, tools, and the selected model for each supported harness."
+    },
+    {
+      "severity": "WARNING",
+      "file": "plan.md",
+      "line": 0,
+      "claim": "The plan does not schedule or verify the required Firecrawl web search for suitable skills.",
+      "evidence": "The goal requires: \"Use Firecrawl web search to find suitable skills for each role.\" Change 1 installs predetermined sources and records provenance, but its details only list `anthropics/healthcare`, `ajhcs/healthcare-agents`, `PhenoML/ClaudeFHIRSkill`, and project-authored skills; its acceptance checks pinned commits, plugin list, lint, and unlicensed-text grep, with no Firecrawl query/provenance requirement.",
+      "suggested_fix": "Add a task and acceptance artifact for Firecrawl searches per new role, including queries, result URLs, selection/rejection rationale, and how selected skills map to roles."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

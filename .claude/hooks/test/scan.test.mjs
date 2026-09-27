@@ -142,6 +142,29 @@ test("inside a git work tree only committable files are scanned; --all scans ign
   }
 });
 
+test("CLI fails a ledger file that carries a key outside LEDGER_FIELDS, and passes an allowlisted-shape one", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "scan-ledger-"));
+  try {
+    writeFileSync(path.join(root, "agent-ledger.jsonl"), `${JSON.stringify({ ts: "t", event: "SubagentStart", agent_type: "fhir-architect" })}\n`);
+    const clean = spawnSync(process.execPath, [cli, root], { encoding: "utf8" });
+    assert.equal(clean.status, 0, clean.stderr);
+
+    writeFileSync(path.join(root, "agent-ledger.jsonl"), `${JSON.stringify({ ts: "t", event: "SubagentStart", prompt_text: "should never be here" })}\n`);
+    const dirty = spawnSync(process.execPath, [cli, root], { encoding: "utf8" });
+    assert.equal(dirty.status, 1);
+    assert.match(dirty.stderr, /agent-ledger\.jsonl:1: ledger-key-not-allowlisted \(prompt_text\)/);
+    assert.ok(!dirty.stderr.includes("should never be here"));
+
+    mkdirSync(path.join(root, "ledger"));
+    writeFileSync(path.join(root, "ledger", "2026-08.jsonl"), `${JSON.stringify({ ts: "t", event: "SubagentStop", extra_field: "x" })}\n`);
+    const rotated = spawnSync(process.execPath, [cli, root], { encoding: "utf8" });
+    assert.equal(rotated.status, 1);
+    assert.match(rotated.stderr, /ledger\/2026-08\.jsonl:1: ledger-key-not-allowlisted \(extra_field\)/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("CLI treats a missing directory as nothing to scan", () => {
   const r = spawnSync(process.execPath, [cli, path.join(tmpdir(), "does-not-exist-xyz")], { encoding: "utf8" });
   assert.equal(r.status, 0);

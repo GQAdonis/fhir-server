@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".github/workflows/agent-tooling.yml",
+      "claim": "A hand edit to a generated Claude agent file will not run the CI drift check because the workflow path filters omit `.claude/agents/**`.",
+      "evidence": "Acceptance criteria require drift to fail CI for generated files, including `.claude/agents/` (`Generated files are not hand-edited` and modified lint requirement). The workflow hunk adds paths for `.agents/**`, `.agent-team/**`, `.codex/**`, `.opencode/**`, `.kimi-code/**`, `.minimax/**`, `AGENTS.md`, `CLAUDE.md`, and `scripts/agent-team/**`, but does not add `.claude/agents/**` under either `push.paths` or `pull_request.paths`.",
+      "suggested_fix": "Add `.claude/agents/**` to both `on.push.paths` and `on.pull_request.paths` for the agent-tooling workflow."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

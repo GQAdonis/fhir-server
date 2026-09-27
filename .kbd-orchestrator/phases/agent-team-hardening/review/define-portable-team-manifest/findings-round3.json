@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".agent-team/roles/fhir-architect.md",
+      "line": 25,
+      "claim": "The architect prompt grants write ownership over all of docs/**, overlapping the domain/business documentation paths that other roles own.",
+      "evidence": "Acceptance criterion: \"No two roles SHALL declare overlapping write paths in `owns`\" and \"Create owned documentation paths for business roles: `docs/integrations/`, `docs/sync/`, `docs/billing/`, `docs/compliance/`.\" The fhir-architect body says \"Writable paths, and only these: `openspec/**`, `docs/**`, `DESIGN.md`...\", while domain role headers own `docs/compliance/**`, `docs/integrations/**`, `docs/sync/**`, and `docs/billing/**`.",
+      "suggested_fix": "Make the architect prompt match its non-overlapping frontmatter ownership, e.g. `docs/*.md` and `docs/images/**`, or explicitly exclude the domain-owned subdirectories."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

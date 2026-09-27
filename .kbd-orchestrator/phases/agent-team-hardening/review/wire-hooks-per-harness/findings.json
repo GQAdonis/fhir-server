@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "codex-cli (openai)",
+  "isolation_mode": "codex-cli-fresh-context",
+  "producer_model": "claude-opus-5-5",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".opencode/plugins/fhir-guards.js",
+      "line": 35,
+      "claim": "OpenCode sessions started in subdirectories can bypass protected-path checks because the plugin replaces the session directory with the repository root.",
+      "evidence": "The plugin calls adapter(root, ...), which serializes that root as payload.directory; guardInputs resolves relative file paths against payload.directory. Invoking the packet's plugin with directory=<repo>/internal/store and worktree=<repo> allowed both an edit of ../../AGENTS.md and a patch targeting testdata/golden.json. Both resolve to protected files from the actual session directory. This contradicts the protected-edit requirement and the diff's documented subdirectory coverage.",
+      "suggested_fix": "Separate the adapter's installation root from the session working directory. Locate the executable under root while passing the original directory for relative-path resolution. Add plugin-level tests with distinct directory and worktree values."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/harness-payload.mts",
+      "line": 44,
+      "claim": "The adapter treats patch examples inside ordinary file content as additional write targets and incorrectly denies permitted edits.",
+      "evidence": "editedPaths scans every string in tool_input for PATCH_HEADER, including content and replacement text, regardless of tool type. A Kimi WriteFile targeting docs/patch-example.md is allowed with ordinary content but denied when its content contains a patch example with '*** Update File: AGENTS.md'; the denial falsely says AGENTS.md is being edited. This is a payload-mapping correctness defect under acceptance criterion 2.1.",
+      "suggested_fix": "Extract paths according to each tool's input contract. Scan patch headers only in actual patch arguments for patch tools; exclude file content and replacement strings. Add a regression fixture writing a patch example to an unprotected document."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

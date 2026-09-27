@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "docs/agent-team.md",
+      "line": 11,
+      "claim": "The documentation still presents an 11-agent roster that does not exactly match the 14-role manifest roster required by the acceptance criteria.",
+      "evidence": "Acceptance criterion: `.agent-team/team.json` SHALL define exactly the roster in `docs/agent-team.md`; hunk `docs/agent-team.md` adds `## Roster` with eleven agents including `fhir-ideation-strategist` and `fhir-knowledge-curator`, while `.agent-team/team.config.json` roster has fourteen roles, excludes those two merged roles, and adds five domain roles.",
+      "suggested_fix": "Make the authoritative roster in `docs/agent-team.md` the 14-role manifest roster only, or rename/move the legacy 11-agent table so it is not the documented team roster used by the requirement."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "claim": "The generated role-native metadata omits Kimi Code even though the change requires per-harness model/tool coverage for all five harnesses.",
+      "evidence": "Acceptance criteria: \"Each role gets ... a Harness card (skills, tools and model per harness)\" and \"Harness card names all five harnesses\"; build-manifest.mjs `nativeFor` returns `{ claude, codex, opencode, minimax: { model: config.models.minimax[t] } }` with no `kimi` entry, while `HARNESSES` includes `kimi`.",
+      "suggested_fix": "Add a Kimi native entry in `nativeFor`, e.g. `kimi: { model: config.models.kimi[t] }`, and add a unit test asserting every role's `native` block contains all five harness keys."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

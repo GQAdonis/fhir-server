@@ -1,0 +1,27 @@
+{
+  "mode": "diff",
+  "pass": "verdict",
+  "judge_model": "codex-cli (openai)",
+  "isolation_mode": "codex-cli-fresh-context",
+  "producer_model": "claude-opus-5-5",
+  "cross_model_check": "verified-distinct",
+  "scored": [
+    {
+      "claim": "OpenCode subdirectory sessions bypass protected-path checks because the plugin substitutes the repository root.",
+      "status": "resolved",
+      "evidence": "41e0113 preserves directory in the payload while using root only to locate the adapter; read-only plugin probes from internal/store denied both ../../AGENTS.md and testdata/golden.json."
+    },
+    {
+      "claim": "Patch examples inside ordinary file content incorrectly become additional write targets.",
+      "status": "resolved",
+      "evidence": ".claude/hooks/src/lib/harness-payload.mts:26–52 restricts patch scanning to designated fields; the Kimi adapter allowed docs/patch-example.md containing '*** Update File: AGENTS.md', while actual protected patches remained denied."
+    },
+    {
+      "claim": "Codex exec_command bypasses the PHI guard because its command is carried in cmd.",
+      "status": "not-a-defect",
+      "evidence": "Codex 0.154.0 accepts cmd at the tool boundary but normalizes PreToolUse to Bash with tool_input.command; the implementer's conclusion is correct for hooks, although the added fixture does not prove normalization. See [versioned handler source, lines 499–508](https://github.com/openai/codex/blob/rust-v0.154.0/codex-rs/core/src/tools/handlers/unified_exec/exec_command.rs#L499-L508)."
+    }
+  ],
+  "regressions": [],
+  "verdict": "PASS"
+}

@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 checked role coverage, AGENTS.md generation, cross-harness limitations documentation, lint/drift wiring, and installation paths against the provided diff/file_tree/evidence; no concrete unmet acceptance criterion could be proven from the packet.",
+    "Correctness \u2014 checked install/export scripts, AGENTS.md generator, harness lint parser, drift check wiring, and hook helper changes for evident logic errors; no concrete shipping defect was identifiable from the supplied hunks.",
+    "Regressions \u2014 checked generated file handling, Claude agent lint behavior, workflow trigger scope, and documented harness behavior; no provable regression from existing packet evidence.",
+    "Security \u2014 checked MiniMax ignore rules, PHI/secret scanner additions, generated harness prompts, and workflow checkout credential handling; no concrete credential/PHI exposure or injection defect was proven.",
+    "Constraint breaches \u2014 checked project blocking constraints applicability; no Go/internal DB/store/handler files were changed and no hardcoded credential pattern was evident in the diff.",
+    "Silent failure \u2014 checked drift/lint invocation paths and generated-file checks for swallowed failures; no concrete silent failure was provable from the packet."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

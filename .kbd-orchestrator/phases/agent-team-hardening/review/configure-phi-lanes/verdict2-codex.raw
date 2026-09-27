@@ -1,0 +1,28 @@
+{
+  "pass": "verdict-2",
+  "judge_model": "codex-cli (openai)",
+  "scored": [
+    {
+      "claim": "Codex exec_command calls carrying command text in cmd bypass the PHI guard.",
+      "status": "resolved",
+      "evidence": "1917893 adds cmd to COMMAND_FIELDS in source and compiled output; executing the Codex adapter with tool_input.cmd targeting a non-sandbox FHIR endpoint returned deny."
+    },
+    {
+      "claim": "Ledger rotation can permanently erase concurrently appended events.",
+      "status": "partial",
+      "evidence": ".claude/hooks/src/lib/ledger.mts:240–270,306–309 still permits appends after lock timeout, so an append during a lock-holding rotation can be erased by the snapshot rewrite at line 349."
+    },
+    {
+      "claim": "Session-wide tracking applies write permissions to the wrong agent when subagent lifetimes overlap.",
+      "status": "partial",
+      "evidence": ".claude/hooks/src/lib/agent-scope.mts:144–149 honors explicit agent_type, but replaying overlapping lead/developer activity without caller identity still selects fhir-tech-lead for either caller."
+    }
+  ],
+  "regressions": [
+    {
+      "severity": "WARNING",
+      "evidence": "The new enforced-agent fallback denies legitimate developer edits without agent_type while a tech-lead subagent remains active; previously the later-started developer's edits were allowed."
+    }
+  ],
+  "verdict": "BLOCK"
+}

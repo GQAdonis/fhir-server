@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 checked the added/modified OpenSpec delta specs, generated harness locations from file_tree, AGENTS.md generation path, drift-check wiring through lint:agents, and documented Kimi/MiniMax limitations; the packet includes matching evidence or implementation for each acceptance requirement.",
+    "Correctness \u2014 checked install-exports path handling, byte comparisons, stale-role removal planning, Codex config merge behavior, AGENTS.md generation, roster/structure linting, and CLI exit behavior; no concrete logic defect is evident from the diff.",
+    "Regressions \u2014 checked broadened Claude agent linting, committed dist/src parity, workflow path filters, and preservation of native Codex config outside generated markers; no regression is supported by the packet.",
+    "Security \u2014 checked symlink refusal for export/install paths, MiniMax runtime-data ignore and committable-file lint, third-party checkout credential handling, and Docker context exclusions; no blocking exposure is evident in the diff.",
+    "Constraint breaches \u2014 checked project blocking constraints for applicability; no Go, schema, store, handler, Helm, or credential-bearing source/config changes in the diff trigger a concrete constraint violation.",
+    "Silent failure \u2014 checked --skip-drift behavior, git ls-files failure handling, damaged Codex marker handling, missing creator handling, and drift script aggregation; failures are surfaced non-zero rather than silently passing."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "line": 33,
+      "claim": "The YAML-subset list parser silently corrupts role inputs/outputs that contain commas, so the generated manifest does not preserve explicit role metadata.",
+      "evidence": "parseValue splits every unquoted comma in flow lists (`if (c === \",\" && !quoted)`) while role headers use unquoted comma-containing items, e.g. `.agent-team/roles/billing-prior-auth-specialist.md` has `inputs: [Procedure and payer/plan in question, Coverage policies (LCD/NCD, payer policies), Denial remittance data (835/EOB codes)]`; acceptance requires each role to get explicit inputs and outputs.",
+      "suggested_fix": "Quote any list item containing commas and/or replace the custom parser with a real YAML parser that preserves flow-list scalar values correctly."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,6 +36,13 @@ const PROTECTED = [
   ".kbd-orchestrator/current-waypoint.json",
   ".kbd-orchestrator/current-waypoint.md",
   ".kbd-orchestrator/position-reminder.txt",
+  ".claude/agents/fhir-architect.md",
+  ".codex/agents/fhir-architect.toml",
+  ".opencode/agents/fhir-architect.md",
+  ".kimi-code/agents/fhir-architect.md",
+  ".minimax/agents/fhir-architect/agent.md",
+  ".agent-team/team.json",
+  "AGENTS.md",
 ];
 
 for (const p of PROTECTED) {
@@ -67,9 +76,30 @@ test("ordinary source files and outside paths are allowed", () => {
   }
 });
 
+test("a case-variant root/target pair is still denied (case-insensitive filesystems)", () => {
+  const { body } = run("/Repo", "/repo/internal/basedef/x.gz");
+  assert.equal(body?.hookSpecificOutput?.permissionDecision, "deny");
+});
+
+test("a symlinked path to a protected file is denied, including a file that does not exist yet", () => {
+  const tmp = mkdtempSync(path.join(tmpdir(), "guard-symlink-"));
+  try {
+    const repo = path.join(tmp, "repo");
+    mkdirSync(path.join(repo, "internal", "basedef"), { recursive: true });
+    const alias = path.join(tmp, "alias");
+    symlinkSync(path.join(repo, "internal", "basedef"), alias, "dir");
+    const existing = run(repo, path.join(alias, "x.gz"));
+    assert.equal(existing.body?.hookSpecificOutput?.permissionDecision, "deny");
+    const notYetWritten = run(repo, path.join(alias, "new.gz"));
+    assert.equal(notYetWritten.body?.hookSpecificOutput?.permissionDecision, "deny");
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test("tool calls without a file path are allowed", () => {
   assert.equal(targetPath({ command: "ls" }), undefined);
   assert.equal(targetPath({ notebook_path: "/repo/x.ipynb" }), "/repo/x.ipynb");
   assert.equal(protectionFor("go.mod"), undefined);
-  assert.equal(PROTECTED_PATHS.length, 7);
+  assert.equal(PROTECTED_PATHS.length, 14);
 });

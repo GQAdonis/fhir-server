@@ -23,6 +23,25 @@
 hs_err_pid*
 replay_pid*
 
+# agent-team-creator local coordination state (contains prompts) and export staging
+.agent-team/local/
+.agent-team/exports/
+.ci/
+# MiniMax Code (MINIMAX_DATA_DIR=.minimax, ATH-D-003): only the generated team
+# agents and mirrored skills are committed. mcode writes auth, config, cache and
+# plugins here at runtime; auth can hold credentials, so everything else is ignored.
+.minimax/*
+!.minimax/agents/
+!.minimax/skills/
+# Inside the allowed trees, only the generated team files are committable:
+# mcode writes its own vendor agents (.builtin) and could write other files here.
+.minimax/agents/*
+!.minimax/agents/.team-agents.json
+!.minimax/agents/*/
+.minimax/agents/.builtin/
+.minimax/agents/*/*
+!.minimax/agents/*/agent.md
+
 # Impeccable design skill: per-developer overrides and scratch output
 .impeccable/config.local.json
 **/.impeccable/config.local.json

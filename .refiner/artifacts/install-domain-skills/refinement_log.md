@@ -1,0 +1,31 @@
+# refine-validate — install-domain-skills (2026-09-25T13:56:59Z)
+- PASS  openspec-strict
+- PASS  settings-json-parses
+- PASS  anthropic-not-vendored
+- PASS  sources-provenance
+- PASS  upstream-license-retained
+- PASS  third-party-notices
+- PASS  mirror-in-sync
+- PASS  project-skills-scan-clean
+- PASS  lint-agents
+- PASS  hooks-tests
+- PASS  check-dist
+- PASS  prometheus-scan
+- BASELINE no-hardcoded-secrets — 2 pre-existing matches on main in untouched files (docker-compose.yml local dev DSN fhir:fhir@db; helm/values.yaml doc-comment placeholder); none introduced by this change
+- N/A   Go build/test/lint/gofmt/license-header (no Go files touched)
+- NOTE  vendored-skill scan keyword hits (10) reviewed as synthetic/public; see evidence/skill-research.md
+# refine-validate — install-domain-skills round 2 (2026-09-25T14:06:22Z), after review fixes
+- PASS  openspec-strict
+- PASS  settings-marketplace-registered-plugin-not-enabled
+- PASS  anthropic-not-vendored
+- PASS  sources-provenance
+- PASS  upstream-license-retained
+- PASS  mirror-in-sync
+- PASS  workflow-yaml-parses
+- PASS  project-skills-scan-clean
+- PASS  lint-agents
+- PASS  hooks-tests
+- PASS  check-dist
+- PASS  prometheus-scan
+- BASELINE no-hardcoded-secrets — 2 pre-existing matches on main in untouched files (docker-compose.yml, helm/values.yaml)
+- N/A   Go build/test/lint/gofmt/license-header (no Go files touched)

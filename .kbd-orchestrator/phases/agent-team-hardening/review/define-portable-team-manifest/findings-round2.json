@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "line": 109,
+      "claim": "The generated Harness card does not list each role's tools for Codex, OpenCode, Kimi Code, or MiniMax Code, violating the required per-harness tools card.",
+      "evidence": "Acceptance criteria require: \"a Harness card listing its preloaded and invoke-when-needed skills, its tools, and its model for each of Claude Code, Codex, OpenCode, Kimi Code and MiniMax Code.\" In `permissionsFor`, only the `claude` case returns `tools: ${h.tools.join(\", \")}`; the other harnesses return only permission text such as `workspace-write (session default)`, `session default permissions`, or `read-only by instruction`. The sample generated card likewise lists tools only for Claude Code while the other four rows omit the role tool list.",
+      "suggested_fix": "Include the role's tool list in every harness row, e.g. append `tools: ${h.tools.join(\", \")}` plus any harness-specific permission notes for Codex, OpenCode, Kimi Code, and MiniMax Code."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

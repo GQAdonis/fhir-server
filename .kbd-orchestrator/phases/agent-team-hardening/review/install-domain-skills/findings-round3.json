@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/mirror-skills.mjs",
+      "line": 58,
+      "claim": "The mirror check does not enforce that each source skill is listed in exactly one SOURCES.json category, so a skill duplicated across project, thirdParty, and generated can pass contrary to the scenario.",
+      "evidence": "Acceptance criterion \u201cEvery source skill is classified\u201d requires a directory with SKILL.md to be \u201clisted in exactly one of project, thirdParty or generated, or the mirror check fails naming it\u201d; the implementation builds `known = new Set([...sources.project, ...Object.keys(sources.thirdParty), ...sources.generated])` and only reports skills not in that union, which collapses duplicates instead of failing them.",
+      "suggested_fix": "Build a per-skill classification count across project, thirdParty, and generated, and fail --check/non-check when any `.agents/skills/*/SKILL.md` has count !== 1, naming duplicated and unclassified skills separately."
+    },
+    {
+      "severity": "WARNING",
+      "file": "README.md",
+      "line": 177,
+      "claim": "The build-order documentation says the Anthropic healthcare plugin is \u201cenabled for Claude,\u201d contradicting the per-user opt-in/not-project-enabled requirement.",
+      "evidence": "Acceptance criterion 2.1 says `healthcare@healthcare` is \u201cper-user opt-in, not enabled at project scope,\u201d while the README build-order row for `install-domain-skills` says \u201cAnthropic's healthcare plugin enabled for Claude (not copied into the repo).\u201d",
+      "suggested_fix": "Change the row to say the marketplace is registered for Claude and the plugin remains per-user opt-in/not enabled at project scope."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

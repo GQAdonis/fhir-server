@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/harness-lint.mts",
+      "line": 69,
+      "claim": "The cross-harness lint does not enforce required prompt sections for Codex, OpenCode, Kimi, or MiniMax definitions.",
+      "evidence": "Acceptance criterion 'Agent definitions are linted' requires lint to fail when 'a required prompt section, the PHI-lane block or the Harness card is missing'; however `mdAgent` only checks description/name/extra plus `generatedSections(where, body)`, and the Codex checker only checks keys plus `generatedSections(where, t[\"developer_instructions\"] ?? \"\")`, where `generatedSections` checks only `## Patient-data lane` and `## Harness card`.",
+      "suggested_fix": "Add a shared required-section check for the prompt body/developer_instructions for every harness, reusing the Claude required-section logic or exporting it from agent-lint."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

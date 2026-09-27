@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "line": 349,
+      "claim": "`build-manifest --check` can pass without running `agent-team-creator validate`, so the manifest validity requirement is not enforced in CI or fresh clones.",
+      "evidence": "Acceptance criterion: `.agent-team/team.json` SHALL pass `agent-team-creator validate`. The CLI code only calls `creatorValidate(manifest)` in `--check`, but if the creator CLI is unavailable it prints `agent-team-creator not found; validate skipped` unless `--require-validate` is supplied; `.github/workflows/agent-tooling.yml` runs `node scripts/agent-team/build-manifest.mjs --check` without `--require-validate`.",
+      "suggested_fix": "Make `--check` fail when `agent-team-creator` is unavailable, or update CI to install/provide the skill and run `node scripts/agent-team/build-manifest.mjs --check --require-validate`."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

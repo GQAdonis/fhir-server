@@ -1,0 +1,11 @@
+{
+  "stage": "assess",
+  "completedAt": "2026-09-25T10:54:31Z",
+  "outputs": [
+    "assessment.md"
+  ],
+  "nextStage": "analyze",
+  "summaryForNext": "Target is about 14 roles: 9 engineering (ideation folded into architect, curator into tech-lead) plus HIPAA, FHIR integration, EHR integration manager, data-sync coordinator and billing/prior-auth. Author one portable manifest and export it to Claude, Codex, OpenCode, Kimi and MiniMax Code (mcode; agents in project .minimax via MINIMAX_DATA_DIR). Only Tribe Health Solutions' BAA-covered local models may process real PHI (ATH-D-001), so the cloud-backed harnesses are synthetic-only until they target Tribe's endpoint (operator-supplied). Wire hooks per harness where supported (ATH-D-004). Skills: anthropics/healthcare as a plugin (unlicensed, do not vendor), ajhcs/healthcare-agents (Apache-2.0); integration and sync skills must be project-authored.",
+  "skipped": false,
+  "skipReason": null
+}

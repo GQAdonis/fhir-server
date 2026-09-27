@@ -1,0 +1,31 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/build-manifest.mjs",
+      "line": 226,
+      "claim": "The manifest ownership check does not enforce the requirement that review roles own only findings paths.",
+      "evidence": "Acceptance criterion 'Write ownership is disjoint' states: 'Review roles SHALL own only a findings path.' The added `ownershipProblems` function only checks `owns.length === 0` and pairwise `globsOverlap(a, b)`, with no validation that `fhir-code-reviewer`, `fhir-security-compliance-reviewer`, or `fhir-conformance-validator` own only `.agent-team/findings/...`.",
+      "suggested_fix": "Extend `ownershipProblems` or add a separate check that identifies review/gate roles and rejects any `owns` entry outside `.agent-team/findings/<role>/**`; add a seeded failing test."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/phases/agent-team-hardening/evidence/manifest-build.md",
+      "line": 14,
+      "claim": "The recorded manifest-build test evidence is stale and no longer matches the committed test file.",
+      "evidence": "The evidence row says `node --test scripts/agent-team/build-manifest.test.mjs` produced `10/10 pass`, but `scripts/agent-team/build-manifest.test.mjs` now contains 14 `test(...)` cases, including the later native-wrapper, harness-tool, owns-statement, and list-parser tests.",
+      "suggested_fix": "Re-run the test command and update the evidence file with the actual current node:test summary."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "codex-cli (openai)",
+  "isolation_mode": "codex-cli-fresh-context",
+  "producer_model": "claude-opus-5-5",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "openspec/changes/document-and-verify-cross-harness-team/tasks.md",
+      "line": 12,
+      "claim": "Task 3.1 is marked complete despite the required OpenCode role smoke tests remaining unfulfilled.",
+      "evidence": "Acceptance criterion 3.1 requires headless smoke prompts for all five domain roles in OpenCode, and the packet states that completion requires each new role to demonstrably work in each harness. The added docs/agent-team.md text acknowledges that OpenCode behavior was not verified. Supporting evidence/cross-harness-smoke.md records OpenCode at 0/5, with four roles never attempted; evidence/goal-check.md explicitly leaves G6 PARTIAL.",
+      "suggested_fix": "Leave task 3.1 incomplete until all five roles successfully answer synthetic prompts through a working OpenCode invocation path, and record their outputs and exit codes. Documenting the failed environment does not fulfill the acceptance requirement."
+    }
+  ]
+}

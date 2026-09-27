@@ -1,18 +1,26 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync, mkdirSync, symlinkSync, writeFileSync, readdirSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import {
   LEDGER_FIELDS,
   entryFromHook,
   sanitizeId,
+  acquireLedgerLock,
   appendEntry,
+  ledgerDir,
   ledgerPath,
   parseLedger,
   readKbdPosition,
   makeEntry,
+  isLedgerFile,
+  ledgerKeyFindings,
+  monthKey,
+  rotateLedgerNow,
 } from "../dist/lib/ledger.mjs";
 
 const NOW = new Date("2026-09-24T12:00:00.000Z");
@@ -100,6 +108,159 @@ test("appendEntry writes exactly one line per call and parseLedger skips corrupt
     assert.deepEqual(parsed.map((e) => e.ts), ["t1", "t2"]);
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("isLedgerFile recognizes agent-ledger.jsonl and ledger/<yyyy-mm>.jsonl only", () => {
+  assert.equal(isLedgerFile("agent-ledger.jsonl"), true);
+  assert.equal(isLedgerFile("ledger/2026-08.jsonl"), true);
+  assert.equal(isLedgerFile("ledger/2026-8.jsonl"), false);
+  assert.equal(isLedgerFile("raw/2026-08-note.md"), false);
+  assert.equal(isLedgerFile("outbox/agent-ledger.jsonl.bak"), false);
+});
+
+test("ledgerKeyFindings flags a key outside LEDGER_FIELDS and ignores malformed lines", () => {
+  const clean = JSON.stringify({ ts: "t", event: "SubagentStart", agent_type: "fhir-architect" });
+  const dirty = JSON.stringify({ ts: "t", event: "SubagentStart", prompt_text: "leaked" });
+  const findings = ledgerKeyFindings(`${clean}\n${dirty}\n{torn\n`);
+  assert.deepEqual(findings, [{ line: 2, key: "prompt_text" }]);
+  for (const key of Object.keys(JSON.parse(clean))) assert.ok(LEDGER_FIELDS.includes(key));
+});
+
+test("monthKey rejects years outside 1970-9999 so it never produces a key isLedgerFile can't match", () => {
+  assert.equal(monthKey("2026-08-15T00:00:00.000Z"), "2026-08");
+  assert.equal(monthKey("0099-01-01T00:00:00.000Z"), undefined, "3-digit year would break the ledger/<yyyy-mm>.jsonl pattern");
+  assert.equal(monthKey("+275760-09-13T00:00:00.000Z"), undefined, "year above 9999");
+});
+
+// Cross-process reproduction: appendEntry and rotateLedgerNow must serialize
+// through the same lock, so rotation's read-partition-rewrite can never
+// silently drop a line appended in that window. A same-process async test
+// cannot exercise this: the lock's retry wait is a genuine synchronous block
+// (Atomics.wait), so it would freeze the test's own event loop too. A real
+// child process gives us independent execution to observe the block from.
+const dist = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "dist");
+const ledgerModuleUrl = pathToFileURL(path.join(dist, "lib", "ledger.mjs")).href;
+
+function runChild(code) {
+  return spawn(process.execPath, ["--input-type=module", "-e", code]);
+}
+
+test("appendEntry waits for an externally held ledger lock instead of writing past it", async () => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-lock-"));
+  try {
+    const release = acquireLedgerLock(root, 5000);
+    const child = runChild(
+      `import { appendEntry, makeEntry } from ${JSON.stringify(ledgerModuleUrl)};\n` +
+        `appendEntry(${JSON.stringify(root)}, makeEntry({ ts: "2026-09-24T12:00:00.000Z", event: "SubagentStart" }));\n`,
+    );
+    let exited = false;
+    child.on("exit", () => {
+      exited = true;
+    });
+    await new Promise((r) => setTimeout(r, 300));
+    assert.equal(exited, false, "the append must block on the externally held lock, not proceed past it");
+    assert.equal(existsSync(ledgerPath(root)), false, "no write happened while the lock was held");
+    release();
+    await new Promise((resolve, reject) => child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`child exited ${code}`)))));
+    const lines = readFileSync(ledgerPath(root), "utf8").trim().split("\n");
+    assert.equal(lines.length, 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("rotateLedgerNow waits for an externally held ledger lock before reading, instead of racing a concurrent writer", async () => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-lock-"));
+  try {
+    mkdirSync(path.dirname(ledgerPath(root)), { recursive: true });
+    writeFileSync(ledgerPath(root), `${JSON.stringify({ ts: "2026-07-01T00:00:00.000Z", event: "SubagentStart" })}\n`);
+    const release = acquireLedgerLock(root, 5000);
+    const child = runChild(
+      `import { rotateLedgerNow } from ${JSON.stringify(ledgerModuleUrl)};\n` +
+        `process.stdout.write(JSON.stringify(rotateLedgerNow(${JSON.stringify(root)}, "2026-09")));\n`,
+    );
+    let out = "";
+    child.stdout.on("data", (c) => (out += c));
+    let exited = false;
+    child.on("exit", () => {
+      exited = true;
+    });
+    await new Promise((r) => setTimeout(r, 300));
+    assert.equal(exited, false, "rotation must wait for the externally held lock before reading");
+    assert.equal(existsSync(ledgerDir(root)), false, "no rotation happened while the lock was held");
+    release();
+    await new Promise((resolve, reject) => child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`child exited ${code}`)))));
+    assert.equal(JSON.parse(out).moved, 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("rotation refuses to run without the lock when a live holder keeps it past the timeout", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-lock-throw-"));
+  try {
+    mkdirSync(path.dirname(ledgerPath(root)), { recursive: true });
+    const release = acquireLedgerLock(root, 5000);
+    try {
+      assert.throws(() => acquireLedgerLock(root, 50, "throw"), /held by another process/);
+      const proceed = acquireLedgerLock(root, 50); // a hook append proceeds unlocked rather than hang
+      proceed();
+    } finally {
+      release();
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a stale lock orphaned by a crashed process is cleared and the lock is acquired", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-lock-stale-"));
+  try {
+    mkdirSync(path.dirname(ledgerPath(root)), { recursive: true });
+    acquireLedgerLock(root, 5000); // never released: simulates a crash
+    const old = new Date(Date.now() - 60_000);
+    for (const f of readdirSync(path.dirname(ledgerPath(root)))) utimesSync(path.join(path.dirname(ledgerPath(root)), f), old, old);
+    const again = acquireLedgerLock(root, 50, "throw");
+    again();
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("appendEntry refuses to follow a symlinked .prometheus directory or ledger file", (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-symlink-"));
+  const outside = mkdtempSync(path.join(tmpdir(), "ledger-symlink-target-"));
+  try {
+    try {
+      symlinkSync(outside, path.join(root, ".prometheus"));
+    } catch {
+      t.skip("symlink creation not permitted in this environment");
+      return;
+    }
+    assert.throws(() => appendEntry(root, makeEntry({ ts: "t", event: "SubagentStart" })), /symlink/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("rotateLedgerNow refuses to follow a symlinked ledger directory or month file", (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-symlink-"));
+  const outside = mkdtempSync(path.join(tmpdir(), "ledger-symlink-target-"));
+  try {
+    mkdirSync(path.dirname(ledgerPath(root)), { recursive: true });
+    writeFileSync(ledgerPath(root), `${JSON.stringify({ ts: "2026-07-01T00:00:00.000Z", event: "SubagentStart" })}\n`);
+    try {
+      symlinkSync(outside, ledgerDir(root));
+    } catch {
+      t.skip("symlink creation not permitted in this environment");
+      return;
+    }
+    assert.throws(() => rotateLedgerNow(root, "2026-09"), /symlink/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
   }
 });
 

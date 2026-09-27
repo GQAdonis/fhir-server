@@ -1,0 +1,38 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/test/harness-lint.test.mjs",
+      "line": 17,
+      "claim": "The new harness lint tests fail before running assertions because copyRepo copies `.agent-team/team.json` into a nested destination without creating `.agent-team/` first.",
+      "evidence": "The new test helper defines `DIRS = [\".agent-team/team.json\", ...]` and then executes `cpSync(path.join(repoRoot, d), path.join(root, d), { recursive: true })` for each entry; no `mkdirSync(path.dirname(path.join(root, d)), { recursive: true })` is performed before copying the file destination.",
+      "suggested_fix": "Create the destination parent directory before each `cpSync`, e.g. `mkdirSync(path.dirname(path.join(root, d)), { recursive: true }); cpSync(...);`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/test/harness-lint.test.mjs",
+      "line": 9,
+      "claim": "The new tests import compiled `dist` modules, but the diff adds only the TypeScript source for `harness-lint` and does not add the corresponding committed dist file.",
+      "evidence": "The test imports `../dist/lib/harness-lint.mjs`, while the diff adds `.claude/hooks/src/lib/harness-lint.mts` and modifies `.claude/hooks/src/lint-agents.mts` but contains no `diff --git` entry for `.claude/hooks/dist/lib/harness-lint.mjs` or the updated dist CLI, despite CI running hook tests against dist.",
+      "suggested_fix": "Run the hooks build and commit the generated `.claude/hooks/dist/**` updates, including `dist/lib/harness-lint.mjs` and the updated `dist/lint-agents.mjs`."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "AGENTS.md",
+      "claim": "The required generated `AGENTS.md` is not included in the diff, so the repository change does not install the non-Claude project instructions.",
+      "evidence": "Acceptance criterion requires `AGENTS.md SHALL be generated from CLAUDE.md`; the packet evidence lists `?? AGENTS.md` in git status, but the provided diff has no `diff --git a/AGENTS.md b/AGENTS.md` entry.",
+      "suggested_fix": "Add the generated `AGENTS.md` file to the change and ensure `node scripts/agent-team/gen-agents-md.mjs --check` passes against the committed file."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

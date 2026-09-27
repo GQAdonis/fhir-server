@@ -1,0 +1,22 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations \u2014 checked manifest roster/order, PHI-lane/Harness-card generation, disjoint ownership, review-role findings ownership, domain role path ownership, and skill-resolution checks against the acceptance criteria; no unmet criterion was evident in the packet.",
+    "Correctness \u2014 checked build-manifest parsing, manifest generation, roster-doc comparison, validation invocation, ownership overlap detection, and CI command wiring for concrete logic errors evident from the diff; no blocking defect found.",
+    "Regressions \u2014 checked that installed Claude-agent documentation is explicitly marked transitional and that no harness agent files are exported in this change; no regression supported by the packet.",
+    "Security \u2014 checked PHI lane rules, Tribe-only restrictions, CI checkout credential handling, secret/PHI documentation stubs, and committed state exclusions; no concrete security defect found.",
+    "Constraint breaches \u2014 checked project constraints applicable to this non-Go/tooling-doc change, including no hardcoded secrets, generated/local state ignored, and no internal store/db/handler changes triggering race-integration review; no breach evident.",
+    "Silent failure \u2014 checked build-manifest --check validation behavior, drift checks, seeded-fault evidence, and CI enforcement path; no silent failure evident from the diff."
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

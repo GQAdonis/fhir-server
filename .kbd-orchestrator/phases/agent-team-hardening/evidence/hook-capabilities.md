@@ -1,0 +1,28 @@
+# Hook capabilities per harness (task 1.1)
+
+Checked 2026-09-25 against the installed versions and upstream source or docs.
+
+| Harness (version) | Mechanism | Scope | Events | Block contract | Payload | Verdict |
+|---|---|---|---|---|---|---|
+| Claude Code | `.claude/settings.json` `hooks` (existing) | project | SessionStart, PreToolUse, PostToolUse(+Failure), Stop, SessionEnd, PreCompact, Subagent*, … | exit 2 + stderr; JSON `hookSpecificOutput.permissionDecision` | `hook_event_name`, `tool_name`, `tool_input`, `session_id`, `cwd` | **supported** (current) |
+| Codex 0.154.0 | `.codex/hooks.json` in a config folder (`codex-rs/hooks/src/engine/discovery.rs` `load_hooks_json`), same shape as Claude (`{"hooks":{"PreToolUse":[{"matcher","hooks":[{"type":"command","command"}]}]}}`, plus `commandWindows`) | **project** once the project is trusted. Each hook also needs a trusted hash (`[hooks.state."…"] trusted_hash` in user config), so a new or changed hook is inert until the operator trusts it. | PreToolUse, PostToolUse, SessionStart, UserPromptSubmit, Stop, PermissionRequest | exit 2 + stderr blocks; JSON `hookSpecificOutput.permissionDecision` (camelCase, `deny_unknown_fields`) | Claude-compatible field names. Edits arrive as `apply_patch` (patch text carries `*** Update/Add/Delete File: <path>` lines) and shell as `shell`/`exec_command`. | **supported** (project, needs operator trust) |
+| OpenCode 1.18.25 | JS plugin in `.opencode/plugins/*.js`, auto-loaded at startup (opencode.ai/docs/plugins) | **project** | `tool.execute.before` (throw to block), `tool.execute.after`, `event` (`session.created`, `session.idle`, `session.error`, …) | throw an `Error` in `tool.execute.before` | `input.tool` (`edit`, `write`, `patch`, `bash`, …), `output.args` (`filePath`, `command`, …) | **supported** (project plugin; adapter spawns the compiled hooks) |
+| Kimi Code 0.42.0 | `[[hooks]]` in **`~/.kimi-code/config.toml`** (docs/en/customization/hooks.md), or hooks in a plugin manifest. Plugins install per user; "project-level installation scope is not yet supported" (plugins.md). | **user only** | PreToolUse, PostToolUse, PostToolUseFailure, UserPromptSubmit, Stop, SessionStart/End, SessionHeartbeat, … | exit 2 + stderr, or JSON `permissionDecision: deny`. **Fail-open**: errors and timeouts allow. | Claude-compatible (`hook_event_name`, tool name, `cwd` = project dir) | **partial** (a user-scoped plugin or config entry; the repo can ship the plugin but not activate it) |
+| MiniMax Code 0.5.4 | Plugin manifest `hooks` (`@mavis/plugin-hooks`, `PluginHookCommandHandler`); product-internal hooks are not user-configurable. Plugins install through `mcode plugin` into the data dir. | **user/data-dir** | PreToolUse, PostToolUse, … ("Compatible" mode) | `permissionDecision: deny` (`PluginHookPermissionResolution`) | Claude-compatible in Compatible mode | **partial** (installable plugin; no project auto-load) |
+
+Implications for the adapters (task 2.1):
+- **Codex:** reuse the compiled hooks. The guard needs an `apply_patch` path extractor; ledger events map directly.
+- **OpenCode:** one plugin file that builds a Claude-shaped payload and spawns `node .claude/hooks/dist/<hook>.mjs`, throwing on exit 2.
+- **Kimi and MiniMax:** ship a plugin manifest in the repo that points at the same compiled hooks, with an install instruction. Protection is partial until the operator installs it (Kimi is also fail-open).
+
+## Verification (task 3.1)
+
+| Harness | Kind | Result |
+|---|---|---|
+| Claude Code | existing (phase agent-dev-team) | `guard-generated` registered in `.claude/settings.json`. This change adds protection for the generated agent files and `AGENTS.md` (`PROTECTED_PATHS` 7 → 14). |
+| Codex | **live** | `codex exec --sandbox workspace-write --dangerously-bypass-hook-trust -c projects."<repo>".trust_level="trusted"` (**test-only, never use operationally**; one-off, nothing persisted), asked to `apply_patch`-create `internal/store/testdata/__hook_probe__.txt`. Codex logged "Command blocked by PreToolUse hook: internal/store/testdata/__hook_probe__.txt is protected. Golden snapshots are generated…", and the file was not created. The ledger gained 2 lines (`SubagentStart`/`codex`, `UserPromptSubmit`/`codex`). Without those flags, the operator must trust the project and each hook hash once. |
+| OpenCode | **fixture (plugin module)** | The live `opencode run` was not usable here. The default model (`anthropic/claude-sonnet-4-5`) is missing from the operator's provider config ("ProviderModelNotFoundError"), and with `-m kimi-for-coding/k3` the model looped until the timeout and reported an unverifiable result; no probe file was created. Instead, the real `.opencode/plugins/fhir-guards.js` was imported and its `tool.execute.before` called as OpenCode does (`harness-hook.test.mjs`). A protected write throws "is protected"; ordinary writes and reads pass; a project without the adapter passes. OpenCode logs "Plugin initialized" for the project. |
+| Kimi Code | **fixture** | The adapter denies `WriteFile` on a protected path in the Claude-compatible contract (`harness-hook.test.mjs`), and the plugin launcher denies `AGENTS.md` in-repo and allows outside it (manual probe). Live use requires the operator to install `scripts/agent-team/plugins/fhir-guards` (`/plugins install`), which is a user-level action. |
+| MiniMax Code | **fixture** | The adapter denies `Write` on a protected path (`harness-hook.test.mjs`). The plugin package ships the Claude-compatible `.claude-plugin/plugin.json` and `hooks/hooks.json`. Live use requires `mcode plugin install` and a MiniMax login (not available). |
+
+Hook suite: 108/108, and green on 8 consecutive full runs after the de-flake (task 4.1).

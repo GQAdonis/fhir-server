@@ -1,0 +1,39 @@
+{
+  "mode": "artifact",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The assessment bases the multi-harness export conclusions on a reference file that the packet says is missing.",
+      "evidence": "Assessment cites \u201cNative export contracts (`references/native-harnesses.md`, \"source-verified staging adapters, not installed CLI certification\")\u201d, but `cited_paths` says `MISSING  references/native-harnesses.md`.",
+      "suggested_fix": "Replace the table with evidence from files or command output included in the packet, or add the missing `references/native-harnesses.md` artifact before using it as an assessment basis."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The assessment concludes that none of the requested roles exist without showing the existing agent filenames or contents.",
+      "evidence": "Assessment states \u201cExisting roster (`.claude/agents/fhir-*.md`, 11): DONE for engineering, MISSING for domain and business roles. None of the requested roles exist...\u201d; the provided evidence only says `.claude/agents: 11` and does not list the 11 files or quote their role descriptions.",
+      "suggested_fix": "Include the actual `.claude/agents/fhir-*.md` filenames and enough frontmatter/body excerpts to support the conclusion that HIPAA, FHIR integration, EHR integration manager, data-sync, billing, and prior-auth roles are absent."
+    },
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "line": 0,
+      "claim": "The assessment claims existing skill mirrors and counts across harness directories without packet evidence for those counts or the MiniMax location.",
+      "evidence": "Assessment says \u201cThe OpenSpec skills are already mirrored into `.agents/skills`, `.opencode/skills` and `.kimi-code/skills` (12 each) and `~/.minimax/skills`.\u201d The packet evidence only provides `EXISTS SKILL.md -> 49 matches` with examples and the file tree only shows the directories, not 12-per-harness counts or `~/.minimax/skills` contents.",
+      "suggested_fix": "Add raw command output listing/counting skill directories per harness, including `~/.minimax/skills`, or weaken the claim to only what the packet proves."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "scripts/agent-team/install-exports.mjs",
+      "line": 80,
+      "claim": "The installer can overwrite files outside the harness directories when an existing generated-role path is a symlink.",
+      "evidence": "In `applyPlan`, each planned write does only `mkdirSync(path.dirname(w.to), { recursive: true }); copyFileSync(w.from, w.to);`; `planTarget` rejects symlinked export sources with `lstatSync(from).isFile()` but never `lstat`s the installed destination before writing. The acceptance criteria require the install script to copy only role files and refuse to touch non-team files.",
+      "suggested_fix": "Before copying, `lstatSync(w.to)` when it exists and refuse anything that is not a regular file; also validate target parent directories are real directories inside `root` rather than symlinks."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

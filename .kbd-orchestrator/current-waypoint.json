@@ -2,23 +2,23 @@
   "schemaVersion": "5",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 270,
-  "derivedRevision": 270,
+  "sourceRevision": 579,
+  "derivedRevision": 579,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 270
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 579
   },
   "conflictCount": 0,
   "projectId": "98eeab9c-ff3e-4471-a109-52e79b939f28",
   "runId": "agent-dev-team-20260924T112402Z",
   "path": [
-    "agent-dev-team"
+    "agent-team-hardening"
   ],
   "phaseIds": [
-    "agent-dev-team"
+    "agent-team-hardening"
   ],
-  "activePhaseId": "agent-dev-team",
-  "activePhase": "agent-dev-team",
-  "phase": "agent-dev-team",
+  "activePhaseId": "agent-team-hardening",
+  "activePhase": "agent-team-hardening",
+  "phase": "agent-team-hardening",
   "parentPhase": null,
   "childPointer": null,
   "change": null,
@@ -28,12 +28,12 @@
   "stageId": "reflect",
   "stageStatus": "COMPLETE",
   "completionMetric": "implementation",
-  "implementationCompleted": 8,
-  "implementationTotal": 8,
-  "planRevision": 3,
-  "revision": 270,
-  "exactNextCommand": "/kbd-reflect agent-dev-team",
+  "implementationCompleted": 15,
+  "implementationTotal": 15,
+  "planRevision": 4,
+  "revision": 579,
+  "exactNextCommand": "/kbd-execute agent-team-hardening",
   "nextChange": null,
   "nextTask": null,
-  "updatedAt": "2026-09-24T22:46:37.189824Z"
+  "updatedAt": "2026-09-27T01:28:03.801509Z"
 }

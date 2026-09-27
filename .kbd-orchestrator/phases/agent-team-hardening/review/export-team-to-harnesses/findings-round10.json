@@ -1,0 +1,23 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lint-agents.mts",
+      "line": 27,
+      "claim": "The lint command has a documented `--skip-drift` path that lets generated-file drift pass, violating the requirement that lint fail on any installed definition drift.",
+      "evidence": "Acceptance criteria: \u201cA drift check SHALL regenerate every harness definition and `AGENTS.md` from their sources and fail on any byte difference\u201d and \u201cA lint command SHALL fail when ... any installed definition differs from a fresh export of `.agent-team/team.json`.\u201d The CLI implements `if (args.includes(\"--skip-drift\")) console.log(\"lint-agents: WARNING drift check skipped (--skip-drift); CI still runs it\"); else problems.push(...driftProblems(repoRoot));`, so `lint-agents --skip-drift` can exit 0 without checking byte drift.",
+      "suggested_fix": "Remove the public skip path from `lint-agents`, or make skipped drift force a non-zero exit for the lint command; use a separate non-lint developer helper if offline operation is needed."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

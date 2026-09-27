@@ -104,10 +104,11 @@ OpenSpec is initialized (`openspec/`, schema `spec-driven`). Propose changes wit
 
 ## Agent team
 
-Eleven project subagents (`.claude/agents/fhir-*.md`) cover ideation, architecture, development, testing, review, validation, infrastructure and knowledge curation. Roster, models, the persona → skill matrix, hand-offs and prerequisites are in `docs/agent-team.md`.
+Fourteen roles cover architecture (including ideation), development, testing, review, validation, infrastructure, orchestration (including knowledge curation), HIPAA privacy, FHIR integration, EHR integration management, data sync, and billing/prior authorization. They are defined once in `.agent-team/team.json`, which is built from `.agent-team/roles/` by `node scripts/agent-team/build-manifest.mjs`. They are generated for Claude Code (`.claude/agents/`), Codex (`.codex/`), OpenCode, Kimi Code and MiniMax Code by `node scripts/agent-team/install-exports.mjs`. Never hand-edit the generated files; `lint:agents` fails on drift. Roster, models, the persona → skill matrix, hand-offs and prerequisites are in `docs/agent-team.md`.
 
-- Lead a session with `claude --agent fhir-tech-lead`, or ask for a persona by name. Project agents load at session start.
-- Frontmatter preloads only repo-resident skills (`.claude/skills/`). Machine-local skills are listed in the doc's prerequisites block, and agents name any that are missing and continue.
+- Lead a session with `claude --agent fhir-tech-lead`, or ask for a persona by name. Project agents load at session start. Other harnesses select agents differently (Kimi ignores per-agent models; `mcode exec` has no agent selector); see the doc's per-harness limitations.
+- Frontmatter preloads only repo-resident skills (`.claude/skills/`, plus the domain skills in `.agents/skills/` mirrored to every harness). Machine-local skills are listed in the doc's prerequisites block, and agents name any that are missing and continue.
+- Patient data: cloud-model harnesses get synthetic data only; data derived from real patients, even de-identified, stays on a Tribe local-model lane. Follow the `phi-lane-policy` skill and the decision record in `docs/compliance/README.md`. The current controls are not yet sufficient for real PHI.
 - Archive gate:
   - `fhir-code-reviewer` for every change;
   - `fhir-security-compliance-reviewer` for sensitive paths;

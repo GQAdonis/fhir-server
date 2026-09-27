@@ -1,0 +1,29 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-5.5",
+  "producer_model": "claude-opus-5-5",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "openspec/specs/agent-team/cross-harness-export/spec.md",
+      "claim": "The new `agent-team/cross-harness-export` capability required by the acceptance criteria is not added in the diff.",
+      "evidence": "Acceptance criteria under New Capabilities requires `agent-team/cross-harness-export`, but the diff contains no added or modified OpenSpec capability/spec file for that capability.",
+      "suggested_fix": "Add the `agent-team/cross-harness-export` capability/spec file documenting generation, installation, drift checking, and per-harness limitations."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "openspec/specs/agent-team/team-verification/spec.md",
+      "claim": "The modified `agent-team/team-verification` capability required by the acceptance criteria is not updated in the diff.",
+      "evidence": "Acceptance criteria under Modified Capabilities says `agent-team/team-verification` must cover generated files in every harness plus drift against the manifest, but the diff contains no OpenSpec capability/spec update for `team-verification`.",
+      "suggested_fix": "Update the `agent-team/team-verification` capability/spec to include the cross-harness structure checks and manifest drift checks."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

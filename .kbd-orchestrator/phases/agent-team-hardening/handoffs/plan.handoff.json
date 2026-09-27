@@ -1,0 +1,11 @@
+{
+  "stage": "plan",
+  "completedAt": "2026-09-25T11:27:40Z",
+  "outputs": [
+    "plan.md"
+  ],
+  "nextStage": "execute",
+  "summaryForNext": "7 OpenSpec changes in 6 rounds: skills (Firecrawl research recorded), portable manifest of 14 roles with PHI-lane blocks and Harness cards, export to 5 harnesses with drift check and generated AGENTS.md, retire merged agents and wire hooks per harness in parallel, PHI lanes plus phi-lane-guard registered in every adapter, then docs/CI/acceptance. Apply install-domain-skills first. WARNING: the round-2 fixes (6 depends on 7, guard registered per adapter, AGENTS.md generated) were not re-reviewed, so fhir-conformance-validator must check them; no real PHI this phase (the Tribe endpoint is unknown).",
+  "skipped": false,
+  "skipReason": null
+}
