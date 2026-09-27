@@ -834,3 +834,9 @@
 {"ts":"2026-09-27T00:25:35.039Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-team-hardening","prompt_chars":12190}
 {"ts":"2026-09-27T00:25:45.616Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_type":"fhir-infra-release-engineer","agent_id":"a8314ca66c8ebdc81","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-team-hardening"}
 {"ts":"2026-09-27T00:28:20.838Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-team-hardening","prompt_chars":906}
+{"ts":"2026-09-27T01:14:40.986Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"PostToolUseFailure","tool_name":"Bash","outcome":"failed","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T01:15:22.188Z","event":"kb_ingested","outcome":"delivered:1,remaining:0"}
+{"ts":"2026-09-27T01:18:12.536Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_id":"ae18cc2cdb71bf3f7","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T01:21:47.968Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-team-hardening","prompt_chars":12}
+{"ts":"2026-09-27T01:21:56.166Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"PostToolUseFailure","tool_name":"Bash","outcome":"failed","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T01:28:36.695Z","event":"boundary_recorded","outcome":"phase:duplicate","kbd_phase":"agent-team-hardening"}

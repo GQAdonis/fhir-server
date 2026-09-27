@@ -2,16 +2,16 @@
   "schemaVersion": "1",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 575,
-  "derivedRevision": 575,
+  "sourceRevision": 579,
+  "derivedRevision": 579,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 575
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 579
   },
   "conflictCount": 0,
-  "updatedAt": "2026-09-27T01:03:21.482433Z",
+  "updatedAt": "2026-09-27T01:28:03.801509Z",
   "cursor": [
     "agent-team-hardening",
-    "execute"
+    "reflect"
   ],
   "root": {
     "type": "phase",
@@ -111,7 +111,7 @@
         "type": "phase",
         "id": "agent-team-hardening",
         "canonicalId": "agent-team-hardening",
-        "status": "IN_PROGRESS",
+        "status": "COMPLETE",
         "progress": {
           "done": 7,
           "total": 7

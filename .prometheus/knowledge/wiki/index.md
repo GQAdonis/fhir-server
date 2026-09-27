@@ -65,6 +65,7 @@ okf_version: "0.2"
 * [Claude hooks activity for export-team-to-harnesses hardening](/claude-hooks-activity-for-export-team-to-harnesses-hardening.md)
 * [Claude hooks activity for export-team-to-harnesses security reviewer stop](/claude-hooks-activity-for-export-team-to-harnesses-security-reviewer-stop.md)
 * [Claude hooks activity for export-team-to-harnesses validator follow-up](/claude-hooks-activity-for-export-team-to-harnesses-validator-follow-up.md)
+* [Claude hooks activity for extended agent-team-hardening on 2026-09-27](/claude-hooks-activity-for-extended-agent-team-hardening-on-2026-09-27.md)
 * [Claude hooks activity for fhir curator Read failure window](/claude-hooks-activity-for-fhir-curator-read-failure-window.md)
 * [Claude hooks activity for fhir security reviewer stop on 2026-09-26](/claude-hooks-activity-for-fhir-security-reviewer-stop-on-2026-09-26.md)
 * [Claude hooks activity for fhir-architect verification prompt](/claude-hooks-activity-for-fhir-architect-verification-prompt.md)
