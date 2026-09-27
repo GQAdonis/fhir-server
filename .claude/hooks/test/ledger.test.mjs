@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, mkdirSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, mkdirSync, symlinkSync, writeFileSync, readdirSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -192,6 +192,37 @@ test("rotateLedgerNow waits for an externally held ledger lock before reading, i
     release();
     await new Promise((resolve, reject) => child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`child exited ${code}`)))));
     assert.equal(JSON.parse(out).moved, 1);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("rotation refuses to run without the lock when a live holder keeps it past the timeout", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-lock-throw-"));
+  try {
+    mkdirSync(path.dirname(ledgerPath(root)), { recursive: true });
+    const release = acquireLedgerLock(root, 5000);
+    try {
+      assert.throws(() => acquireLedgerLock(root, 50, "throw"), /held by another process/);
+      const proceed = acquireLedgerLock(root, 50); // a hook append proceeds unlocked rather than hang
+      proceed();
+    } finally {
+      release();
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a stale lock orphaned by a crashed process is cleared and the lock is acquired", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "ledger-lock-stale-"));
+  try {
+    mkdirSync(path.dirname(ledgerPath(root)), { recursive: true });
+    acquireLedgerLock(root, 5000); // never released: simulates a crash
+    const old = new Date(Date.now() - 60_000);
+    for (const f of readdirSync(path.dirname(ledgerPath(root)))) utimesSync(path.join(path.dirname(ledgerPath(root)), f), old, old);
+    const again = acquireLedgerLock(root, 50, "throw");
+    again();
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

@@ -1,0 +1,37 @@
+{
+  "mode": "diff",
+  "pass": "verdict",
+  "judge_model": "codex-cli (openai)",
+  "isolation_mode": "codex-cli-fresh-context",
+  "producer_model": "claude-opus-5-5",
+  "cross_model_check": "verified-distinct",
+  "scored": [
+    {
+      "claim": "The Codex template nests model selection inside the provider definition.",
+      "status": "resolved",
+      "evidence": "41e0113 moves model_provider and model above the first table header in .codex/config.phi.template.toml:18\u201321, making both root-level keys."
+    },
+    {
+      "claim": "Codex exec_command calls carrying command text in cmd bypass the PHI guard.",
+      "status": "unresolved",
+      "evidence": "The committed adapter still returns exit 0 with empty output for exec_command tool_input.cmd, while the equivalent command field produces deny; phi-lane.test.mjs:84\u201392 cites binary strings and supplies a command fixture, which does not establish native hook normalization or refute the cmd schema exposed in this session."
+    },
+    {
+      "claim": "Ledger rotation can permanently erase concurrently appended events.",
+      "status": "partial",
+      "evidence": "ledger.mts:253\u2013260 proceeds unlocked after errors or a 3000 ms timeout; an in-memory execution of the committed code reproduced loss of an append during rotation after that timeout despite the new shared lock."
+    },
+    {
+      "claim": "Session-wide tracking applies write permissions to the wrong agent when subagent lifetimes overlap.",
+      "status": "partial",
+      "evidence": "agent-scope.mts now restores the outer agent after an inner stop, but activeAgentType still selects the session stack's last entry without caller identity; replaying overlapping tech-lead/developer starts still assigns developer permissions to the session."
+    },
+    {
+      "claim": "The tech lead's write allowlist permits targets outside the repository.",
+      "status": "resolved",
+      "evidence": "agent-scope-guard.mts:39\u201349 now denies when canonical path containment returns null; the commit adds absolute external-path and sibling-worktree denial tests."
+    }
+  ],
+  "regressions": [],
+  "verdict": "BLOCK"
+}

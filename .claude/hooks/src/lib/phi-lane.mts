@@ -30,7 +30,9 @@ const URL_PATTERN = /https?:\/\/[^\s"'`)>]+/g;
 const SERVER_FIELDS = ["base_url", "baseUrl", "server", "serverUrl"] as const;
 
 /** Field names a shell-like tool input uses for the command text. */
-const COMMAND_FIELDS = ["command", "script"] as const;
+// Codex exposes its shell tool to the model as `exec_command` with `cmd`; hook
+// payloads have been seen with `command`. Read both (plus `script`).
+const COMMAND_FIELDS = ["command", "cmd", "script"] as const;
 
 /**
  * Flags/methods that mean a shell fetch command sends a body (an upload),

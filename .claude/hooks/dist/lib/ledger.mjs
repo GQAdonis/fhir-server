@@ -5,7 +5,7 @@
 // enumerated by this code or sanitized identifiers. Tool inputs, tool outputs,
 // prompt text and file contents can never reach the ledger — a new field in a
 // hook payload is ignored by construction, not by remembering to strip it.
-import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
+import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { refuseSymlink, sleepSync } from "./fsguard.mjs";
 import { scanText } from "./scan.mjs";
@@ -194,6 +194,8 @@ export function ledgerKeyFindings(text) {
     return findings;
 }
 const LOCK_RETRY_MS = 20;
+/** A lock older than this was orphaned by a crashed process and may be cleared. */
+const LOCK_STALE_MS = 30_000;
 function lockPath(projectRoot) {
     return path.join(projectRoot, ".prometheus", ".ledger.lock");
 }
@@ -201,15 +203,18 @@ function lockPath(projectRoot) {
  * Acquire an exclusive, cross-process lock coordinating ledger appends and
  * rotation, so rotation's read-partition-rewrite never overwrites a line
  * appended in that window (the two operations serialize instead of racing).
- * Returns a release function. Never blocks indefinitely: past `timeoutMs`
- * (contention, or a lock orphaned by a crashed process) the lock is cleared
- * and the caller proceeds without it — a hook must never hang a tool call
- * forever, and rare timeout-window contention is a smaller risk than that.
+ * Returns a release function. Never blocks indefinitely. Past `timeoutMs`:
+ * a lock older than LOCK_STALE_MS (orphaned by a crashed process) is cleared
+ * and acquisition retried; a live holder's lock is never removed. Then
+ * `onTimeout` decides: "proceed" (hooks: a tool call must never hang, so the
+ * append goes ahead unlocked) or "throw" (rotation: an operator command that
+ * must not rewrite the ledger without the lock).
  */
-export function acquireLedgerLock(projectRoot, timeoutMs = 3000) {
+export function acquireLedgerLock(projectRoot, timeoutMs = 3000, onTimeout = "proceed") {
     const lock = lockPath(projectRoot);
     mkdirSync(path.dirname(lock), { recursive: true });
     const deadline = Date.now() + timeoutMs;
+    let clearedStale = false;
     for (;;) {
         refuseSymlink(lock);
         try {
@@ -228,16 +233,31 @@ export function acquireLedgerLock(projectRoot, timeoutMs = 3000) {
             if (err.code !== "EEXIST")
                 return () => { }; // can't create a lock file at all: proceed rather than hang
             if (Date.now() >= deadline) {
-                try {
-                    unlinkSync(lock); // clear a stale/contended lock so the *next* caller isn't blocked forever
+                if (!clearedStale && lockAgeMs(lock) > LOCK_STALE_MS) {
+                    clearedStale = true; // at most once, so an unremovable lock can't loop forever
+                    try {
+                        unlinkSync(lock); // orphaned by a crashed process: clear it and try again
+                    }
+                    catch {
+                        // already gone, or not removable: the next pass falls through to onTimeout
+                    }
+                    continue;
                 }
-                catch {
-                    // already gone
-                }
+                if (onTimeout === "throw")
+                    throw new Error(`ledger lock ${lock} is held by another process; try again when no sessions are writing`);
                 return () => { };
             }
             sleepSync(LOCK_RETRY_MS);
         }
+    }
+}
+/** Milliseconds since the lock file was last modified; 0 when it can't be read (treated as live). */
+function lockAgeMs(lock) {
+    try {
+        return Date.now() - statSync(lock).mtimeMs;
+    }
+    catch {
+        return 0;
     }
 }
 /** Write `content` to `target` atomically (write to a sibling temp file, then rename), refusing to follow a symlink at either path. */
@@ -282,7 +302,7 @@ export function rotateLedgerNow(projectRoot, beforeMonth) {
         return null;
     const prometheusDir = path.join(projectRoot, ".prometheus");
     const dir = ledgerDir(projectRoot);
-    const release = acquireLedgerLock(projectRoot);
+    const release = acquireLedgerLock(projectRoot, 3000, "throw");
     try {
         refuseSymlink(prometheusDir);
         refuseSymlink(file);

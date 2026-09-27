@@ -23,7 +23,9 @@ const URL_PATTERN = /https?:\/\/[^\s"'`)>]+/g;
 /** Field names an MCP-style tool input uses for its target server. */
 const SERVER_FIELDS = ["base_url", "baseUrl", "server", "serverUrl"];
 /** Field names a shell-like tool input uses for the command text. */
-const COMMAND_FIELDS = ["command", "script"];
+// Codex exposes its shell tool to the model as `exec_command` with `cmd`; hook
+// payloads have been seen with `command`. Read both (plus `script`).
+const COMMAND_FIELDS = ["command", "cmd", "script"];
 /**
  * Flags/methods that mean a shell fetch command sends a body (an upload),
  * across curl, wget and httpie. Detecting these matters because a public FHIR

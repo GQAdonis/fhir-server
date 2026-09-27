@@ -6,7 +6,7 @@ import os, { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { activeAgentType, clearAgentScope, isWithinOwnedScope, recordAgentStart, recordAgentStop, rolesWithScope } from "../dist/lib/agent-scope.mjs";
+import { activeAgentType, clearAgentScope, isWithinOwnedScope, recordAgentStart, recordAgentStop, rolesWithScope, scopedAgentFor } from "../dist/lib/agent-scope.mjs";
 
 const hook = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "dist", "agent-scope-guard.mjs");
 
@@ -239,5 +239,40 @@ test("hook: malformed input and a missing manifest never block", () => {
   } finally {
     clearAgentScope(sessionId);
     rmSync(bare, { recursive: true, force: true });
+  }
+});
+
+test("lib: scopedAgentFor prefers the tool call's own agent_type, and fails closed on parallel agents without one", () => {
+  const id = `s-${Math.random().toString(36).slice(2)}`;
+  const enforced = new Set(["fhir-tech-lead"]);
+  try {
+    recordAgentStart(id, "fhir-tech-lead");
+    recordAgentStart(id, "fhir-go-developer");
+    assert.equal(scopedAgentFor(id, "fhir-go-developer", enforced), "fhir-go-developer", "payload identity wins");
+    assert.equal(scopedAgentFor(id, "fhir-tech-lead", enforced), "fhir-tech-lead");
+    assert.equal(scopedAgentFor(id, undefined, enforced), "fhir-tech-lead", "no payload identity: the enforced agent applies (fail closed)");
+    clearAgentScope(id);
+    recordAgentStart(id, "fhir-go-developer");
+    assert.equal(scopedAgentFor(id, undefined, enforced), "fhir-go-developer");
+    assert.equal(scopedAgentFor("", undefined, enforced), undefined);
+  } finally {
+    clearAgentScope(id);
+  }
+});
+
+test("hook: overlapping subagents are told apart by the payload agent_type", () => {
+  const root = sandboxRepo();
+  const sessionId = `s-${Math.random().toString(36).slice(2)}`;
+  const target = path.join(root, "internal", "store", "search.go");
+  try {
+    run(root, { hook_event_name: "SubagentStart", session_id: sessionId, agent_type: "fhir-tech-lead" });
+    run(root, { hook_event_name: "SubagentStart", session_id: sessionId, agent_type: "fhir-go-developer" });
+    const dev = run(root, { hook_event_name: "PreToolUse", session_id: sessionId, agent_type: "fhir-go-developer", tool_name: "Edit", tool_input: { file_path: target } });
+    assert.notEqual(dev.body?.hookSpecificOutput?.permissionDecision, "deny", "the developer's own write is not held to the tech lead's scope");
+    const lead = run(root, { hook_event_name: "PreToolUse", session_id: sessionId, agent_type: "fhir-tech-lead", tool_name: "Edit", tool_input: { file_path: target } });
+    assert.equal(lead.body?.hookSpecificOutput?.permissionDecision, "deny", "the tech lead's write is denied even though another agent started later");
+  } finally {
+    clearAgentScope(sessionId);
+    rmSync(root, { recursive: true, force: true });
   }
 });

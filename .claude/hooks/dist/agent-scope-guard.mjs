@@ -6,7 +6,7 @@
 // Claude Code only — see `lib/agent-scope.mts` for why, and for the
 // documented limitations (main-session personas, concurrent subagents).
 import { allow, deny, runHook } from "./lib/hook-io.mjs";
-import { activeAgentType, clearAgentScope, isWithinOwnedScope, recordAgentStart, recordAgentStop } from "./lib/agent-scope.mjs";
+import { clearAgentScope, isWithinOwnedScope, recordAgentStart, recordAgentStop, scopedAgentFor } from "./lib/agent-scope.mjs";
 import { projectDir, rel } from "./lib/paths.mjs";
 import { targetPath } from "./lib/protected-paths.mjs";
 const ENFORCED_AGENTS = new Set(["fhir-tech-lead"]);
@@ -28,7 +28,7 @@ await runHook("agent-scope-guard", (input) => {
             clearAgentScope(sessionId);
         return allow();
     }
-    const agentType = activeAgentType(sessionId);
+    const agentType = scopedAgentFor(sessionId, input.agent_type, ENFORCED_AGENTS);
     if (agentType === undefined || !ENFORCED_AGENTS.has(agentType))
         return allow();
     const target = targetPath(input.tool_input);

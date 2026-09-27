@@ -23,10 +23,13 @@
 // - Nested subagents (an outer persona whose Task delegates to an inner one)
 //   are tracked as a stack: the most recently started, not-yet-stopped agent
 //   is "active", and stopping an inner agent restores the outer one rather
-//   than clearing the scope outright. True *parallel* subagent execution
-//   within one session is not a supported Claude Code model as far as this
-//   guard assumes; if that assumption is ever wrong, this stack does not
-//   disambiguate which parallel agent a given tool call belongs to.
+//   than clearing the scope outright.
+// - Parallel subagents: Claude Code can run several subagents at once in one
+//   session. A tool call's own payload identifies its agent (`agent_type`)
+//   when Claude Code sends one, and that is used first. Without it, if an
+//   enforced agent is among several active ones, the guard fails closed and
+//   applies the enforced agent's scope (see `scopedAgentFor`), so a parallel
+//   sibling's writes may be denied rather than the scoped agent escaping.
 
 import { chmodSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import os from "node:os";
@@ -130,6 +133,20 @@ export function activeAgentType(sessionId: string): string | undefined {
   if (sessionId === "") return undefined;
   const stack = readStack(sessionId);
   return stack.length > 0 ? stack[stack.length - 1] : undefined;
+}
+
+/**
+ * Which agent's scope applies to a tool call. The payload's own `agent_type`
+ * wins when present. Otherwise: if any enforced agent is active in the
+ * session, it applies (fail closed: parallel siblings can't be told apart);
+ * else the innermost active agent.
+ */
+export function scopedAgentFor(sessionId: string, payloadAgentType: unknown, enforced: ReadonlySet<string>): string | undefined {
+  if (typeof payloadAgentType === "string" && payloadAgentType !== "") return payloadAgentType;
+  if (sessionId === "") return undefined;
+  const stack = readStack(sessionId);
+  const enforcedActive = [...stack].reverse().find((agent) => enforced.has(agent));
+  return enforcedActive ?? stack.at(-1);
 }
 
 export interface ScopedRole {

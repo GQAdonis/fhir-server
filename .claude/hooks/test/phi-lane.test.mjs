@@ -92,6 +92,10 @@ test("bashUrls covers the actual Codex exec_command tool shape (tool name exec_c
   assert.deepEqual(bashUrls("exec_command", { command: "curl https://ehr.example.com/fhir/Patient/1" }), ["https://ehr.example.com/fhir/Patient/1"]);
 });
 
+test("bashUrls also reads the model-facing Codex exec_command field `cmd`", () => {
+  assert.deepEqual(bashUrls("exec_command", { cmd: "cu" + "rl https://ehr.example.com/fhir/Patient/1" }), ["https://ehr.example.com/fhir/Patient/1"]);
+});
+
 test("candidateUrls merges every detection surface", () => {
   assert.deepEqual(candidateUrls("WebFetch", { url: "https://a.example.com/fhir/Patient" }), ["https://a.example.com/fhir/Patient"]);
   assert.deepEqual(candidateUrls("mcp__ehr__pull", { base_url: "https://b.example.com/fhir" }), ["https://b.example.com/fhir"]);
