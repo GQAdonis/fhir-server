@@ -7,8 +7,13 @@
 // evaded by an obfuscated shell command (documented residual risk,
 // docs/agent-team.md).
 
-/** A FHIR-shaped path segment: `/fhir`, `/FHIR`, `/R4`, `/api/FHIR`, case-insensitive. */
-const FHIR_PATH = /(^|\/)(fhir|r4|api\/fhir)(\/|$|\?|#)/i;
+/**
+ * A FHIR-shaped path segment: `/fhir`, `/FHIR`, `/R4`, `/api/FHIR`,
+ * case-insensitive. Matched only against `URL.pathname`, which never
+ * contains `?` or `#` (those are `search`/`hash`), so the terminator
+ * alternation is just `/` or end-of-string.
+ */
+const FHIR_PATH = /(^|\/)(fhir|r4|api\/fhir)(\/|$)/i;
 
 /** Bash commands are scanned for URLs only when they look like a fetch of something FHIR-related. */
 const FETCH_HINT = /\b(curl|wget|httpie|fhir)\b/i;
@@ -26,6 +31,27 @@ const SERVER_FIELDS = ["base_url", "baseUrl", "server", "serverUrl"] as const;
 
 /** Field names a shell-like tool input uses for the command text. */
 const COMMAND_FIELDS = ["command", "script"] as const;
+
+/**
+ * Flags/methods that mean a shell fetch command sends a body (an upload),
+ * across curl, wget and httpie. Detecting these matters because a public FHIR
+ * sandbox is safe to *read* from, but this guard cannot tell synthetic test
+ * data from real PHI in an upload body — so an upload is treated like a
+ * non-sandbox destination unless the lane is proven, even to an allowlisted
+ * sandbox host.
+ */
+const UPLOAD_PATTERNS: readonly RegExp[] = [
+  /(^|\s)-d(\s|=|$)/, // curl -d
+  /--data(-raw|-binary|-urlencode)?(\s|=)/, // curl --data*
+  /(^|\s)-F(\s|=)/, // curl -F
+  /--form(\s|=)/, // curl --form
+  /(^|\s)-T(\s|=)/, // curl -T
+  /--upload-file(\s|=)/, // curl --upload-file
+  /--post-file(\d)?(\s|=)/, // wget --post-file
+  /--post-data(\s|=)/, // wget --post-data
+  /(-X|--request)\s*=?\s*"?(POST|PUT|PATCH|DELETE)"?\b/i, // curl method override
+  /\bhttps?\s+(POST|PUT|PATCH|DELETE)\b/i, // httpie: http POST url ...
+];
 
 export interface SandboxEntry {
   readonly host: string;
@@ -53,20 +79,60 @@ export function parseSandboxes(raw: string | undefined): Allowlist {
   }
 }
 
-function hostOf(url: string): string | undefined {
+/** `hostname` for a bracketed IPv6 literal keeps its brackets (`"[::1]"`); strip them so `"::1"` compares equal. */
+function stripBrackets(host: string): string {
+  return host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;
+}
+
+/** The URL's hostname, lower-cased and with IPv6 brackets stripped, or undefined for an unparseable URL. */
+export function hostOf(url: string): string | undefined {
   try {
-    return new URL(url).hostname.toLowerCase();
+    return stripBrackets(new URL(url).hostname.toLowerCase());
   } catch {
     return undefined;
   }
 }
 
-/** True for loopback hosts and any host on the allowlist (exact match or a subdomain of one). */
-export function isSandbox(url: string, allowlist: Allowlist): boolean {
-  const host = hostOf(url);
-  if (host === undefined) return false;
-  if (host === "localhost" || host === "127.0.0.1" || host === "::1") return true;
-  return allowlist.sandboxes.some((s) => host === s.host.toLowerCase() || host.endsWith(`.${s.host.toLowerCase()}`));
+function isLoopbackHost(host: string): boolean {
+  return host === "localhost" || host === "127.0.0.1" || host === "::1";
+}
+
+/**
+ * This repo's own dev-server loopback port (docker-compose.yml `fhir-server`
+ * service), treated as a sandbox by default without an allowlist entry or
+ * operator opt-in.
+ */
+const LOCAL_DEV_SERVER_PORT = "9090";
+
+/**
+ * True for an allowlisted host (exact match or a subdomain of one), for this
+ * repo's own loopback dev-server port, or for any loopback host when the
+ * operator has set `PHI_LOCAL_SANDBOX=1` to vouch for a locally-verified
+ * endpoint. A blanket "every loopback host is a sandbox" rule is bypassable
+ * by port-forwarding or tunnelling a real production endpoint onto
+ * localhost, so loopback alone is no longer sufficient.
+ */
+export function isSandbox(url: string, allowlist: Allowlist, env: Readonly<Record<string, string | undefined>> = {}): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  const host = stripBrackets(parsed.hostname.toLowerCase());
+  if (allowlist.sandboxes.some((s) => host === s.host.toLowerCase() || host.endsWith(`.${s.host.toLowerCase()}`))) return true;
+  if (!isLoopbackHost(host)) return false;
+  if (parsed.port === LOCAL_DEV_SERVER_PORT) return true;
+  return env["PHI_LOCAL_SANDBOX"] === "1";
+}
+
+/** True when a shell-like tool call's command sends a body (an upload), across curl/wget/httpie. */
+export function isUploadCommand(toolName: string, toolInput: unknown): boolean {
+  if (!SHELL_TOOL.test(toolName)) return false;
+  if (toolInput === null || typeof toolInput !== "object") return false;
+  const command = fieldValue(toolInput as Record<string, unknown>, COMMAND_FIELDS);
+  if (command === undefined) return false;
+  return UPLOAD_PATTERNS.some((p) => p.test(command));
 }
 
 /** True when the URL's path looks like a FHIR REST endpoint. */
@@ -136,11 +202,14 @@ export function tribeLaneActive(env: Readonly<Record<string, string | undefined>
 }
 
 /**
- * The FHIR-shaped, non-sandbox URL a tool call would reach without a proven
- * Tribe lane, or undefined when the call is fine (sandbox, non-FHIR, or a
- * proven Tribe lane).
+ * The FHIR-shaped URL a tool call would reach without a proven Tribe lane,
+ * when that call is either a non-sandbox destination or an upload (even to a
+ * sandbox — this guard cannot tell synthetic data from real in a body), or
+ * undefined when the call is fine (a non-uploading sandbox read, a
+ * non-FHIR-shaped URL, or a proven Tribe lane).
  */
 export function deniedUrl(toolName: string, toolInput: unknown, allowlist: Allowlist, env: Readonly<Record<string, string | undefined>>): string | undefined {
   if (tribeLaneActive(env)) return undefined;
-  return candidateUrls(toolName, toolInput).find((url) => isFhirShaped(url) && !isSandbox(url, allowlist));
+  const uploading = isUploadCommand(toolName, toolInput);
+  return candidateUrls(toolName, toolInput).find((url) => isFhirShaped(url) && (uploading || !isSandbox(url, allowlist, env)));
 }

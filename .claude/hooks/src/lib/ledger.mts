@@ -5,10 +5,11 @@
 // enumerated by this code or sanitized identifiers. Tool inputs, tool outputs,
 // prompt text and file contents can never reach the ledger — a new field in a
 // hook payload is ignored by construction, not by remembering to strip it.
-import { appendFileSync, mkdirSync, readFileSync } from "node:fs";
+import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import type { HookInput } from "./hook-io.mjs";
+import { refuseSymlink, sleepSync } from "./fsguard.mjs";
 import { scanText } from "./scan.mjs";
 
 export const LEDGER_FIELDS = [
@@ -123,11 +124,21 @@ export function ledgerDir(projectRoot: string): string {
   return path.join(projectRoot, ".prometheus", "ledger");
 }
 
-/** The "yyyy-mm" UTC month key for a `ts` string, or undefined when it does not parse. */
+/**
+ * The "yyyy-mm" UTC month key for a `ts` string, or undefined when it does not
+ * parse *or* its year falls outside 1970-9999: `isLedgerFile`/rotation always
+ * expect an exactly-4-digit year, and an out-of-range year (unpadded below
+ * 1000, or more than 4 digits above 9999) would otherwise produce a month key
+ * that can never match `ledger/<yyyy-mm>.jsonl`, silently losing a line during
+ * rotation instead of keeping it (partitionLedgerLines keeps what monthKey
+ * can't place).
+ */
 export function monthKey(ts: string): string | undefined {
   const d = new Date(ts);
   if (Number.isNaN(d.getTime())) return undefined;
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+  const year = d.getUTCFullYear();
+  if (year < 1970 || year > 9999) return undefined;
+  return `${year}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
 export interface LedgerPartition {
@@ -207,16 +218,121 @@ export function ledgerKeyFindings(text: string): LedgerKeyFinding[] {
   return findings;
 }
 
+const LOCK_RETRY_MS = 20;
+
+function lockPath(projectRoot: string): string {
+  return path.join(projectRoot, ".prometheus", ".ledger.lock");
+}
+
 /**
- * Append one line. Lines are kept well under 4 KB so a single O_APPEND write
- * stays line-atomic when hooks run concurrently.
+ * Acquire an exclusive, cross-process lock coordinating ledger appends and
+ * rotation, so rotation's read-partition-rewrite never overwrites a line
+ * appended in that window (the two operations serialize instead of racing).
+ * Returns a release function. Never blocks indefinitely: past `timeoutMs`
+ * (contention, or a lock orphaned by a crashed process) the lock is cleared
+ * and the caller proceeds without it — a hook must never hang a tool call
+ * forever, and rare timeout-window contention is a smaller risk than that.
+ */
+export function acquireLedgerLock(projectRoot: string, timeoutMs = 3000): () => void {
+  const lock = lockPath(projectRoot);
+  mkdirSync(path.dirname(lock), { recursive: true });
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    refuseSymlink(lock);
+    try {
+      const fd = openSync(lock, "wx");
+      closeSync(fd);
+      return () => {
+        try {
+          unlinkSync(lock);
+        } catch {
+          // already released or removed: fine
+        }
+      };
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== "EEXIST") return () => {}; // can't create a lock file at all: proceed rather than hang
+      if (Date.now() >= deadline) {
+        try {
+          unlinkSync(lock); // clear a stale/contended lock so the *next* caller isn't blocked forever
+        } catch {
+          // already gone
+        }
+        return () => {};
+      }
+      sleepSync(LOCK_RETRY_MS);
+    }
+  }
+}
+
+/** Write `content` to `target` atomically (write to a sibling temp file, then rename), refusing to follow a symlink at either path. */
+function writeFileAtomic(target: string, content: string): void {
+  refuseSymlink(target);
+  const tmp = `${target}.tmp-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  writeFileSync(tmp, content, "utf8");
+  renameSync(tmp, target);
+}
+
+/**
+ * Append one line, holding the ledger lock for the write. Lines are kept well
+ * under 4 KB so the write itself is small and fast; the lock (not O_APPEND
+ * atomicity alone) is what protects against rotation's read-modify-write.
  */
 export function appendEntry(projectRoot: string, entry: LedgerEntry): void {
   const line = `${JSON.stringify(entry)}\n`;
   if (Buffer.byteLength(line) > 4000) throw new Error("ledger line exceeds 4000 bytes");
+  const dir = path.join(projectRoot, ".prometheus");
+  refuseSymlink(dir);
+  mkdirSync(dir, { recursive: true });
   const file = ledgerPath(projectRoot);
-  mkdirSync(path.dirname(file), { recursive: true });
-  appendFileSync(file, line, { encoding: "utf8" });
+  const release = acquireLedgerLock(projectRoot);
+  try {
+    refuseSymlink(file);
+    appendFileSync(file, line, { encoding: "utf8" });
+  } finally {
+    release();
+  }
+}
+
+export interface RotateResult {
+  readonly moved: number;
+  readonly monthFiles: number;
+}
+
+/**
+ * Rotate lines strictly before `beforeMonth` ("yyyy-mm") out of the live
+ * ledger into `ledger/<yyyy-mm>.jsonl`, holding the ledger lock for the whole
+ * read-partition-write sequence so a concurrent `appendEntry` (which takes the
+ * same lock) can never be silently overwritten by the rewrite. Returns null
+ * when there is no ledger file at all.
+ */
+export function rotateLedgerNow(projectRoot: string, beforeMonth: string): RotateResult | null {
+  const file = ledgerPath(projectRoot);
+  if (!existsSync(file)) return null;
+  const prometheusDir = path.join(projectRoot, ".prometheus");
+  const dir = ledgerDir(projectRoot);
+  const release = acquireLedgerLock(projectRoot);
+  try {
+    refuseSymlink(prometheusDir);
+    refuseSymlink(file);
+    const lines = readFileSync(file, "utf8").split("\n").filter((l) => l !== "");
+    const { rotated, kept } = partitionLedgerLines(lines, beforeMonth);
+    if (rotated.size === 0) return { moved: 0, monthFiles: 0 };
+    refuseSymlink(dir);
+    mkdirSync(dir, { recursive: true });
+    let moved = 0;
+    for (const [month, monthLines] of [...rotated.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
+      const monthFile = path.join(dir, `${month}.jsonl`);
+      refuseSymlink(monthFile);
+      const existing = existsSync(monthFile) ? readFileSync(monthFile, "utf8") : "";
+      writeFileAtomic(monthFile, existing + monthLines.map((l) => `${l}\n`).join(""));
+      moved += monthLines.length;
+    }
+    writeFileAtomic(file, kept.length > 0 ? `${kept.join("\n")}\n` : "");
+    writeFileAtomic(path.join(prometheusDir, ".flush-cursor"), `${JSON.stringify({ offset: 0 })}\n`);
+    return { moved, monthFiles: rotated.size };
+  } finally {
+    release();
+  }
 }
 
 /** Parse ledger text, skipping blank or corrupt lines. */

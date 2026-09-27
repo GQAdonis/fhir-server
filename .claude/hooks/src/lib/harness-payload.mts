@@ -15,20 +15,27 @@ const PATH_KEYS = ["file_path", "filePath", "filepath", "path", "notebook_path",
 /** `*** Update File: x`, `*** Add File: x`, `*** Delete File: x`, `*** Move to: x` (Codex apply_patch, OpenCode patch). */
 const PATCH_HEADER = /^\s*\*\*\* (?:Update File|Add File|Delete File|Move to): (.+?)\s*$/gm;
 
-/** Every string value in a (nested) tool input, for patch-text scanning. */
-function strings(value: unknown, out: string[] = [], depth = 0): string[] {
-  if (depth > 6) return out;
-  if (typeof value === "string") out.push(value);
-  else if (Array.isArray(value)) for (const v of value) strings(v, out, depth + 1);
-  else if (value !== null && typeof value === "object") for (const v of Object.values(value)) strings(v, out, depth + 1);
-  return out;
-}
+/**
+ * The field that carries actual patch/diff text for each harness, scanned for
+ * `PATCH_HEADER`. Deliberately narrow: an ordinary Edit/Write/WriteFile call's
+ * `content`/`new_string`/etc. must never be treated as edit targets just
+ * because it happens to *contain* patch-example text (a false-positive deny
+ * on a harmless write). Only a genuine patch-shaped tool call's own
+ * patch-bearing field is scanned.
+ */
+const PATCH_TEXT_KEYS: Record<Harness, readonly string[]> = {
+  codex: ["command"], // apply_patch
+  opencode: ["patchText"], // patch
+  kimi: [],
+  minimax: ["command"], // apply_patch
+};
 
 /**
- * Files a tool call would write, from direct path fields and from patch text.
+ * Files a tool call would write, from direct path fields and — only for a
+ * patch-shaped tool's own patch-text field — from patch headers.
  * Order-preserving and de-duplicated.
  */
-export function editedPaths(toolInput: unknown): string[] {
+export function editedPaths(harness: Harness, toolInput: unknown): string[] {
   const found: string[] = [];
   if (toolInput !== null && typeof toolInput === "object" && !Array.isArray(toolInput)) {
     const record = toolInput as Record<string, unknown>;
@@ -38,10 +45,13 @@ export function editedPaths(toolInput: unknown): string[] {
     }
     // MultiEdit-style arrays of edits with their own paths.
     for (const v of Object.values(record)) {
-      if (Array.isArray(v)) for (const item of v) if (item !== null && typeof item === "object") found.push(...editedPaths(item));
+      if (Array.isArray(v)) for (const item of v) if (item !== null && typeof item === "object") found.push(...editedPaths(harness, item));
+    }
+    for (const key of PATCH_TEXT_KEYS[harness]) {
+      const v = record[key];
+      if (typeof v === "string") for (const m of v.matchAll(PATCH_HEADER)) found.push(m[1]!);
     }
   }
-  for (const s of strings(toolInput)) for (const m of s.matchAll(PATCH_HEADER)) found.push(m[1]!);
   return [...new Set(found)];
 }
 
@@ -96,7 +106,7 @@ export function guardInputs(harness: Harness, p: NativePayload): HookInput[] {
   // Paths are relative to the session directory (which may be a subdirectory),
   // so make them absolute before the guard relativizes them to the repo root.
   const absolute = (file: string): string => (cwd !== undefined && !path.isAbsolute(file) && !/^[A-Za-z]:[\\/]/.test(file) ? path.resolve(cwd, file) : file);
-  return editedPaths(toolInput).map((file) =>
+  return editedPaths(harness, toolInput).map((file) =>
     compact({
       hook_event_name: "PreToolUse",
       session_id: p.session_id ?? p.sessionID,

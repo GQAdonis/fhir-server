@@ -59,3 +59,4 @@
   - synthetic-only covers published de-identified research datasets, and patient data in partner documents and tool output;
   - Tribe lanes: Claude first, then Codex and OpenCode after verification; Kimi and MiniMax are not approved.
 - **Deferred follow-up (next phase, gating the first real-PHI session):** W1 lane proof must read the real endpoint; W2 full isolation of the Tribe profile (`--setting-sources`, no note sinks); W3 shell egress on the Claude Tribe profile; W4 complete harness templates, each deny verified; W5 guard FHIR-detection gaps. The review's suggestions S1–S6 go in the same change. The gate conditions are listed in `docs/compliance/README.md`.
+- **OpenCode (2026-09-26):** operator accepted OpenCode 0/5 smoke as a known limitation; G6 is PARTIAL, and a follow-up re-runs the OpenCode smoke set after the local OpenCode config is fixed.

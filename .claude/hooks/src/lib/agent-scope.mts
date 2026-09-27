@@ -7,25 +7,63 @@
 // small per-session state file (outside the repo, never committed) so a later
 // PreToolUse call in the same session can look it up.
 //
-// Documented limitation: a persona run as the *main* session (for example
-// `claude --agent fhir-tech-lead`) never fires SubagentStart, so its tool
-// calls are not scoped here — there is no hook event that identifies a main
-// session's own persona. No other harness (Codex, OpenCode, Kimi, MiniMax)
-// fires a subagent-lifecycle hook event at all today (docs/agent-team.md,
-// "Hook coverage per harness"), so this module is registered for Claude Code
-// only; harness-hook.mts never calls it. Concurrent subagents in one session
-// are not disambiguated: the most recent SubagentStart wins until the next
-// SubagentStop clears it (residual limitation, documented here rather than
-// silently assumed away).
+// Documented limitations:
+// - A persona run as the *main* session (for example `claude --agent
+//   fhir-tech-lead`) never fires SubagentStart, so its tool calls are not
+//   scoped here — there is no hook event that identifies a main session's own
+//   persona.
+// - No other harness (Codex, OpenCode, Kimi, MiniMax) fires a
+//   subagent-lifecycle hook event at all today (docs/agent-team.md, "Hook
+//   coverage per harness"), so this module is registered for Claude Code
+//   only; harness-hook.mts never calls it.
+// - A Bash/shell tool call carries no `file_path`/`path`/`notebook_path`
+//   field (`targetPath` finds none), so this guard never fires for it: a
+//   scoped agent's shell command (e.g. `echo ... > internal/store/x.go`) is
+//   not enforced, only its Edit/Write/MultiEdit/NotebookEdit tool calls are.
+// - Nested subagents (an outer persona whose Task delegates to an inner one)
+//   are tracked as a stack: the most recently started, not-yet-stopped agent
+//   is "active", and stopping an inner agent restores the outer one rather
+//   than clearing the scope outright. True *parallel* subagent execution
+//   within one session is not a supported Claude Code model as far as this
+//   guard assumes; if that assumption is ever wrong, this stack does not
+//   disambiguate which parallel agent a given tool call belongs to.
 
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import { refuseSymlink } from "./fsguard.mjs";
 import { globMatch } from "./protected-paths.mjs";
 
+/**
+ * A private, per-OS-user state directory (not shared across accounts on a
+ * multi-user host): created with mode 0700, and re-tightened on every call in
+ * case something loosened it. If it already exists and is owned by a
+ * different user, refuse to use it — writing through a directory another
+ * account controls would let that account spoof or read agent-scope state.
+ */
 function stateDir(): string {
-  return path.join(os.tmpdir(), "fhir-server-agent-scope");
+  const uid = typeof process.getuid === "function" ? process.getuid() : undefined;
+  const suffix = uid !== undefined ? String(uid) : (os.userInfo().username || "unknown").replace(/[^A-Za-z0-9._-]/g, "_");
+  const dir = path.join(os.tmpdir(), `fhir-server-agent-scope-${suffix}`);
+  refuseSymlink(dir);
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  if (uid !== undefined) {
+    let stat;
+    try {
+      stat = statSync(dir);
+    } catch {
+      stat = undefined;
+    }
+    if (stat !== undefined && stat.uid !== uid) throw new Error(`agent-scope: ${dir} is owned by another user; refusing to use it`);
+  }
+  try {
+    chmodSync(dir, 0o700);
+  } catch {
+    // Best-effort: platforms without POSIX permission bits (e.g. Windows), or
+    // a directory we don't own (caught above), leave this as a no-op.
+  }
+  return dir;
 }
 
 function stateFile(sessionId: string): string {
@@ -33,14 +71,51 @@ function stateFile(sessionId: string): string {
   return path.join(stateDir(), `${safe}.json`);
 }
 
-/** Record that `agentType` is now the active subagent for `sessionId`. */
-export function recordAgentStart(sessionId: string, agentType: string): void {
-  if (sessionId === "" || agentType === "") return;
-  mkdirSync(stateDir(), { recursive: true });
-  writeFileSync(stateFile(sessionId), JSON.stringify({ agent_type: agentType }));
+function readStack(sessionId: string): string[] {
+  try {
+    const value = JSON.parse(readFileSync(stateFile(sessionId), "utf8")) as { stack?: unknown };
+    return Array.isArray(value.stack) ? value.stack.filter((s): s is string => typeof s === "string") : [];
+  } catch {
+    return [];
+  }
 }
 
-/** Clear the recorded active subagent for `sessionId`, if any. */
+function writeStack(sessionId: string, stack: readonly string[]): void {
+  const file = stateFile(sessionId);
+  if (stack.length === 0) {
+    try {
+      rmSync(file, { force: true });
+    } catch {
+      // already gone: fine
+    }
+    return;
+  }
+  refuseSymlink(file);
+  writeFileSync(file, JSON.stringify({ stack }));
+}
+
+/** Push `agentType` as the now-active subagent for `sessionId` (nested on top of any already-active agent). */
+export function recordAgentStart(sessionId: string, agentType: string): void {
+  if (sessionId === "" || agentType === "") return;
+  const stack = readStack(sessionId);
+  stack.push(agentType);
+  writeStack(sessionId, stack);
+}
+
+/**
+ * Pop the most recent matching `agentType` entry for `sessionId`, restoring
+ * whichever agent (if any) was active before it started — not a blind clear,
+ * so an outer agent's scope survives an inner agent's stop.
+ */
+export function recordAgentStop(sessionId: string, agentType: string): void {
+  if (sessionId === "") return;
+  const stack = readStack(sessionId);
+  const idx = stack.lastIndexOf(agentType);
+  if (idx !== -1) stack.splice(idx, 1);
+  writeStack(sessionId, stack);
+}
+
+/** Clear every recorded active subagent for `sessionId`, if any (full reset, e.g. when the stopped agent's identity is unknown). */
 export function clearAgentScope(sessionId: string): void {
   if (sessionId === "") return;
   try {
@@ -50,15 +125,11 @@ export function clearAgentScope(sessionId: string): void {
   }
 }
 
-/** The subagent recorded as active for `sessionId`, or undefined when none is recorded. */
+/** The innermost (most recently started, not yet stopped) subagent for `sessionId`, or undefined when none is active. */
 export function activeAgentType(sessionId: string): string | undefined {
   if (sessionId === "") return undefined;
-  try {
-    const value = JSON.parse(readFileSync(stateFile(sessionId), "utf8")) as { agent_type?: unknown };
-    return typeof value.agent_type === "string" ? value.agent_type : undefined;
-  } catch {
-    return undefined;
-  }
+  const stack = readStack(sessionId);
+  return stack.length > 0 ? stack[stack.length - 1] : undefined;
 }
 
 export interface ScopedRole {

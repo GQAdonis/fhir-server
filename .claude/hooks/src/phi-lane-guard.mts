@@ -7,7 +7,7 @@ import path from "node:path";
 
 import { allow, deny, runHook } from "./lib/hook-io.mjs";
 import { projectDir } from "./lib/paths.mjs";
-import { deniedUrl, parseSandboxes } from "./lib/phi-lane.mjs";
+import { deniedUrl, hostOf, parseSandboxes } from "./lib/phi-lane.mjs";
 
 function loadSandboxes(root: string) {
   try {
@@ -22,7 +22,10 @@ await runHook("phi-lane-guard", (input) => {
   const allowlist = loadSandboxes(projectDir());
   const url = deniedUrl(toolName, input.tool_input, allowlist, process.env);
   if (url === undefined) return allow();
+  // Host only, never the full URL: a FHIR path/query can carry a resource id or other identifier
+  // (e.g. /Patient/12345), and a denial reason is not the place to echo that back out.
+  const host = hostOf(url) ?? "the target endpoint";
   return deny(
-    `${url} is a non-sandbox FHIR endpoint. Real PHI may be processed only on a proven Tribe lane (ATH-D-001, phi-lane-policy): set PHI_LANE=tribe with the Tribe model endpoint active, or use a public FHIR sandbox / synthetic data instead.`,
+    `${host} is a non-sandbox FHIR endpoint, or a sandbox upload without a proven Tribe lane. Real PHI may be processed only on a proven Tribe lane (ATH-D-001, phi-lane-policy): set PHI_LANE=tribe with the Tribe model endpoint active, or use a public FHIR sandbox / synthetic data instead.`,
   );
 });

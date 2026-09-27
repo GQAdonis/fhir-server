@@ -10,6 +10,14 @@
 # version before relying on this file (model_providers/sandbox schemas change
 # between releases).
 
+# These two keys must stay above every `[table]` header below: TOML assigns a
+# bare `key = value` line to whichever table header most recently preceded
+# it, so placing them after `[model_providers.tribe]` would make them
+# `model_providers.tribe.model_provider`/`.model` instead of the root-level
+# selection keys Codex actually reads (verified with `python3 -m tomllib`).
+model_provider = "tribe"
+model = "$TRIBE_MODEL_NAME"
+
 [model_providers.tribe]
 name = "Tribe Health Solutions (local, BAA-covered — ATH-D-001)"
 # Codex config.toml does not interpolate "$VAR" inside string values. Render
@@ -19,9 +27,6 @@ name = "Tribe Health Solutions (local, BAA-covered — ATH-D-001)"
 base_url = "$TRIBE_MODEL_BASE_URL"
 env_key = "TRIBE_MODEL_API_KEY"
 wire_api = "chat"
-
-model_provider = "tribe"
-model = "$TRIBE_MODEL_NAME"
 
 # Deny off-lane channels (task 4.1, carried from the define-portable-team-
 # manifest security review). network_access=false blocks the *shell sandbox*

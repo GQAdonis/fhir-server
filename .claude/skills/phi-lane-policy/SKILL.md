@@ -26,7 +26,7 @@ Declaring the lane without the matching endpoint is still the synthetic lane.
 ## Rules
 
 1. Assume the synthetic lane unless both lane conditions are verifiably true. If unsure, stop and ask the operator.
-2. On the synthetic lane, never request, paste, fetch or summarize real patient records, even a single identifier, and never accept de-identified data derived from them. If real PHI or de-identified patient data appears in input, stop, do not repeat it, and tell the operator it must move to a Tribe lane.
+2. On the synthetic lane, never request, paste, fetch or summarize real patient records, even a single identifier, and never accept de-identified data derived from them. If real PHI or de-identified patient data appears in input, stop, do not repeat it, and tell the operator it must move to a Tribe lane. Only generated synthetic data (Synthea, hand-written fixtures) may ever be sent, including uploaded, to a public FHIR sandbox (Epic, Oracle Health, SMART Health IT, HAPI public) — the sandbox being public means a POST/PUT there is not private, so real or de-identified patient data must never be uploaded to one, only fetched-from-it synthetic data or your own synthetic writes.
 3. On the Tribe lane, apply minimum necessary: fetch only the resources, elements and date range the task needs, and prefer `_elements` / `_type` filters.
 4. Never write PHI or credentials to:
    - the repository, `.prometheus/`, or `.kbd-orchestrator/`;

@@ -51,3 +51,16 @@ test("the JSON template is valid JSON and the TOML templates parse (single top-l
     assert.match(text, /^\[[a-zA-Z0-9_.[\]]+\]$/m, `${rel}: no TOML table header found`);
   }
 });
+
+test("the Codex template's model_provider/model selection keys are at the document root, not nested inside [model_providers.tribe]", () => {
+  // TOML semantics: a bare `key = value` line belongs to whichever [table] header most recently
+  // preceded it. model_provider/model must select the provider at the *root* Codex config table,
+  // so they must appear before the first `[model_providers...]` header, not after it.
+  const text = readFileSync(path.join(repo, ".codex/config.phi.template.toml"), "utf8");
+  const nonCommentLines = text.split("\n").filter((l) => !/^\s*#/.test(l) && l.trim() !== "");
+  const firstTableIdx = nonCommentLines.findIndex((l) => /^\[/.test(l));
+  assert.ok(firstTableIdx >= 0, "expected at least one [table] header");
+  const beforeFirstTable = nonCommentLines.slice(0, firstTableIdx).join("\n");
+  assert.match(beforeFirstTable, /^model_provider\s*=\s*"tribe"$/m, "model_provider must precede every [table] header");
+  assert.match(beforeFirstTable, /^model\s*=\s*"\$TRIBE_MODEL_NAME"$/m, "model must precede every [table] header");
+});

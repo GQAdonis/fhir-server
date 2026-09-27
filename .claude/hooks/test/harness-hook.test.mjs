@@ -23,13 +23,36 @@ function run(harness, hook, payload) {
 
 const PATCH = (file) => `*** Begin Patch\n*** Update File: ${file}\n@@\n-a\n+b\n*** End Patch\n`;
 
-test("editedPaths finds direct path fields, nested edits and patch headers", () => {
-  assert.deepEqual(editedPaths({ file_path: "a.go" }), ["a.go"]);
-  assert.deepEqual(editedPaths({ filePath: "b.go" }), ["b.go"]);
-  assert.deepEqual(editedPaths({ path: "c.go" }), ["c.go"]);
-  assert.deepEqual(editedPaths({ edits: [{ file_path: "d.go" }, { file_path: "e.go" }] }), ["d.go", "e.go"]);
-  assert.deepEqual(editedPaths({ command: `*** Begin Patch\n*** Add File: x/new.go\n*** Update File: y.go\n*** Move to: z.go\n*** Delete File: old.go\n*** End Patch` }), ["x/new.go", "y.go", "z.go", "old.go"]);
-  assert.deepEqual(editedPaths({ command: "ls -la" }), []);
+test("editedPaths finds direct path fields, nested edits and patch headers in a patch tool's own patch-text field", () => {
+  assert.deepEqual(editedPaths("codex", { file_path: "a.go" }), ["a.go"]);
+  assert.deepEqual(editedPaths("codex", { filePath: "b.go" }), ["b.go"]);
+  assert.deepEqual(editedPaths("codex", { path: "c.go" }), ["c.go"]);
+  assert.deepEqual(editedPaths("codex", { edits: [{ file_path: "d.go" }, { file_path: "e.go" }] }), ["d.go", "e.go"]);
+  assert.deepEqual(
+    editedPaths("codex", { command: `*** Begin Patch\n*** Add File: x/new.go\n*** Update File: y.go\n*** Move to: z.go\n*** Delete File: old.go\n*** End Patch` }),
+    ["x/new.go", "y.go", "z.go", "old.go"],
+  );
+  assert.deepEqual(editedPaths("codex", { command: "ls -la" }), []);
+  // A field that isn't the harness's known patch-text field is never scanned for patch headers,
+  // even for a tool whose *other* field does carry patch text (the false-positive this guards against).
+  assert.deepEqual(editedPaths("kimi", { path: "docs/x.md", content: PATCH("AGENTS.md") }), ["docs/x.md"]);
+});
+
+test("a Write/WriteFile tool's ordinary file content is never scanned for patch headers (false-positive guard)", () => {
+  const root = sandbox();
+  try {
+    const payload = {
+      hook_event_name: "PreToolUse",
+      cwd: root,
+      tool_name: "WriteFile",
+      tool_input: { path: path.join(root, "docs", "patch-example.md"), content: PATCH("AGENTS.md") },
+    };
+    const r = run("kimi", "guard", payload);
+    assert.equal(r.status, 0, r.stderr);
+    assert.equal(r.stdout, "", "an ordinary write whose content merely contains patch-example text must not be denied");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("non-writing tools produce no guard inputs", () => {
@@ -168,6 +191,27 @@ test("the OpenCode project plugin blocks a protected edit and records sessions (
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test("the OpenCode plugin resolves relative paths against the session directory, not the repository root (subdirectory sessions stay guarded)", async () => {
+  const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+  const { FhirGuards } = await import(pathToFileURL(path.join(repo, ".opencode", "plugins", "fhir-guards.js")).href);
+  const sub = path.join(repo, "internal", "store");
+  // A session started in `internal/store`, as OpenCode reports it: `directory` is the
+  // subdirectory, `worktree` is the repo root.
+  const hooks = await FhirGuards({ directory: sub, worktree: repo });
+  await assert.rejects(
+    hooks["tool.execute.before"]({ tool: "write", sessionID: "t" }, { args: { filePath: "testdata/golden.json" } }),
+    /internal\/store\/testdata\/golden\.json is protected/,
+    "relative to the session directory, this is the protected golden-snapshot glob",
+  );
+  await assert.rejects(
+    hooks["tool.execute.before"]({ tool: "write", sessionID: "t" }, { args: { filePath: "../../AGENTS.md" } }),
+    /AGENTS\.md is protected/,
+    "relative to the session directory, this climbs to the protected repo-root AGENTS.md",
+  );
+  // Not protected from this session directory: internal/store/AGENTS.md is a different file.
+  await hooks["tool.execute.before"]({ tool: "write", sessionID: "t" }, { args: { filePath: "AGENTS.md" } });
 });
 
 test("the Kimi/MiniMax launcher runs only for allowlisted repositories", async () => {

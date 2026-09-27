@@ -1,0 +1,55 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "codex-cli (openai)",
+  "isolation_mode": "codex-cli-fresh-context",
+  "producer_model": "claude-opus-5-5",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".codex/config.phi.template.toml",
+      "line": 23,
+      "claim": "The Codex template nests model selection inside the provider definition, so it does not select the Tribe provider.",
+      "evidence": "The preceding [model_providers.tribe] table remains active at model_provider and model. Parsing the template with tomllib produces only model_providers and sandbox_workspace_write at the root; both selection keys are inside model_providers.tribe. Rendering the environment placeholders does not correct this structure. This breaks the provider template required by criterion 2.1.",
+      "suggested_fix": "Move model_provider and model before the first table header. Add a TOML parser assertion that both keys exist at the root and select the defined Tribe provider."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/phi-lane.mts",
+      "line": 27,
+      "claim": "Ordinary Codex exec_command calls bypass the PHI guard because their command text is carried in cmd.",
+      "evidence": "SHELL_TOOL explicitly includes exec_command, but COMMAND_FIELDS includes only command and script, and phiLaneInput passes inputs through unchanged. With no lane variables, the registered Codex adapter returned exit 0 and empty output for tool_name='exec_command', tool_input={cmd:'curl https://ehr.example.com/fhir/Patient/1'}. The equivalent Bash command is denied. This violates criteria 1.1\u20131.2 without requiring command obfuscation.",
+      "suggested_fix": "Normalize each supported harness's native shell payload, including cmd, before URL detection. Add an adapter fixture using the actual exec_command input shape."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/rotate-ledger.mts",
+      "line": 55,
+      "claim": "Ledger rotation can permanently erase events appended while rotation is running.",
+      "evidence": "The script reads the ledger at line 40, appends archive records, then truncates and rewrites the live ledger from that earlier snapshot at line 55. appendEntry independently uses appendFileSync without a shared lock. An in-memory execution of the packet's rotation source, injecting an append between archival and the rewrite, lost the appended event from both live and archived records. This defeats the ledger-integrity requirement in criterion 4.2.",
+      "suggested_fix": "Coordinate rotation and appenders through a shared lock or another protocol that preserves concurrent writes. Include cursor updates in that protocol and add a deterministic concurrent-append regression test."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/lib/agent-scope.mts",
+      "line": 40,
+      "claim": "Session-wide agent tracking applies write permissions to the wrong agent when subagent lifetimes overlap.",
+      "evidence": "recordAgentStart overwrites one file per session, and every SubagentStop deletes that file without checking agent_id. Replaying tech-lead start, developer start, and developer stop yields fhir-tech-lead, fhir-go-developer, then undefined while the tech lead remains active. agent-scope-guard allows edits in the latter two states. Conversely, another agent's edits inherit the tech lead's restrictions while its record is active. Criterion 4.3 requires enforcement for the tech lead and unaffected behavior for other agents.",
+      "suggested_fix": "Bind scope to the identity of the agent making each tool call, using per-agent state or isolated agent sessions. If the harness cannot provide that binding, enforce an execution arrangement that prevents ambiguous overlap. Test overlapping starts and out-of-order stops."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": ".claude/hooks/src/agent-scope-guard.mts",
+      "line": 34,
+      "claim": "The tech lead's write allowlist permits every target outside the repository.",
+      "evidence": "After identifying fhir-tech-lead, the guard returns allow when rel(root, target) is null. Executing the packet's handler denies root/internal/store/search.go but allows root/../other-worktree/internal/store/search.go. No owns pattern authorizes the latter path. This bypasses criterion 4.3 through an absolute path, parent traversal, or symlink to an external target.",
+      "suggested_fix": "Deny targets outside the canonical repository root for a scoped agent unless an explicit external ownership rule authorizes them. Add tests for absolute external paths, sibling worktrees, and outward-pointing symlinks."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

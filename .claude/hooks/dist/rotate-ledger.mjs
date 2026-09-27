@@ -11,9 +11,8 @@
 // Replaces the tech lead's hand Edit/Write for rotation
 // (`.agent-team/roles/fhir-tech-lead.md` "Owns"): `.prometheus/agent-ledger.jsonl`
 // is no longer in that role's write scope.
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
-import { ledgerDir, ledgerPath, partitionLedgerLines } from "./lib/ledger.mjs";
+import { existsSync } from "node:fs";
+import { ledgerPath, rotateLedgerNow } from "./lib/ledger.mjs";
 function currentMonth(now) {
     return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 }
@@ -26,24 +25,24 @@ if (beforeIdx >= 0 && (before === undefined || !/^\d{4}-\d{2}$/.test(before))) {
     console.error("rotate-ledger: --before requires a yyyy-mm value");
     process.exit(1);
 }
-const file = ledgerPath(root);
-if (!existsSync(file)) {
+if (!existsSync(ledgerPath(root))) {
     console.log("rotate-ledger: no ledger file; nothing to rotate");
     process.exit(0);
 }
-const lines = readFileSync(file, "utf8").split("\n").filter((l) => l !== "");
-const { rotated, kept } = partitionLedgerLines(lines, before ?? currentMonth(new Date()));
-if (rotated.size === 0) {
-    console.log(`rotate-ledger: nothing before ${before ?? currentMonth(new Date())}; nothing to rotate`);
-    process.exit(0);
+const beforeMonth = before ?? currentMonth(new Date());
+try {
+    const result = rotateLedgerNow(root, beforeMonth);
+    if (result === null) {
+        console.log("rotate-ledger: no ledger file; nothing to rotate");
+        process.exit(0);
+    }
+    if (result.moved === 0) {
+        console.log(`rotate-ledger: nothing before ${beforeMonth}; nothing to rotate`);
+        process.exit(0);
+    }
+    console.log(`rotate-ledger: moved ${result.moved} line(s) into ${result.monthFiles} month file(s)`);
 }
-const dir = ledgerDir(root);
-mkdirSync(dir, { recursive: true });
-let moved = 0;
-for (const [month, monthLines] of [...rotated.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
-    appendFileSync(path.join(dir, `${month}.jsonl`), monthLines.map((l) => `${l}\n`).join(""));
-    moved += monthLines.length;
+catch (err) {
+    console.error(`rotate-ledger: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
 }
-writeFileSync(file, kept.length > 0 ? `${kept.join("\n")}\n` : "");
-writeFileSync(path.join(root, ".prometheus", ".flush-cursor"), `${JSON.stringify({ offset: 0 })}\n`);
-console.log(`rotate-ledger: moved ${moved} line(s) into ${rotated.size} month file(s); ${kept.length} line(s) kept in agent-ledger.jsonl`);

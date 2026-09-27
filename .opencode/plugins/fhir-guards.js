@@ -7,9 +7,14 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-// Runs the adapter without blocking OpenCode's event loop; resolves with its stdout ("" on any failure).
-function adapter(directory, hook, payload) {
-  const cli = path.join(directory, ".claude", "hooks", "dist", "harness-hook.mjs");
+// Runs the adapter without blocking OpenCode's event loop; resolves with its
+// stdout ("" on any failure). `root` only locates the installed adapter
+// script; it must never leak into `payload` as the session `directory` (that
+// would make every relative path in the payload resolve against the repo
+// root instead of the actual session directory, defeating protected-path
+// checks for a session started in a subdirectory).
+function adapter(root, hook, payload) {
+  const cli = path.join(root, ".claude", "hooks", "dist", "harness-hook.mjs");
   if (!existsSync(cli)) return Promise.resolve("");
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [cli, "--harness", "opencode", "--hook", hook], { windowsHide: true, stdio: ["pipe", "pipe", "ignore"] });
@@ -23,7 +28,7 @@ function adapter(directory, hook, payload) {
       resolve(out);
     });
     child.stdin.on("error", () => {});
-    child.stdin.end(JSON.stringify({ ...payload, directory }));
+    child.stdin.end(JSON.stringify(payload));
   });
 }
 
@@ -34,7 +39,7 @@ export const FhirGuards = async ({ directory, worktree }) => {
   return {
   "tool.execute.before": async (input, output) => {
     for (const hook of ["guard", "phi-lane"]) {
-      const out = await adapter(root, hook, { tool: input.tool, sessionID: input.sessionID, args: output.args });
+      const out = await adapter(root, hook, { tool: input.tool, sessionID: input.sessionID, args: output.args, directory });
       if (out === "") continue;
       let result;
       try {
@@ -47,7 +52,7 @@ export const FhirGuards = async ({ directory, worktree }) => {
   },
   event: async ({ event }) => {
     if (event.type === "session.created" || event.type === "session.deleted" || event.type === "session.error") {
-      await adapter(root, "ledger", { hook_event_name: event.type, sessionID: event.properties?.info?.id ?? event.properties?.sessionID });
+      await adapter(root, "ledger", { hook_event_name: event.type, sessionID: event.properties?.info?.id ?? event.properties?.sessionID, directory });
     }
   },
 };

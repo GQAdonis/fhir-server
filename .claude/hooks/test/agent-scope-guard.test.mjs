@@ -2,11 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import os, { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { activeAgentType, clearAgentScope, isWithinOwnedScope, recordAgentStart, rolesWithScope } from "../dist/lib/agent-scope.mjs";
+import { activeAgentType, clearAgentScope, isWithinOwnedScope, recordAgentStart, recordAgentStop, rolesWithScope } from "../dist/lib/agent-scope.mjs";
 
 const hook = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "dist", "agent-scope-guard.mjs");
 
@@ -37,6 +37,21 @@ test("lib: session state round-trips through SubagentStart/Stop", () => {
   assert.equal(activeAgentType(id), "fhir-tech-lead");
   clearAgentScope(id);
   assert.equal(activeAgentType(id), undefined);
+});
+
+test("lib: nested SubagentStart/Stop uses a stack, so a completed inner agent restores the outer one instead of leaving it undefined", () => {
+  const id = `test-${Math.random().toString(36).slice(2)}`;
+  try {
+    recordAgentStart(id, "fhir-tech-lead");
+    recordAgentStart(id, "fhir-go-developer");
+    assert.equal(activeAgentType(id), "fhir-go-developer");
+    recordAgentStop(id, "fhir-go-developer");
+    assert.equal(activeAgentType(id), "fhir-tech-lead", "the outer agent must remain active, not undefined");
+    recordAgentStop(id, "fhir-tech-lead");
+    assert.equal(activeAgentType(id), undefined);
+  } finally {
+    clearAgentScope(id);
+  }
 });
 
 test("lib: isWithinOwnedScope matches the manifest owns globs, and is undefined for an unscoped/unknown role", () => {
@@ -115,6 +130,75 @@ test("hook: a non-tech-lead agent is unaffected, even editing a path outside fhi
       tool_input: { file_path: path.join(root, "internal", "store", "search.go") },
     });
     assert.equal(result.body, null);
+  } finally {
+    clearAgentScope(sessionId);
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("hook: a nested subagent's stop leaves the outer tech-lead scope enforced, not cleared", () => {
+  const root = sandboxRepo();
+  const sessionId = `s-${Math.random().toString(36).slice(2)}`;
+  try {
+    run(root, { hook_event_name: "SubagentStart", session_id: sessionId, agent_type: "fhir-tech-lead" });
+    run(root, { hook_event_name: "SubagentStart", session_id: sessionId, agent_type: "fhir-go-developer" });
+    run(root, { hook_event_name: "SubagentStop", session_id: sessionId, agent_type: "fhir-go-developer" });
+    const denied = run(root, {
+      hook_event_name: "PreToolUse",
+      session_id: sessionId,
+      tool_name: "Edit",
+      tool_input: { file_path: path.join(root, "internal", "store", "search.go") },
+    });
+    assert.equal(denied.body?.hookSpecificOutput?.permissionDecision, "deny", "the tech-lead scope must still apply after the nested developer subagent stops");
+  } finally {
+    clearAgentScope(sessionId);
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("hook: an absolute path outside the repository is denied for the scoped agent, not silently allowed", () => {
+  const root = sandboxRepo();
+  const sessionId = `s-${Math.random().toString(36).slice(2)}`;
+  const outsideDir = mkdtempSync(path.join(tmpdir(), "other-worktree-"));
+  try {
+    run(root, { hook_event_name: "SubagentStart", session_id: sessionId, agent_type: "fhir-tech-lead" });
+    const denied = run(root, {
+      hook_event_name: "PreToolUse",
+      session_id: sessionId,
+      tool_name: "Edit",
+      tool_input: { file_path: path.join(outsideDir, "internal", "store", "search.go") },
+    });
+    assert.equal(denied.body?.hookSpecificOutput?.permissionDecision, "deny");
+    assert.match(denied.body.hookSpecificOutput.permissionDecisionReason, /outside the repository/);
+
+    // Parent traversal to a sibling worktree, still outside root.
+    const sibling = run(root, {
+      hook_event_name: "PreToolUse",
+      session_id: sessionId,
+      tool_name: "Edit",
+      tool_input: { file_path: path.join(root, "..", "other-worktree", "internal", "store", "search.go") },
+    });
+    assert.equal(sibling.body?.hookSpecificOutput?.permissionDecision, "deny");
+  } finally {
+    clearAgentScope(sessionId);
+    rmSync(root, { recursive: true, force: true });
+    rmSync(outsideDir, { recursive: true, force: true });
+  }
+});
+
+test("hook: a path under the OS temp directory but outside the repository is denied too (not a scratch-space loophole)", () => {
+  const root = sandboxRepo();
+  const sessionId = `s-${Math.random().toString(36).slice(2)}`;
+  try {
+    run(root, { hook_event_name: "SubagentStart", session_id: sessionId, agent_type: "fhir-tech-lead" });
+    const scratch = path.join(os.tmpdir(), `agent-scope-guard-scratch-${Math.random().toString(36).slice(2)}.txt`);
+    const denied = run(root, {
+      hook_event_name: "PreToolUse",
+      session_id: sessionId,
+      tool_name: "Edit",
+      tool_input: { file_path: scratch },
+    });
+    assert.equal(denied.body?.hookSpecificOutput?.permissionDecision, "deny");
   } finally {
     clearAgentScope(sessionId);
     rmSync(root, { recursive: true, force: true });
