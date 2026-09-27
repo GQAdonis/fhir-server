@@ -6,6 +6,7 @@ okf_version: "0.2"
 
 ## Reference
 
+* [Claude hooks activity after late agent-team-hardening on 2026-09-27](/claude-hooks-activity-after-late-agent-team-hardening-on-2026-09-27.md)
 * [Claude hooks activity for 2026-09-24 final no-change ingestion](/claude-hooks-activity-for-2026-09-24-final-no-change-ingestion.md)
 * [Claude hooks activity for 2026-09-24 late no-change ingestion](/claude-hooks-activity-for-2026-09-24-late-no-change-ingestion.md)
 * [Claude hooks activity for 2026-09-24 prompt-only no-change ingestion](/claude-hooks-activity-for-2026-09-24-prompt-only-no-change-ingestion.md)
@@ -21,6 +22,7 @@ okf_version: "0.2"
 * [Claude hooks activity for add-karpathy-agent-ledger](/claude-hooks-timing-for-add-karpathy-agent-ledger-activity.md)
 * [Claude hooks activity for agent-dev-team guardrail and agent changes](/claude-hooks-activity-for-agent-dev-team-guardrail-and-agent-changes.md)
 * [Claude hooks activity for agent-dev-team KB ingestion window](/claude-hooks-activity-for-agent-dev-team-kb-ingestion-window.md)
+* [Claude hooks activity for agent-team-hardening at 01:15 on 2026-09-27](/claude-hooks-activity-for-agent-team-hardening-at-01-15-on-2026-09-27.md)
 * [Claude hooks activity for agent-team-hardening at 23:10](/claude-hooks-activity-for-agent-team-hardening-at-23-10.md)
 * [Claude hooks activity for agent-team-hardening at 23:13](/claude-hooks-activity-for-agent-team-hardening-at-23-13.md)
 * [Claude hooks activity for agent-team-hardening on 2026-09-26](/claude-hooks-activity-for-agent-team-hardening-on-2026-09-26.md)
@@ -89,6 +91,7 @@ okf_version: "0.2"
 * [Claude hooks activity for final agent-team verification ingestion](/claude-hooks-activity-for-final-agent-team-verification-ingestion.md)
 * [Claude hooks activity for final document-and-verify boundary](/claude-hooks-activity-for-final-document-and-verify-boundary.md)
 * [Claude hooks activity for final document-and-verify ingestion](/claude-hooks-activity-for-final-document-and-verify-ingestion.md)
+* [Claude hooks activity for late agent-team-hardening on 2026-09-27](/claude-hooks-activity-for-late-agent-team-hardening-on-2026-09-27.md)
 * [Claude hooks activity for late no-change agent-dev-team window](/claude-hooks-activity-for-late-no-change-agent-dev-team-window.md)
 * [Claude hooks activity for no-change agent-dev-team window](/claude-hooks-activity-for-no-change-agent-dev-team-window.md)
 * [Claude hooks activity for portable team manifest hardening](/claude-hooks-activity-for-portable-team-manifest-hardening.md)

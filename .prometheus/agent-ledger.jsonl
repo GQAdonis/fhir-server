@@ -840,3 +840,16 @@
 {"ts":"2026-09-27T01:21:47.968Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-team-hardening","prompt_chars":12}
 {"ts":"2026-09-27T01:21:56.166Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"PostToolUseFailure","tool_name":"Bash","outcome":"failed","kbd_phase":"agent-team-hardening"}
 {"ts":"2026-09-27T01:28:36.695Z","event":"boundary_recorded","outcome":"phase:duplicate","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T01:30:14.073Z","event":"kb_ingested","outcome":"delivered:1,remaining:0"}
+{"ts":"2026-09-27T01:33:05.057Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_id":"aa266a0fecb9007d5","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T02:11:33.908Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_type":"fhir-infra-release-engineer","agent_id":"a5b27540213b10ccc","event":"SubagentStart","outcome":"started","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T02:11:45.883Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_type":"fhir-infra-release-engineer","agent_id":"a5b27540213b10ccc","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T02:11:46.946Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-team-hardening","prompt_chars":833}
+{"ts":"2026-09-27T02:12:15.544Z","event":"kb_ingested","outcome":"delivered:1,remaining:0"}
+{"ts":"2026-09-27T02:15:05.833Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_id":"a3f6f11234fa001c7","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T03:24:13.538Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_type":"fhir-infra-release-engineer","agent_id":"a8314ca66c8ebdc81","event":"SubagentStart","outcome":"started","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T03:24:21.995Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_type":"fhir-infra-release-engineer","agent_id":"a8314ca66c8ebdc81","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T03:24:22.854Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-team-hardening","prompt_chars":837}
+{"ts":"2026-09-27T03:24:51.930Z","event":"kb_ingested","outcome":"delivered:1,remaining:0"}
+{"ts":"2026-09-27T03:27:42.954Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","agent_id":"ab0a235346df0bdb6","event":"SubagentStop","outcome":"stopped","kbd_phase":"agent-team-hardening"}
+{"ts":"2026-09-27T12:57:42.087Z","session_id":"804f7bb9-3d04-408e-b6a2-c907a2a83b7a","event":"UserPromptSubmit","outcome":"submitted","kbd_phase":"agent-team-hardening","prompt_chars":76}
