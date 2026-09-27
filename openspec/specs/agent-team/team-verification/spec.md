@@ -41,3 +41,10 @@ The `local` lane of `.kbd-orchestrator/project.json` `model_policy.registry` (th
 #### Scenario: Policy inspected
 - **WHEN** `project.json` is read
 - **THEN** the `local` lane lists `claude-haiku-4-5-20251001`, `claude-sonnet-5` and `claude-opus-5-5`, every `frontier` entry is `claude-opus-5-5`, and no entry names an older Claude model
+
+### Requirement: Cross-harness acceptance
+Each of the five domain roles SHALL answer a role-confirmation prompt in every harness that can run it headlessly (Claude Code, Codex, OpenCode, Kimi Code), using synthetic data only. MiniMax Code SHALL be verified by agent file presence under `MINIMAX_DATA_DIR`, plus an interactive listing when available.
+
+#### Scenario: Domain role smoke
+- **WHEN** `billing-prior-auth-specialist` is invoked in OpenCode with a synthetic prior-auth question
+- **THEN** it answers within its role and cites a coverage source, with no real PHI in the prompt or output

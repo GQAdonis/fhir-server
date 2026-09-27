@@ -2,10 +2,10 @@
   "schemaVersion": "5",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 574,
-  "derivedRevision": 574,
+  "sourceRevision": 575,
+  "derivedRevision": 575,
   "frontier": {
-    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 574
+    "31c6990e-fcd9-42ac-8b8f-dff1c9f3c671": 575
   },
   "conflictCount": 0,
   "projectId": "98eeab9c-ff3e-4471-a109-52e79b939f28",
@@ -26,14 +26,14 @@
   "status": "ready",
   "lifecycle": "ready",
   "stageId": "execute",
-  "stageStatus": "IN_PROGRESS",
+  "stageStatus": "COMPLETE",
   "completionMetric": "implementation",
   "implementationCompleted": 15,
   "implementationTotal": 15,
   "planRevision": 4,
-  "revision": 574,
+  "revision": 575,
   "exactNextCommand": "/kbd-execute agent-team-hardening",
   "nextChange": null,
   "nextTask": null,
-  "updatedAt": "2026-09-26T23:08:01.035475Z"
+  "updatedAt": "2026-09-27T01:03:21.482433Z"
 }

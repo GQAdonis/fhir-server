@@ -2,7 +2,13 @@
 
 ## Judge
 
-The first dispatch returned HTTP 401: the local liter-llm gateway (localhost:4000) rejected its credential, and a retry got the same result. This needs the operator (`/liter-llm-bridge configure`), so the judge round is pending.
+The first dispatch returned HTTP 401 from the local liter-llm gateway (localhost:4000), and the gateway later stopped responding. With operator approval (2026-09-26), the final phase gate used the Codex CLI as the cross-model judge.
+
+**Round 1: BLOCK, 2 CRITICAL** (`findings.json`). Both reproduced with failing tests and fixed in `41e0113`:
+- The OpenCode plugin resolved relative paths against the repository root, which let subdirectory sessions bypass the guard. It now uses the session directory.
+- Patch headers inside ordinary file content were treated as write targets, causing false denies. Only the patch-carrying field is scanned now.
+
+**Verdict round (`findings-verdict.json`): PASS.** Both findings are resolved, and the judge's third claim (`cmd`) is scored not-a-defect for this change.
 
 ## fhir-security-compliance-reviewer: BLOCK (1 CRITICAL, 2 WARNING, 3 SUGGESTION)
 
